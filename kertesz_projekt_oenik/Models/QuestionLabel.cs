@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace kertesz_projekt_oenik.Models
 {
-    public class Label
+    public class QuestionLabel
     {
         [Key]
         public string ID { get; set; }
