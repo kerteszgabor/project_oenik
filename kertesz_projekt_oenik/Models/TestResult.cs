@@ -25,8 +25,6 @@ namespace kertesz_projekt_oenik.Models
 
         public List<Answer> Answers { get; set; }
 
-        public List<Question> QuestionsToCorrectManually { get; set; }
-
         public bool IsCorrectionFinished { get; set; }
     }
 }

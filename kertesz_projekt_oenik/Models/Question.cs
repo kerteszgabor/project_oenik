@@ -1,4 +1,5 @@
-﻿using System;
+﻿using kertesz_projekt_oenik.Models.DBConnections;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,8 +17,10 @@ namespace kertesz_projekt_oenik.Models
         public string Text { get; set; }
 
         public DateTime CreationTime { get; set; }
+        public User CreatedBy { get; set; }
 
         public bool IsShared { get; set; }
+        public bool CorrectManually { get; set; }
 
         public QuestionType QuestionType { get; set; } 
 
@@ -29,5 +32,7 @@ namespace kertesz_projekt_oenik.Models
         public string PictureExtensionType { get; set; }
 
         public byte[] PictureData { get; set; }
+
+        public ICollection<TestQuestion> TestQuestions { get; set; }
     }
 }

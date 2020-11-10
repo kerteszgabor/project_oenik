@@ -48,10 +48,24 @@ namespace kertesz_projekt_oenik.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a267d85d-9c8d-4260-aed4-81b962bbd5ed",
-                            ConcurrencyStamp = "45c8f6c0-d954-4c4d-9424-919e9ee3dfca",
+                            Id = "19d63ac4-ffcc-4315-bb49-870fb1f3679d",
+                            ConcurrencyStamp = "a244d6a1-a079-483b-96bf-c772e81da7ba",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "c0d0e24b-f1b9-461e-9ab5-26a9f82cdbb6",
+                            ConcurrencyStamp = "9902aa50-2cab-44d8-beea-2e6a27ecefad",
+                            Name = "Student",
+                            NormalizedName = "STUDENT"
+                        },
+                        new
+                        {
+                            Id = "bb7373f8-83dc-47f4-bb9e-45379e163430",
+                            ConcurrencyStamp = "a4adc168-0b46-42af-9f1a-b7a17abdbd14",
+                            Name = "Teacher",
+                            NormalizedName = "TEACHER"
                         });
                 });
 
@@ -213,8 +227,8 @@ namespace kertesz_projekt_oenik.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "44bd8575-707b-4524-b148-6ece5b358859",
-                            RoleId = "a267d85d-9c8d-4260-aed4-81b962bbd5ed"
+                            UserId = "f978232d-8908-41ec-afdd-4cf081cc0baa",
+                            RoleId = "19d63ac4-ffcc-4315-bb49-870fb1f3679d"
                         });
                 });
 
@@ -244,6 +258,9 @@ namespace kertesz_projekt_oenik.Migrations
 
                     b.Property<string>("AnswerText")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("CorrectManually")
+                        .HasColumnType("bit");
 
                     b.Property<string>("QuestionID")
                         .HasColumnType("nvarchar(450)");
@@ -277,6 +294,135 @@ namespace kertesz_projekt_oenik.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.DBConnections.CourseTest", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CourseID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TestID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CourseID");
+
+                    b.HasIndex("TestID");
+
+                    b.ToTable("CourseTest");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.DBConnections.TestProgQuestion", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProgrammingQuestionID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TestID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ProgrammingQuestionID");
+
+                    b.HasIndex("TestID");
+
+                    b.ToTable("TestProgQuestion");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.DBConnections.TestQuestion", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("QuestionID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TestID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("QuestionID");
+
+                    b.HasIndex("TestID");
+
+                    b.ToTable("TestQuestion");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.DBConnections.UserCourse", b =>
+                {
+                    b.Property<string>("CourseID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CourseID", "UserID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("UserCourse");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.ProgrammingQuestion", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CorrectAnswer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExpectedOutput")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsShared")
+                        .HasColumnType("bit");
+
+                    b.Property<double>("MaxPoints")
+                        .HasColumnType("float");
+
+                    b.Property<int>("OptimalNumberOfLines")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("PictureData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("PictureExtensionType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("QuestionType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReferenceComplexityLevel")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("ReferenceRuntime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ProgrammingQuestions");
+                });
+
             modelBuilder.Entity("kertesz_projekt_oenik.Models.Question", b =>
                 {
                     b.Property<string>("ID")
@@ -284,6 +430,12 @@ namespace kertesz_projekt_oenik.Migrations
 
                     b.Property<string>("CorrectAnswer")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("CorrectManually")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
@@ -304,9 +456,6 @@ namespace kertesz_projekt_oenik.Migrations
                     b.Property<int>("QuestionType")
                         .HasColumnType("int");
 
-                    b.Property<string>("TestResultID")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
 
@@ -316,7 +465,7 @@ namespace kertesz_projekt_oenik.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("TestResultID");
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("Questions");
                 });
@@ -353,10 +502,6 @@ namespace kertesz_projekt_oenik.Migrations
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsLateSubmissionAllowed")
                         .HasColumnType("bit");
 
@@ -375,8 +520,6 @@ namespace kertesz_projekt_oenik.Migrations
                     b.HasIndex("CreatedById");
 
                     b.ToTable("Tests");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Test");
                 });
 
             modelBuilder.Entity("kertesz_projekt_oenik.Models.TestResult", b =>
@@ -451,42 +594,23 @@ namespace kertesz_projekt_oenik.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "44bd8575-707b-4524-b148-6ece5b358859",
+                            Id = "f978232d-8908-41ec-afdd-4cf081cc0baa",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "1b939603-28bf-4476-8669-a694475f7a17",
+                            ConcurrencyStamp = "83df4b6e-0993-4c42-b87b-96d343d0283c",
                             Email = "admin@oenik.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@OENIK.hu",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAENWCemVi5NMggNHbT7OUfTgDeItFQGhpaYjYd+nMh6FL88hUb/Xdutxu9RuPoKd6qg==",
+                            PasswordHash = "AQAAAAEAACcQAAAAENUSFEGilh715YhssJRdipvaMYOdslEE3MTLyRwURbA8B+YeFCvtBLVW/Q6B03L0gg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "2176af94-fd39-463a-bedc-a71426beb81e",
+                            SecurityStamp = "da4fa86c-5eac-4b45-a4aa-ad495aa45b5b",
                             TwoFactorEnabled = false,
                             UserName = "admin",
                             CreatedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastLogin = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             ModifiedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
-                });
-
-            modelBuilder.Entity("kertesz_projekt_oenik.Models.ProgrammingQuestion", b =>
-                {
-                    b.HasBaseType("kertesz_projekt_oenik.Models.Test");
-
-                    b.Property<string>("ExpectedOutput")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OptimalNumberOfLines")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReferenceComplexityLevel")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("ReferenceRuntime")
-                        .HasColumnType("time");
-
-                    b.HasDiscriminator().HasValue("ProgrammingQuestion");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -553,11 +677,77 @@ namespace kertesz_projekt_oenik.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.DBConnections.CourseTest", b =>
+                {
+                    b.HasOne("kertesz_projekt_oenik.Models.Course", "Course")
+                        .WithMany("CourseTests")
+                        .HasForeignKey("CourseID");
+
+                    b.HasOne("kertesz_projekt_oenik.Models.Test", "Test")
+                        .WithMany("CourseTests")
+                        .HasForeignKey("TestID");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.DBConnections.TestProgQuestion", b =>
+                {
+                    b.HasOne("kertesz_projekt_oenik.Models.ProgrammingQuestion", "ProgrammingQuestion")
+                        .WithMany("TestProgQuestions")
+                        .HasForeignKey("ProgrammingQuestionID");
+
+                    b.HasOne("kertesz_projekt_oenik.Models.Test", "Test")
+                        .WithMany("TestProgQuestions")
+                        .HasForeignKey("TestID");
+
+                    b.Navigation("ProgrammingQuestion");
+
+                    b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.DBConnections.TestQuestion", b =>
+                {
+                    b.HasOne("kertesz_projekt_oenik.Models.Question", "Question")
+                        .WithMany("TestQuestions")
+                        .HasForeignKey("QuestionID");
+
+                    b.HasOne("kertesz_projekt_oenik.Models.Test", "Test")
+                        .WithMany("TestQuestions")
+                        .HasForeignKey("TestID");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.DBConnections.UserCourse", b =>
+                {
+                    b.HasOne("kertesz_projekt_oenik.Models.Course", "Course")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("CourseID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("kertesz_projekt_oenik.Models.User", "User")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("kertesz_projekt_oenik.Models.Question", b =>
                 {
-                    b.HasOne("kertesz_projekt_oenik.Models.TestResult", null)
-                        .WithMany("QuestionsToCorrectManually")
-                        .HasForeignKey("TestResultID");
+                    b.HasOne("kertesz_projekt_oenik.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById");
+
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("kertesz_projekt_oenik.Models.QuestionLabel", b =>
@@ -608,11 +798,40 @@ namespace kertesz_projekt_oenik.Migrations
                     b.Navigation("CreatedBy");
                 });
 
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.Course", b =>
+                {
+                    b.Navigation("CourseTests");
+
+                    b.Navigation("UserCourses");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.ProgrammingQuestion", b =>
+                {
+                    b.Navigation("TestProgQuestions");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.Question", b =>
+                {
+                    b.Navigation("TestQuestions");
+                });
+
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.Test", b =>
+                {
+                    b.Navigation("CourseTests");
+
+                    b.Navigation("TestProgQuestions");
+
+                    b.Navigation("TestQuestions");
+                });
+
             modelBuilder.Entity("kertesz_projekt_oenik.Models.TestResult", b =>
                 {
                     b.Navigation("Answers");
+                });
 
-                    b.Navigation("QuestionsToCorrectManually");
+            modelBuilder.Entity("kertesz_projekt_oenik.Models.User", b =>
+                {
+                    b.Navigation("UserCourses");
                 });
 #pragma warning restore 612, 618
         }

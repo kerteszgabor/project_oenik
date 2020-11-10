@@ -74,6 +74,30 @@ namespace kertesz_projekt_oenik.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProgrammingQuestions",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsShared = table.Column<bool>(type: "bit", nullable: false),
+                    QuestionType = table.Column<int>(type: "int", nullable: false),
+                    CorrectAnswer = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MaxPoints = table.Column<double>(type: "float", nullable: false),
+                    PictureExtensionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    PictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    OptimalNumberOfLines = table.Column<int>(type: "int", nullable: false),
+                    ReferenceComplexityLevel = table.Column<int>(type: "int", nullable: false),
+                    ReferenceRuntime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    ExpectedOutput = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProgrammingQuestions", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -180,6 +204,34 @@ namespace kertesz_projekt_oenik.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Questions",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    IsShared = table.Column<bool>(type: "bit", nullable: false),
+                    CorrectManually = table.Column<bool>(type: "bit", nullable: false),
+                    QuestionType = table.Column<int>(type: "int", nullable: false),
+                    CorrectAnswer = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MaxPoints = table.Column<double>(type: "float", nullable: false),
+                    PictureExtensionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    PictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questions", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Questions_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tests",
                 columns: table => new
                 {
@@ -190,12 +242,7 @@ namespace kertesz_projekt_oenik.Migrations
                     IsShared = table.Column<bool>(type: "bit", nullable: false),
                     IsLateSubmissionAllowed = table.Column<bool>(type: "bit", nullable: false),
                     AllowedTakeLength = table.Column<TimeSpan>(type: "time", nullable: false),
-                    MaxPoints = table.Column<double>(type: "float", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OptimalNumberOfLines = table.Column<int>(type: "int", nullable: true),
-                    ReferenceComplexityLevel = table.Column<int>(type: "int", nullable: true),
-                    ReferenceRuntime = table.Column<TimeSpan>(type: "time", nullable: true),
-                    ExpectedOutput = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    MaxPoints = table.Column<double>(type: "float", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -205,6 +252,125 @@ namespace kertesz_projekt_oenik.Migrations
                         column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserCourse",
+                columns: table => new
+                {
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ID = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserCourse", x => new { x.CourseID, x.UserID });
+                    table.ForeignKey(
+                        name: "FK_UserCourse_AspNetUsers_UserID",
+                        column: x => x.UserID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserCourse_Courses_CourseID",
+                        column: x => x.CourseID,
+                        principalTable: "Courses",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuestionLabels",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    LabelText = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionLabels", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_QuestionLabels_Questions_QuestionID",
+                        column: x => x.QuestionID,
+                        principalTable: "Questions",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseTest",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CourseID = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseTest", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_CourseTest_Courses_CourseID",
+                        column: x => x.CourseID,
+                        principalTable: "Courses",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CourseTest_Tests_TestID",
+                        column: x => x.TestID,
+                        principalTable: "Tests",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestProgQuestion",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ProgrammingQuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestProgQuestion", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_TestProgQuestion_ProgrammingQuestions_ProgrammingQuestionID",
+                        column: x => x.ProgrammingQuestionID,
+                        principalTable: "ProgrammingQuestions",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TestProgQuestion_Tests_TestID",
+                        column: x => x.TestID,
+                        principalTable: "Tests",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestQuestion",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestQuestion", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_TestQuestion_Questions_QuestionID",
+                        column: x => x.QuestionID,
+                        principalTable: "Questions",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TestQuestion_Tests_TestID",
+                        column: x => x.TestID,
+                        principalTable: "Tests",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -245,39 +411,13 @@ namespace kertesz_projekt_oenik.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Questions",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsShared = table.Column<bool>(type: "bit", nullable: false),
-                    QuestionType = table.Column<int>(type: "int", nullable: false),
-                    CorrectAnswer = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MaxPoints = table.Column<double>(type: "float", nullable: false),
-                    PictureExtensionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    PictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    TestResultID = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Questions", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Questions_TestResults_TestResultID",
-                        column: x => x.TestResultID,
-                        principalTable: "TestResults",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Answers",
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     AnswerText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CorrectManually = table.Column<bool>(type: "bit", nullable: false),
                     TestResultID = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
@@ -297,39 +437,25 @@ namespace kertesz_projekt_oenik.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "QuestionLabels",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    LabelText = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuestionLabels", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_QuestionLabels_Questions_QuestionID",
-                        column: x => x.QuestionID,
-                        principalTable: "Questions",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "a267d85d-9c8d-4260-aed4-81b962bbd5ed", "45c8f6c0-d954-4c4d-9424-919e9ee3dfca", "Admin", "ADMIN" });
+                values: new object[,]
+                {
+                    { "19d63ac4-ffcc-4315-bb49-870fb1f3679d", "a244d6a1-a079-483b-96bf-c772e81da7ba", "Admin", "ADMIN" },
+                    { "c0d0e24b-f1b9-461e-9ab5-26a9f82cdbb6", "9902aa50-2cab-44d8-beea-2e6a27ecefad", "Student", "STUDENT" },
+                    { "bb7373f8-83dc-47f4-bb9e-45379e163430", "a4adc168-0b46-42af-9f1a-b7a17abdbd14", "Teacher", "TEACHER" }
+                });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedById", "CreatedOn", "Discriminator", "Email", "EmailConfirmed", "FirstName", "LastIP", "LastLogin", "LastName", "LockoutEnabled", "LockoutEnd", "ModifiedOn", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "44bd8575-707b-4524-b148-6ece5b358859", 0, "1b939603-28bf-4476-8669-a694475f7a17", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "admin@oenik.hu", true, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "ADMIN@OENIK.hu", "ADMIN", "AQAAAAEAACcQAAAAENWCemVi5NMggNHbT7OUfTgDeItFQGhpaYjYd+nMh6FL88hUb/Xdutxu9RuPoKd6qg==", null, false, "2176af94-fd39-463a-bedc-a71426beb81e", false, "admin" });
+                values: new object[] { "f978232d-8908-41ec-afdd-4cf081cc0baa", 0, "83df4b6e-0993-4c42-b87b-96d343d0283c", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "admin@oenik.hu", true, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "ADMIN@OENIK.hu", "ADMIN", "AQAAAAEAACcQAAAAENUSFEGilh715YhssJRdipvaMYOdslEE3MTLyRwURbA8B+YeFCvtBLVW/Q6B03L0gg==", null, false, "da4fa86c-5eac-4b45-a4aa-ad495aa45b5b", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "a267d85d-9c8d-4260-aed4-81b962bbd5ed", "44bd8575-707b-4524-b148-6ece5b358859" });
+                values: new object[] { "19d63ac4-ffcc-4315-bb49-870fb1f3679d", "f978232d-8908-41ec-afdd-4cf081cc0baa" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Answers_QuestionID",
@@ -386,14 +512,44 @@ namespace kertesz_projekt_oenik.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CourseTest_CourseID",
+                table: "CourseTest",
+                column: "CourseID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseTest_TestID",
+                table: "CourseTest",
+                column: "TestID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuestionLabels_QuestionID",
                 table: "QuestionLabels",
                 column: "QuestionID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Questions_TestResultID",
+                name: "IX_Questions_CreatedById",
                 table: "Questions",
-                column: "TestResultID");
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestProgQuestion_ProgrammingQuestionID",
+                table: "TestProgQuestion",
+                column: "ProgrammingQuestionID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestProgQuestion_TestID",
+                table: "TestProgQuestion",
+                column: "TestID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestQuestion_QuestionID",
+                table: "TestQuestion",
+                column: "QuestionID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestQuestion_TestID",
+                table: "TestQuestion",
+                column: "TestID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TestResults_CourseID",
@@ -414,6 +570,11 @@ namespace kertesz_projekt_oenik.Migrations
                 name: "IX_Tests_CreatedById",
                 table: "Tests",
                 column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCourse_UserID",
+                table: "UserCourse",
+                column: "UserID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -437,16 +598,31 @@ namespace kertesz_projekt_oenik.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "CourseTest");
+
+            migrationBuilder.DropTable(
                 name: "QuestionLabels");
+
+            migrationBuilder.DropTable(
+                name: "TestProgQuestion");
+
+            migrationBuilder.DropTable(
+                name: "TestQuestion");
+
+            migrationBuilder.DropTable(
+                name: "UserCourse");
+
+            migrationBuilder.DropTable(
+                name: "TestResults");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Questions");
+                name: "ProgrammingQuestions");
 
             migrationBuilder.DropTable(
-                name: "TestResults");
+                name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "Courses");

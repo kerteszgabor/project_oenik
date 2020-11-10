@@ -1,4 +1,5 @@
 ﻿using kertesz_projekt_oenik.Models;
+using kertesz_projekt_oenik.Models.DBConnections;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,21 @@ namespace kertesz_projekt_oenik.Data
                 NormalizedName = "ADMIN"
             });
 
+            // Create Teacher and Student roles
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Student",
+                NormalizedName = "STUDENT"
+            });
+
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Teacher",
+                NormalizedName = "TEACHER"
+            });
+
             //Seed an admin user into the role
             builder.Entity<User>().HasData(new User()
             {
@@ -46,10 +62,59 @@ namespace kertesz_projekt_oenik.Data
                 RoleId = roleID,
                 UserId = adminID
             });
+
+            builder.Entity<UserCourse>().HasKey(uc => new
+            {
+                uc.CourseID,
+                uc.UserID
+            });
+          //  builder.Entity<CourseTest>().HasNoKey();
+          //  SetupManyToManyMaps(builder);
         }
 
-        public DbSet<User> Students { get; set; }
-        public DbSet<User> Teachers { get; set; }
+        private void SetupManyToManyMaps(ModelBuilder builder)
+        {
+            builder.Entity<UserCourse>()
+                .HasOne(uc => uc.Course)
+                .WithMany(c => c.UserCourses)
+                .HasForeignKey(uc => uc.CourseID);
+
+            builder.Entity<UserCourse>()
+                .HasOne(uc => uc.User)
+                .WithMany(c => c.UserCourses)
+                .HasForeignKey(uc => uc.UserID);
+
+            builder.Entity<CourseTest>()
+               .HasOne(ct => ct.Course)
+               .WithMany(t => t.CourseTests)
+               .HasForeignKey(ct => ct.CourseID);
+
+            builder.Entity<CourseTest>()
+                .HasOne(ct => ct.Test)
+                .WithMany(c => c.CourseTests)
+                .HasForeignKey(ct => ct.TestID);
+
+            builder.Entity<TestProgQuestion>()
+               .HasOne(tp => tp.Test)
+               .WithMany(t => t.TestProgQuestions)
+               .HasForeignKey(tp => tp.TestID);
+
+            builder.Entity<TestProgQuestion>()
+                .HasOne(tp => tp.ProgrammingQuestion)
+                .WithMany(p => p.TestProgQuestions)
+                .HasForeignKey(tp => tp.ProgrammingQuestionID);
+
+            builder.Entity<TestQuestion>()
+               .HasOne(tq => tq.Test)
+               .WithMany(t => t.TestQuestions)
+               .HasForeignKey(tq => tq.TestID);
+
+            builder.Entity<TestQuestion>()
+                .HasOne(tq => tq.Question)
+                .WithMany(q => q.TestQuestions)
+                .HasForeignKey(tq => tq.QuestionID);
+        }
+
         public DbSet<Course> Courses { get; set; }
         public DbSet<Test> Tests { get; set; }
         public DbSet<Question> Questions { get; set; }

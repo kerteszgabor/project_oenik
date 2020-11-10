@@ -1,4 +1,5 @@
-﻿using System;
+﻿using kertesz_projekt_oenik.Models.DBConnections;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -25,5 +26,11 @@ namespace kertesz_projekt_oenik.Models
         public TimeSpan AllowedTakeLength { get; set; }
 
         public double MaxPoints { get; set; }
+
+        public ICollection<CourseTest> CourseTests { get; set; }
+
+        public ICollection<TestProgQuestion> TestProgQuestions { get; set; }
+
+        public ICollection<TestQuestion> TestQuestions { get; set; }
     }
 }

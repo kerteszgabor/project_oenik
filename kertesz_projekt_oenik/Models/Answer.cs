@@ -10,8 +10,21 @@ namespace kertesz_projekt_oenik.Models
     {
         [Key]
         public string ID { get; set; }
-
         public Question Question { get; set; }
         public string AnswerText { get; set; }
+        public bool CorrectManually
+        {
+            get { return CorrectManually; } 
+            set
+            {
+                if (Question.CorrectManually)
+                {
+                    CorrectManually = true;
+                }
+                else
+                {
+                    CorrectManually = false;
+                }
+            } }
     }
 }

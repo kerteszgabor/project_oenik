@@ -1,4 +1,5 @@
-﻿using System;
+﻿using kertesz_projekt_oenik.Models.DBConnections;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,8 +17,9 @@ namespace kertesz_projekt_oenik.Models
 
         public DateTime CreationTime { get; set; }
 
-        List<User> Teachers { get; set; }
+        public ICollection<UserCourse> UserCourses { get; set; }
 
-        List<User> Students { get; set; }
+        public ICollection<CourseTest> CourseTests { get; set; }
+
     }
 }

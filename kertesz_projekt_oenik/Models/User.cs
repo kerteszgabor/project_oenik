@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using kertesz_projekt_oenik.Models.DBConnections;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -25,5 +26,7 @@ namespace kertesz_projekt_oenik.Models
         public DateTime ModifiedOn { get; set; }
         
         public User CreatedBy { get; set; }
+
+        public ICollection<UserCourse> UserCourses { get; set; }
     }
 }
