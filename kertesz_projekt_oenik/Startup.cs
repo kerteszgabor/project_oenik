@@ -81,6 +81,8 @@ namespace kertesz_projekt_oenik
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
