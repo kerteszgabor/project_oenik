@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using kertesz_projekt_oenik.Models;
 using kertesz_projekt_oenik.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -27,30 +28,40 @@ namespace kertesz_projekt_oenik.Controllers
         }
 
         [Route("register")]
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> InsertUser([FromBody] RegisterViewModel model)
         {
-            var user = new User
+            var currentUserName = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (currentUserName == "admin")
             {
-                Email = model.Email,
-                UserName = model.Username,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                NormalizedUserName = model.Username.ToUpper(),
-                NormalizedEmail = model.Email.ToUpper(),
+                User currentUser = (User)_userManager.FindByNameAsync(currentUserName).Result;
+                var user = new User
+                {
+                    Email = model.Email,
+                    UserName = model.Username,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    NormalizedUserName = model.Username.ToUpper(),
+                    NormalizedEmail = model.Email.ToUpper(),
+                    CreatedOn = DateTime.Now,
+                    CreatedBy = currentUser,
+                    EmailConfirmed = true
+                };
+                var result = await _userManager.CreateAsync(user, model.Password);
 
-            };
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, model.Role);
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, model.Role);
+                }
+                return Ok(new { Username = user.UserName });
             }
-            return Ok(new { Username = user.UserName });
+            else
+            {
+                return Forbid();
+            }
         }
-
-
 
         [Route("login")]
         [HttpPost]
@@ -74,7 +85,12 @@ namespace kertesz_projekt_oenik.Controllers
                   expires: DateTime.Now.AddMinutes(60),
                   signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
                 );
-                ;
+
+                var updatedUser = user as User;
+                updatedUser.LastLogin = DateTime.Now;
+                updatedUser.LastIP = this.Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                await _userManager.UpdateAsync(updatedUser);
+
                 return Ok(
                   new
                   {
