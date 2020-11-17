@@ -36,7 +36,7 @@ namespace kertesz_projekt_oenik.Controllers
             var currentUserName = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             if (currentUserName == "admin")
             {
-                User currentUser = (User)_userManager.FindByNameAsync(currentUserName).Result;
+                User currentUser = _userManager.FindByNameAsync(currentUserName).Result;
                 var user = new User
                 {
                     Email = model.Email,
@@ -87,10 +87,9 @@ namespace kertesz_projekt_oenik.Controllers
                   signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
                 );
 
-                var updatedUser = user as User;
-                updatedUser.LastLogin = DateTime.Now;
-                updatedUser.LastIP = this.Request.HttpContext.Connection.RemoteIpAddress.ToString();
-                await _userManager.UpdateAsync(updatedUser);
+                user.LastLogin = DateTime.Now;
+                user.LastIP = this.Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                await _userManager.UpdateAsync(user);
 
                 return Ok(
                   new
@@ -101,7 +100,6 @@ namespace kertesz_projekt_oenik.Controllers
             }
             return Unauthorized();
         }
-
 
         [HttpGet]
         [Route("list")]

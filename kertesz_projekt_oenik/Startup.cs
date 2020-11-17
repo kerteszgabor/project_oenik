@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using kertesz_projekt_oenik.Data;
+using kertesz_projekt_oenik.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,7 +37,7 @@ namespace kertesz_projekt_oenik
 
 
 
-            services.AddIdentity<IdentityUser, IdentityRole>(
+            services.AddIdentity<User, IdentityRole>(
                     option =>
                     {
                         option.Password.RequireDigit = false;
