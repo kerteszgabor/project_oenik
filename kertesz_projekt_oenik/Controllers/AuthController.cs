@@ -20,11 +20,13 @@ namespace kertesz_projekt_oenik.Controllers
     public class AuthController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<User> userManager, IConfiguration configuration)
+        public AuthController(UserManager<User> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _configuration = configuration;
         }
 
@@ -69,10 +71,13 @@ namespace kertesz_projekt_oenik.Controllers
         public async Task<ActionResult> Login([FromBody] LoginViewModel model)
         {
             var user = await _userManager.FindByNameAsync(model.Username);
+            var userRoles = await _userManager.GetRolesAsync(user);
+
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 var claim = new[] {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName)
+                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                    new Claim(ClaimTypes.Role, userRoles.FirstOrDefault())
                 };
                 var signinKey = new SymmetricSecurityKey(
                   Encoding.UTF8.GetBytes(_configuration["Jwt:SigningKey"]));
@@ -99,13 +104,6 @@ namespace kertesz_projekt_oenik.Controllers
                   });
             }
             return Unauthorized();
-        }
-
-        [HttpGet]
-        [Route("list")]
-        public async Task<IEnumerable<User>> List()
-        {
-            return await _userManager.Users.ToListAsync();
         }
     }
 }
