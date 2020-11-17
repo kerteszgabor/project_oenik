@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -18,10 +19,10 @@ namespace kertesz_projekt_oenik.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public AuthController(UserManager<User> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -99,6 +100,14 @@ namespace kertesz_projekt_oenik.Controllers
                   });
             }
             return Unauthorized();
+        }
+
+
+        [HttpGet]
+        [Route("list")]
+        public async Task<IEnumerable<User>> List()
+        {
+            return await _userManager.Users.ToListAsync();
         }
     }
 }
