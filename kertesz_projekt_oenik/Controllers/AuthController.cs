@@ -6,7 +6,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using kertesz_projekt_oenik.Data;
+using kertesz_projekt_oenik.Exceptions;
 using kertesz_projekt_oenik.Models;
+using kertesz_projekt_oenik.Repositories;
 using kertesz_projekt_oenik.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,13 +26,14 @@ namespace kertesz_projekt_oenik.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly ApplicationDbContext applicationDbContext;
+        private readonly AuthorizationRepository _authRepo;
 
-        public AuthController(UserManager<User> userManager, IConfiguration configuration, ApplicationDbContext context)
+
+        public AuthController(UserManager<User> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _configuration = configuration;
-            applicationDbContext = context;
+            this._authRepo = new AuthorizationRepository(_userManager, _configuration);
         }
 
         [Route("register")]
@@ -38,24 +41,15 @@ namespace kertesz_projekt_oenik.Controllers
         [HttpPost]
         public async Task<ActionResult> InsertUser([FromBody] RegisterViewModel model)
         {
-            var currentUserName = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            User currentUser = _userManager.FindByNameAsync(currentUserName).Result;
-
-            var user = CreateUserFromViewModel(model);
-            user.CreatedOn = DateTime.Now;
-            user.ModifiedOn = DateTime.Now;
-            user.CreatedBy = currentUser;
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
+            try
             {
-                await _userManager.AddToRoleAsync(user, model.Role);
-                return Ok(new { Username = user.UserName });
+                var currentUserName = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                var result = await _authRepo.InsertUser(model, currentUserName);
+                return Ok();
             }
-            else
+            catch (CannotAddUserException)
             {
-                return BadRequest(result.Errors.ToList());
+                return BadRequest();
             }
         }
 
@@ -63,32 +57,10 @@ namespace kertesz_projekt_oenik.Controllers
         [HttpPost]
         public async Task<ActionResult> Login([FromBody] LoginViewModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
-            var userRoles = await _userManager.GetRolesAsync(user);
-
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+            try
             {
-                var claim = new[] {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                    new Claim(ClaimTypes.Role, userRoles.FirstOrDefault())
-                };
-                var signinKey = new SymmetricSecurityKey(
-                  Encoding.UTF8.GetBytes(_configuration["Jwt:SigningKey"]));
-
-                int expiryInMinutes = Convert.ToInt32(_configuration["Jwt:ExpiryInMinutes"]);
-
-                var token = new JwtSecurityToken(
-                  issuer: _configuration["Jwt:Site"],
-                  audience: _configuration["Jwt:Site"],
-                  claims: claim,
-                  expires: DateTime.Now.AddMinutes(60),
-                  signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
-                );
-
-                user.LastLogin = DateTime.Now;
-                user.LastIP = this.Request.HttpContext.Connection.RemoteIpAddress.ToString();
-                await _userManager.UpdateAsync(user);
-
+                var loginIP = this.Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                var token = await _authRepo.Login(model, loginIP);
                 return Ok(
                   new
                   {
@@ -96,21 +68,24 @@ namespace kertesz_projekt_oenik.Controllers
                       expiration = token.ValidTo
                   });
             }
-            return Unauthorized();
+            catch (UserNotFoundException)
+            {
+                return Unauthorized();
+            }
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IEnumerable<User>> List()
         {
-            return await _userManager.Users.ToListAsync();
+            return await _authRepo.List();
         }
 
         [HttpGet("{username}")]
         [Authorize(Roles = "Admin")]
         public async Task<User> GetUserByUsername(string username)
         {
-            return await _userManager.FindByNameAsync(username);
+            return await _authRepo.GetUserByUsername(username);
         }
 
         [HttpDelete("{uid}")]
@@ -118,22 +93,14 @@ namespace kertesz_projekt_oenik.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string uid)
         {
-            var user = await _userManager.FindByIdAsync(uid);
-            if (user != null)
+            try
             {
-                var result = await _userManager.DeleteAsync(user);
-                if (result.Succeeded)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest(result.Errors.ToList());
-                }
+                await _authRepo.Delete(uid);
+                return Ok();
             }
-            else
+            catch (UserNotFoundException)
             {
-                return NotFound("User not found");
+                return BadRequest("User was not found");
             }
         }
 
@@ -143,32 +110,24 @@ namespace kertesz_projekt_oenik.Controllers
         {
             if (patchDoc != null)
             {
-                var user = await _userManager.FindByIdAsync(uid);
-                patchDoc.ApplyTo(user);
-                user.ModifiedOn = DateTime.Now;
-                await _userManager.UpdateAsync(user);
-                return Ok(user);
+                try
+                {
+                    var user = await _authRepo.GetUserByID(uid);
+                    patchDoc.ApplyTo(user);
+                    user.ModifiedOn = DateTime.Now;
+                    await _authRepo.Update(user);
+                    return Ok(user);
+                }
+                catch (UserNotFoundException)
+                {
+                    return BadRequest("User was not found");
+                }
+
             }
             else
             {
                 return BadRequest();
             }
-        }
-
-        private User CreateUserFromViewModel(RegisterViewModel model)
-        {
-            return new User()
-            {
-                Email = model.Email,
-                UserName = model.Username,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                NormalizedUserName = model.Username.ToUpper(),
-                NormalizedEmail = model.Email.ToUpper(),
-                ModifiedOn = DateTime.Now,
-                EmailConfirmed = true
-            };
         }
     }
 }
