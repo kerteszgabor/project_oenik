@@ -5,7 +5,7 @@ using System.Text;
 
 namespace project.Repository.Interfaces
 {
-    interface IAnswerRepository : IRepository<Answer>
+    public interface IAnswerRepository : IRepository<Answer>
     {
     }
 }
