@@ -10,8 +10,8 @@ using project.Repository.Data;
 namespace project.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20201125170152_InitDB")]
-    partial class InitDB
+    [Migration("20201209215605_init06")]
+    partial class init06
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -50,22 +50,22 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "96110387-c379-4f43-be32-c93224d39c94",
-                            ConcurrencyStamp = "f266b220-9f29-4e00-8248-8f126bffdb63",
+                            Id = "cf2e9aae-ba1e-4c65-99a0-c2561f81c68a",
+                            ConcurrencyStamp = "5d324045-1f85-4e40-895a-f5ce6437e025",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "c1ce19f9-7b5d-4590-87a2-34dbc2288e0c",
-                            ConcurrencyStamp = "a8abb751-19bc-45af-a3d1-cd3ae9edec29",
+                            Id = "99ea831c-ecee-4157-836a-ad151533572e",
+                            ConcurrencyStamp = "8814ecd2-9845-45b5-af28-7367c57e0985",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "b490a36c-0328-45a5-9ede-8d669a2ef7c1",
-                            ConcurrencyStamp = "55343e97-df18-4d23-9d4c-1d5f675c4714",
+                            Id = "3754e317-69fc-433d-9405-43e58130fb50",
+                            ConcurrencyStamp = "6b51dc0b-4474-408f-b6fd-3e84907d3739",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         });
@@ -231,8 +231,8 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "78cc1f04-71a4-450a-91cf-557666de8c6c",
-                            RoleId = "96110387-c379-4f43-be32-c93224d39c94"
+                            UserId = "dec9e78b-a544-4319-813c-9abadc06cfef",
+                            RoleId = "cf2e9aae-ba1e-4c65-99a0-c2561f81c68a"
                         });
                 });
 
@@ -257,47 +257,20 @@ namespace project.Repository.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("project.Domain.Models.Answer", b =>
+            modelBuilder.Entity("project.Domain.Models.BaseEntity", b =>
                 {
                     b.Property<string>("ID")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("AnswerText")
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("CorrectManually")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("QuestionID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("TestResultID")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("ID");
 
-                    b.HasIndex("QuestionID");
+                    b.ToTable("BaseEntity");
 
-                    b.HasIndex("TestResultID");
-
-                    b.ToTable("Answers");
-                });
-
-            modelBuilder.Entity("project.Domain.Models.Course", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Courses");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("BaseEntity");
                 });
 
             modelBuilder.Entity("project.Domain.Models.DBConnections.CourseTest", b =>
@@ -378,16 +351,107 @@ namespace project.Repository.Migrations
                     b.ToTable("UserCourse");
                 });
 
+            modelBuilder.Entity("project.Domain.Models.User", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<string>("LastIP")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<DateTime>("LastLogin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<DateTime>("ModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasDiscriminator().HasValue("User");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "dec9e78b-a544-4319-813c-9abadc06cfef",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "d4ca0e68-3e7c-4a83-9daf-89d5ed931146",
+                            Email = "admin@oenik.hu",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@OENIK.hu",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAEAACcQAAAAEA+Og6ZONsvfNBqag/pUwmPgAY7vvOegXYNv8IbCvZ9sA9Z8EyLr0wtqmlOWf+mcmw==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "788d8d77-e6c7-4076-b909-ff407d63043d",
+                            TwoFactorEnabled = false,
+                            UserName = "admin",
+                            CreatedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastLogin = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ModifiedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
+            modelBuilder.Entity("project.Domain.Models.Answer", b =>
+                {
+                    b.HasBaseType("project.Domain.Models.BaseEntity");
+
+                    b.Property<string>("AnswerText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("CorrectManually")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("QuestionID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TestResultID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("QuestionID");
+
+                    b.HasIndex("TestResultID");
+
+                    b.HasDiscriminator().HasValue("Answer");
+                });
+
+            modelBuilder.Entity("project.Domain.Models.Course", b =>
+                {
+                    b.HasBaseType("project.Domain.Models.BaseEntity");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasDiscriminator().HasValue("Course");
+                });
+
             modelBuilder.Entity("project.Domain.Models.ProgrammingQuestion", b =>
                 {
-                    b.Property<string>("ID")
-                        .HasColumnType("nvarchar(450)");
+                    b.HasBaseType("project.Domain.Models.BaseEntity");
 
                     b.Property<string>("CorrectAnswer")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("ProgrammingQuestion_CreationTime");
 
                     b.Property<string>("ExpectedOutput")
                         .HasColumnType("nvarchar(max)");
@@ -424,114 +488,118 @@ namespace project.Repository.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("ID");
-
-                    b.ToTable("ProgrammingQuestions");
+                    b.HasDiscriminator().HasValue("ProgrammingQuestion");
                 });
 
             modelBuilder.Entity("project.Domain.Models.Question", b =>
                 {
-                    b.Property<string>("ID")
-                        .HasColumnType("nvarchar(450)");
+                    b.HasBaseType("project.Domain.Models.BaseEntity");
 
                     b.Property<string>("CorrectAnswer")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Question_CorrectAnswer");
 
                     b.Property<bool>("CorrectManually")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("Question_CorrectManually");
 
                     b.Property<string>("CreatedById")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Question_CreationTime");
 
                     b.Property<bool>("IsShared")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("Question_IsShared");
 
                     b.Property<double>("MaxPoints")
-                        .HasColumnType("float");
+                        .HasColumnType("float")
+                        .HasColumnName("Question_MaxPoints");
 
                     b.Property<byte[]>("PictureData")
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("Question_PictureData");
 
                     b.Property<string>("PictureExtensionType")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Question_PictureExtensionType");
 
                     b.Property<int>("QuestionType")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("QuestionType1");
 
                     b.Property<string>("Text")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Question_Text");
 
                     b.Property<string>("Title")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("ID");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Question_Title");
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("Questions");
+                    b.HasDiscriminator().HasValue("Question");
                 });
 
             modelBuilder.Entity("project.Domain.Models.QuestionLabel", b =>
                 {
-                    b.Property<string>("ID")
-                        .HasColumnType("nvarchar(450)");
+                    b.HasBaseType("project.Domain.Models.BaseEntity");
 
                     b.Property<string>("LabelText")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("QuestionID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("ID");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("QuestionLabel_QuestionID");
 
                     b.HasIndex("QuestionID");
 
-                    b.ToTable("QuestionLabels");
+                    b.HasDiscriminator().HasValue("QuestionLabel");
                 });
 
             modelBuilder.Entity("project.Domain.Models.Test", b =>
                 {
-                    b.Property<string>("ID")
-                        .HasColumnType("nvarchar(450)");
+                    b.HasBaseType("project.Domain.Models.BaseEntity");
 
                     b.Property<TimeSpan>("AllowedTakeLength")
                         .HasColumnType("time");
 
                     b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("Test_CreatedById");
 
                     b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Test_CreationTime");
 
                     b.Property<bool>("IsLateSubmissionAllowed")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsShared")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("Test_IsShared");
 
                     b.Property<double>("MaxPoints")
-                        .HasColumnType("float");
+                        .HasColumnType("float")
+                        .HasColumnName("Test_MaxPoints");
 
                     b.Property<string>("Title")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("ID");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Test_Title");
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("Tests");
+                    b.HasDiscriminator().HasValue("Test");
                 });
 
             modelBuilder.Entity("project.Domain.Models.TestResult", b =>
                 {
-                    b.Property<string>("ID")
-                        .HasColumnType("nvarchar(450)");
+                    b.HasBaseType("project.Domain.Models.BaseEntity");
 
                     b.Property<string>("CourseID")
                         .HasColumnType("nvarchar(450)");
@@ -554,69 +622,13 @@ namespace project.Repository.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("ID");
-
                     b.HasIndex("CourseID");
 
                     b.HasIndex("TestID");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TestResults");
-                });
-
-            modelBuilder.Entity("project.Domain.Models.User", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
-
-                    b.Property<string>("LastIP")
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.Property<DateTime>("LastLogin")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
-
-                    b.Property<DateTime>("ModifiedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasDiscriminator().HasValue("User");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "78cc1f04-71a4-450a-91cf-557666de8c6c",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "16a65fd1-4809-4389-a21f-f5e26ede1d12",
-                            Email = "admin@oenik.hu",
-                            EmailConfirmed = true,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@OENIK.hu",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEFd7OUXay338aOYElX5A0XGS1EW+bEtsxEhI1Rv2m68dhrO9unL93NWv0byrx6REiw==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "0f2352f3-dfde-4831-b509-4a374604ecfa",
-                            TwoFactorEnabled = false,
-                            UserName = "admin",
-                            CreatedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LastLogin = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ModifiedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
+                    b.HasDiscriminator().HasValue("TestResult");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -668,19 +680,6 @@ namespace project.Repository.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("project.Domain.Models.Answer", b =>
-                {
-                    b.HasOne("project.Domain.Models.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionID");
-
-                    b.HasOne("project.Domain.Models.TestResult", null)
-                        .WithMany("Answers")
-                        .HasForeignKey("TestResultID");
-
-                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("project.Domain.Models.DBConnections.CourseTest", b =>
@@ -747,6 +746,28 @@ namespace project.Repository.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("project.Domain.Models.User", b =>
+                {
+                    b.HasOne("project.Domain.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById");
+
+                    b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("project.Domain.Models.Answer", b =>
+                {
+                    b.HasOne("project.Domain.Models.BaseEntity", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionID");
+
+                    b.HasOne("project.Domain.Models.TestResult", null)
+                        .WithMany("Answers")
+                        .HasForeignKey("TestResultID");
+
+                    b.Navigation("Question");
+                });
+
             modelBuilder.Entity("project.Domain.Models.Question", b =>
                 {
                     b.HasOne("project.Domain.Models.User", "CreatedBy")
@@ -797,11 +818,7 @@ namespace project.Repository.Migrations
 
             modelBuilder.Entity("project.Domain.Models.User", b =>
                 {
-                    b.HasOne("project.Domain.Models.User", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
-                    b.Navigation("CreatedBy");
+                    b.Navigation("UserCourses");
                 });
 
             modelBuilder.Entity("project.Domain.Models.Course", b =>
@@ -833,11 +850,6 @@ namespace project.Repository.Migrations
             modelBuilder.Entity("project.Domain.Models.TestResult", b =>
                 {
                     b.Navigation("Answers");
-                });
-
-            modelBuilder.Entity("project.Domain.Models.User", b =>
-                {
-                    b.Navigation("UserCourses");
                 });
 #pragma warning restore 612, 618
         }

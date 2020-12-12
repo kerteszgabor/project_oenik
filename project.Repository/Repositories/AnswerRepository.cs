@@ -1,8 +1,10 @@
-﻿using project.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using project.Domain.Interfaces;
+using project.Domain.Models;
 using project.Repository.Data;
-using project.Repository.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,6 +35,18 @@ namespace project.Repository.Repositories
         {
             await foreach (var item in context.Answers)
                 yield return item;
+        }
+
+        public async Task<List<Answer>> GetAllAnswersOfQuestionOfTest(Question question, Test test)
+        {
+            return await context.TestResults
+                .Include(x => x.Answers)
+                .AsQueryable()
+                .FirstOrDefaultAsync(x => x.Test.ID == test.ID).Result
+                .Answers
+                .Where(x => x.Question.ID == question.ID)
+                .AsQueryable()
+                .ToListAsync();
         }
     }
 }

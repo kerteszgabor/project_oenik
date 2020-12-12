@@ -1,15 +1,13 @@
 ﻿using project.Domain.Models;
-using project.Repository.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Repository.Interfaces
+namespace project.Domain.Interfaces
 {
-    public interface IRepository<T> where T : BaseEntity
+    public interface IRepository<T> 
     {
-        ApplicationDbContext context { get; set; }
         Task<T> Get(string id);
         IAsyncEnumerable<T> GetAll();
         Task<bool> Create(T entity);

@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace project.Domain.Models
 {
-    public class TestResult : BaseEntity
+    public class TestResult
     {
+        [Key]
+        public string ID { get; set; }
         public Test Test { get; set; }
 
         public Course Course { get; set; }

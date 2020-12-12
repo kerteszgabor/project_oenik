@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace project.Repository.Migrations
 {
-    public partial class InitDB : Migration
+    public partial class init06 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -58,43 +58,6 @@ namespace project.Repository.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Courses",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Courses", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProgrammingQuestions",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsShared = table.Column<bool>(type: "bit", nullable: false),
-                    QuestionType = table.Column<int>(type: "int", nullable: false),
-                    CorrectAnswer = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MaxPoints = table.Column<double>(type: "float", nullable: false),
-                    PictureExtensionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    PictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    OptimalNumberOfLines = table.Column<int>(type: "int", nullable: false),
-                    ReferenceComplexityLevel = table.Column<int>(type: "int", nullable: false),
-                    ReferenceRuntime = table.Column<TimeSpan>(type: "time", nullable: false),
-                    ExpectedOutput = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProgrammingQuestions", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -204,54 +167,183 @@ namespace project.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Questions",
+                name: "BaseEntity",
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    AnswerText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CorrectManually = table.Column<bool>(type: "bit", nullable: true),
+                    TestResultID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    IsShared = table.Column<bool>(type: "bit", nullable: false),
-                    CorrectManually = table.Column<bool>(type: "bit", nullable: false),
-                    QuestionType = table.Column<int>(type: "int", nullable: false),
+                    ProgrammingQuestion_CreationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsShared = table.Column<bool>(type: "bit", nullable: true),
+                    QuestionType = table.Column<int>(type: "int", nullable: true),
                     CorrectAnswer = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MaxPoints = table.Column<double>(type: "float", nullable: false),
+                    MaxPoints = table.Column<double>(type: "float", nullable: true),
                     PictureExtensionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    PictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                    PictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    OptimalNumberOfLines = table.Column<int>(type: "int", nullable: true),
+                    ReferenceComplexityLevel = table.Column<int>(type: "int", nullable: true),
+                    ReferenceRuntime = table.Column<TimeSpan>(type: "time", nullable: true),
+                    ExpectedOutput = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Question_Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Question_Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Question_CreationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Question_IsShared = table.Column<bool>(type: "bit", nullable: true),
+                    Question_CorrectManually = table.Column<bool>(type: "bit", nullable: true),
+                    QuestionType1 = table.Column<int>(type: "int", nullable: true),
+                    Question_CorrectAnswer = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Question_MaxPoints = table.Column<double>(type: "float", nullable: true),
+                    Question_PictureExtensionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Question_PictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    QuestionLabel_QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    LabelText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Test_Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Test_CreationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Test_CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Test_IsShared = table.Column<bool>(type: "bit", nullable: true),
+                    IsLateSubmissionAllowed = table.Column<bool>(type: "bit", nullable: true),
+                    AllowedTakeLength = table.Column<TimeSpan>(type: "time", nullable: true),
+                    Test_MaxPoints = table.Column<double>(type: "float", nullable: true),
+                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CourseID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FinishTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PointResult = table.Column<double>(type: "float", nullable: true),
+                    IsCorrectionFinished = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Questions", x => x.ID);
+                    table.PrimaryKey("PK_BaseEntity", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Questions_AspNetUsers_CreatedById",
+                        name: "FK_BaseEntity_AspNetUsers_CreatedById",
                         column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BaseEntity_AspNetUsers_Test_CreatedById",
+                        column: x => x.Test_CreatedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BaseEntity_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BaseEntity_BaseEntity_CourseID",
+                        column: x => x.CourseID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BaseEntity_BaseEntity_QuestionID",
+                        column: x => x.QuestionID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BaseEntity_BaseEntity_QuestionLabel_QuestionID",
+                        column: x => x.QuestionLabel_QuestionID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BaseEntity_BaseEntity_TestID",
+                        column: x => x.TestID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BaseEntity_BaseEntity_TestResultID",
+                        column: x => x.TestResultID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tests",
+                name: "CourseTest",
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    IsShared = table.Column<bool>(type: "bit", nullable: false),
-                    IsLateSubmissionAllowed = table.Column<bool>(type: "bit", nullable: false),
-                    AllowedTakeLength = table.Column<TimeSpan>(type: "time", nullable: false),
-                    MaxPoints = table.Column<double>(type: "float", nullable: false)
+                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CourseID = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tests", x => x.ID);
+                    table.PrimaryKey("PK_CourseTest", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Tests_AspNetUsers_CreatedById",
-                        column: x => x.CreatedById,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        name: "FK_CourseTest_BaseEntity_CourseID",
+                        column: x => x.CourseID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CourseTest_BaseEntity_TestID",
+                        column: x => x.TestID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestProgQuestion",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ProgrammingQuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestProgQuestion", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_TestProgQuestion_BaseEntity_ProgrammingQuestionID",
+                        column: x => x.ProgrammingQuestionID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TestProgQuestion_BaseEntity_TestID",
+                        column: x => x.TestID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestQuestion",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestQuestion", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_TestQuestion_BaseEntity_QuestionID",
+                        column: x => x.QuestionID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TestQuestion_BaseEntity_TestID",
+                        column: x => x.TestID,
+                        principalTable: "BaseEntity",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -273,168 +365,11 @@ namespace project.Repository.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserCourse_Courses_CourseID",
+                        name: "FK_UserCourse_BaseEntity_CourseID",
                         column: x => x.CourseID,
-                        principalTable: "Courses",
+                        principalTable: "BaseEntity",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "QuestionLabels",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    LabelText = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuestionLabels", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_QuestionLabels_Questions_QuestionID",
-                        column: x => x.QuestionID,
-                        principalTable: "Questions",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CourseTest",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CourseID = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CourseTest", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_CourseTest_Courses_CourseID",
-                        column: x => x.CourseID,
-                        principalTable: "Courses",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_CourseTest_Tests_TestID",
-                        column: x => x.TestID,
-                        principalTable: "Tests",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TestProgQuestion",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ProgrammingQuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TestProgQuestion", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_TestProgQuestion_ProgrammingQuestions_ProgrammingQuestionID",
-                        column: x => x.ProgrammingQuestionID,
-                        principalTable: "ProgrammingQuestions",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TestProgQuestion_Tests_TestID",
-                        column: x => x.TestID,
-                        principalTable: "Tests",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TestQuestion",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TestQuestion", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_TestQuestion_Questions_QuestionID",
-                        column: x => x.QuestionID,
-                        principalTable: "Questions",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TestQuestion_Tests_TestID",
-                        column: x => x.TestID,
-                        principalTable: "Tests",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TestResults",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    TestID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CourseID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FinishTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PointResult = table.Column<double>(type: "float", nullable: false),
-                    IsCorrectionFinished = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TestResults", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_TestResults_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TestResults_Courses_CourseID",
-                        column: x => x.CourseID,
-                        principalTable: "Courses",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TestResults_Tests_TestID",
-                        column: x => x.TestID,
-                        principalTable: "Tests",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Answers",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    QuestionID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    AnswerText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CorrectManually = table.Column<bool>(type: "bit", nullable: false),
-                    TestResultID = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Answers", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Answers_Questions_QuestionID",
-                        column: x => x.QuestionID,
-                        principalTable: "Questions",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Answers_TestResults_TestResultID",
-                        column: x => x.TestResultID,
-                        principalTable: "TestResults",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -442,30 +377,20 @@ namespace project.Repository.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "96110387-c379-4f43-be32-c93224d39c94", "f266b220-9f29-4e00-8248-8f126bffdb63", "Admin", "ADMIN" },
-                    { "c1ce19f9-7b5d-4590-87a2-34dbc2288e0c", "a8abb751-19bc-45af-a3d1-cd3ae9edec29", "Student", "STUDENT" },
-                    { "b490a36c-0328-45a5-9ede-8d669a2ef7c1", "55343e97-df18-4d23-9d4c-1d5f675c4714", "Teacher", "TEACHER" }
+                    { "cf2e9aae-ba1e-4c65-99a0-c2561f81c68a", "5d324045-1f85-4e40-895a-f5ce6437e025", "Admin", "ADMIN" },
+                    { "99ea831c-ecee-4157-836a-ad151533572e", "8814ecd2-9845-45b5-af28-7367c57e0985", "Student", "STUDENT" },
+                    { "3754e317-69fc-433d-9405-43e58130fb50", "6b51dc0b-4474-408f-b6fd-3e84907d3739", "Teacher", "TEACHER" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedById", "CreatedOn", "Discriminator", "Email", "EmailConfirmed", "FirstName", "LastIP", "LastLogin", "LastName", "LockoutEnabled", "LockoutEnd", "ModifiedOn", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "78cc1f04-71a4-450a-91cf-557666de8c6c", 0, "16a65fd1-4809-4389-a21f-f5e26ede1d12", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "admin@oenik.hu", true, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "ADMIN@OENIK.hu", "ADMIN", "AQAAAAEAACcQAAAAEFd7OUXay338aOYElX5A0XGS1EW+bEtsxEhI1Rv2m68dhrO9unL93NWv0byrx6REiw==", null, false, "0f2352f3-dfde-4831-b509-4a374604ecfa", false, "admin" });
+                values: new object[] { "dec9e78b-a544-4319-813c-9abadc06cfef", 0, "d4ca0e68-3e7c-4a83-9daf-89d5ed931146", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "User", "admin@oenik.hu", true, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "ADMIN@OENIK.hu", "ADMIN", "AQAAAAEAACcQAAAAEA+Og6ZONsvfNBqag/pUwmPgAY7vvOegXYNv8IbCvZ9sA9Z8EyLr0wtqmlOWf+mcmw==", null, false, "788d8d77-e6c7-4076-b909-ff407d63043d", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "96110387-c379-4f43-be32-c93224d39c94", "78cc1f04-71a4-450a-91cf-557666de8c6c" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Answers_QuestionID",
-                table: "Answers",
-                column: "QuestionID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Answers_TestResultID",
-                table: "Answers",
-                column: "TestResultID");
+                values: new object[] { "cf2e9aae-ba1e-4c65-99a0-c2561f81c68a", "dec9e78b-a544-4319-813c-9abadc06cfef" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -512,6 +437,46 @@ namespace project.Repository.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BaseEntity_CourseID",
+                table: "BaseEntity",
+                column: "CourseID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEntity_CreatedById",
+                table: "BaseEntity",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEntity_QuestionID",
+                table: "BaseEntity",
+                column: "QuestionID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEntity_QuestionLabel_QuestionID",
+                table: "BaseEntity",
+                column: "QuestionLabel_QuestionID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEntity_Test_CreatedById",
+                table: "BaseEntity",
+                column: "Test_CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEntity_TestID",
+                table: "BaseEntity",
+                column: "TestID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEntity_TestResultID",
+                table: "BaseEntity",
+                column: "TestResultID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseEntity_UserId",
+                table: "BaseEntity",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CourseTest_CourseID",
                 table: "CourseTest",
                 column: "CourseID");
@@ -520,16 +485,6 @@ namespace project.Repository.Migrations
                 name: "IX_CourseTest_TestID",
                 table: "CourseTest",
                 column: "TestID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QuestionLabels_QuestionID",
-                table: "QuestionLabels",
-                column: "QuestionID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Questions_CreatedById",
-                table: "Questions",
-                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TestProgQuestion_ProgrammingQuestionID",
@@ -552,26 +507,6 @@ namespace project.Repository.Migrations
                 column: "TestID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestResults_CourseID",
-                table: "TestResults",
-                column: "CourseID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TestResults_TestID",
-                table: "TestResults",
-                column: "TestID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TestResults_UserId",
-                table: "TestResults",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tests_CreatedById",
-                table: "Tests",
-                column: "CreatedById");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserCourse_UserID",
                 table: "UserCourse",
                 column: "UserID");
@@ -579,9 +514,6 @@ namespace project.Repository.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Answers");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -601,9 +533,6 @@ namespace project.Repository.Migrations
                 name: "CourseTest");
 
             migrationBuilder.DropTable(
-                name: "QuestionLabels");
-
-            migrationBuilder.DropTable(
                 name: "TestProgQuestion");
 
             migrationBuilder.DropTable(
@@ -613,22 +542,10 @@ namespace project.Repository.Migrations
                 name: "UserCourse");
 
             migrationBuilder.DropTable(
-                name: "TestResults");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "ProgrammingQuestions");
-
-            migrationBuilder.DropTable(
-                name: "Questions");
-
-            migrationBuilder.DropTable(
-                name: "Courses");
-
-            migrationBuilder.DropTable(
-                name: "Tests");
+                name: "BaseEntity");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

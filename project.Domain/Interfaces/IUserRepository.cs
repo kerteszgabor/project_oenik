@@ -7,22 +7,22 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
-namespace project.Repository.Interfaces
+namespace project.Domain.Interfaces
 {
     public interface IUserRepository<T> where T : User
     {
         UserManager<User> UserManager { get; set; }
         IConfiguration Configuration { get; set; }
-        Task<User> Get(string id);
-        Task<User> GetByName(string name);
-        Task<IEnumerable<T>> GetAll();
+        Task<User> Get(string uid);
+        IQueryable<T> List();
 
-        Task<bool> Delete(string id);
+        Task<bool> Delete(string uid);
 
         Task<bool> Update(User updatedUser);
 
-        Task<bool> RegisterUser(RegisterData model);
-        Task<JwtSecurityToken> Login(LoginData model);
+        Task<bool> Register(RegisterData registerData);
+        Task<JwtSecurityToken> Login(LoginData loginData);
     }
 }

@@ -17,11 +17,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using project.Domain.Models;
 using project.Repository.Data;
-using project.Repository.Interfaces;
 using project.Repository.Repositories;
 using project.Service.Interfaces;
 using project.Service.Services;
 using Microsoft.AspNetCore.Identity.UI;
+using project.Domain.Interfaces;
 
 namespace project.WebAPI
 {

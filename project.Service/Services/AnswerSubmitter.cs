@@ -1,5 +1,5 @@
-﻿using project.Domain.Models;
-using project.Repository.Interfaces;
+﻿using project.Domain.Interfaces;
+using project.Domain.Models;
 using project.Service.Interfaces;
 using System;
 using System.Collections.Generic;

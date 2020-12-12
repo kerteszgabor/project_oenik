@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using project.Domain.Models;
 using project.Domain.DTO;
-using project.Repository.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,6 +11,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using project.Domain.Interfaces;
 
 namespace project.Repository.Repositories
 {
@@ -26,15 +26,15 @@ namespace project.Repository.Repositories
             this.Configuration = configuration;
         }
 
-        public async Task<JwtSecurityToken> Login(LoginData model)
+        public async Task<JwtSecurityToken> Login(LoginData loginData)
         {
-            var user = await UserManager.FindByNameAsync(model.Username);
-            var userRoles = await UserManager.GetRolesAsync(user);
+            var currentUser = await UserManager.FindByNameAsync(loginData.Username);
+            var userRoles = await UserManager.GetRolesAsync(currentUser);
 
-            if (user != null && await UserManager.CheckPasswordAsync(user, model.Password))
+            if (currentUser != null && await UserManager.CheckPasswordAsync(currentUser, loginData.Password))
             {
                 var claim = new[] {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                    new Claim(JwtRegisteredClaimNames.Sub, currentUser.UserName),
                     new Claim(ClaimTypes.Role, userRoles.FirstOrDefault())
                 };
                 var signinKey = new SymmetricSecurityKey(
@@ -50,9 +50,9 @@ namespace project.Repository.Repositories
                   signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
                 ) ;
 
-                user.LastLogin = DateTime.Now;
-                user.LastIP = model.IPAddress;
-                await UserManager.UpdateAsync(user);
+                currentUser.LastLogin = DateTime.Now;
+                currentUser.LastIP = loginData.IPAddress;
+                await UserManager.UpdateAsync(currentUser);
 
                 return token;
             }
@@ -63,50 +63,36 @@ namespace project.Repository.Repositories
             }
         }
 
-        public async Task<bool> RegisterUser(RegisterData model)
+        public async Task<bool> Register(RegisterData registerData)
         {
-            User currentUser = UserManager.FindByNameAsync(model.RegisteringUserName).Result;
+            User currentUser = UserManager.FindByNameAsync(registerData.RegisteringUserName).Result;
 
-            var user = new User()
+            var newUser = new User()
             {
-                Email = model.Email,
-                UserName = model.Username,
+                Email = registerData.Email,
+                UserName = registerData.Username,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                NormalizedUserName = model.Username.ToUpper(),
-                NormalizedEmail = model.Email.ToUpper(),
+                FirstName = registerData.FirstName,
+                LastName = registerData.LastName,
+                NormalizedUserName = registerData.Username.ToUpper(),
+                NormalizedEmail = registerData.Email.ToUpper(),
                 ModifiedOn = DateTime.Now,
                 EmailConfirmed = true,
                 CreatedOn = DateTime.Now,
                 CreatedBy = currentUser
             };
 
-            var result = await UserManager.CreateAsync(user, model.Password);
+            var result = await UserManager.CreateAsync(newUser, registerData.Password);
 
             if (result.Succeeded)
             {
-                await UserManager.AddToRoleAsync(user, model.Role);
+                await UserManager.AddToRoleAsync(newUser, registerData.Role);
                 return true;
             }
             else
             {
                 return false;
             //    throw new CannotAddUserException(result.Errors.ToList());
-            }
-        }
-
-        public async Task<User> GetByName(string name)
-        {
-            var user = await UserManager.FindByNameAsync(name);
-            if (user != null)
-            {
-                return user;
-            }
-            else
-            {
-                return null;
-              //  throw new UserNotFoundException();
             }
         }
 
@@ -123,9 +109,9 @@ namespace project.Repository.Repositories
                 //throw new UserNotFoundException();
             }
         }
-        public async Task<IEnumerable<User>> GetAll()
+        public IQueryable<User> List()
         {
-            return await UserManager.Users.ToListAsync();
+            return UserManager.Users.AsQueryable();
         }
 
         public async Task<bool> Delete(string uid)

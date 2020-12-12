@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace project.Domain.Models
 {
-    public class QuestionLabel : BaseEntity
+    public class QuestionLabel
     {
+        [Key]
+        public string ID { get; set; }
         public Question Question { get; set; }
         public string LabelText { get; set; }
     }

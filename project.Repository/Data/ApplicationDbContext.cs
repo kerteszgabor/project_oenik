@@ -122,6 +122,5 @@ namespace project.Repository.Data
         public DbSet<QuestionLabel> QuestionLabels { get; set; }
         public DbSet<ProgrammingQuestion> ProgrammingQuestions { get; set; }
         public DbSet<TestResult> TestResults { get; set; }
-        
     }
 }

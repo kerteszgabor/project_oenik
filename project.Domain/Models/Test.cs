@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 
 namespace project.Domain.Models
 {
-    public class Test : BaseEntity
+    public class Test
     {
+        [Key]
+        public string ID { get; set; }
         [StringLength(100)]
         public string Title { get; set; }
 
