@@ -40,6 +40,7 @@ namespace project.WebAPI
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped(typeof(IUserRepository<User>), typeof(UserRepository));
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IClassReportBuilder, ClassReportBuilder>();
 
             services.AddDefaultIdentity<User>(
                 option =>
