@@ -212,6 +212,8 @@ namespace project.Service.Services
                                    where m.Value.ToBeCompiled
                                    select m.Key;
 
+            Helpers.ClassReportBuilder.HelperMethods.DeleteDirectory(Path.Combine(Directory.GetCurrentDirectory(), "compilations"));
+
             Parallel.ForEach(methodsToCompile, (method) =>
             {
                 var methodModel = methodPairs[method];
@@ -288,7 +290,7 @@ namespace project.Service.Services
 
         private object CompileMethod(MethodDeclarationSyntax method, object[] parameters)
         {
-            string fileName = method.Identifier.ToString();
+            string fileName = method.Identifier.ToString() + ".dll";
             // Detect the file location for the library that defines the object type
             var systemRefLocation = typeof(object).GetTypeInfo().Assembly.Location;
             // Create a reference to the library
@@ -296,10 +298,13 @@ namespace project.Service.Services
             // A single, immutable invocation to the compiler
             // to produce a library
 
-            string path = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+            Directory.CreateDirectory("compilations");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "compilations", fileName);
             //string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), fileName);
 
-           // var methodTree = SyntaxFactory.ParseSyntaxTree(method.Body.ToString());
+            // var methodTree = SyntaxFactory.ParseSyntaxTree(method.Body.ToString());
+
+            
 
             var compilation = CSharpCompilation.Create(fileName)
           .WithOptions(
@@ -312,8 +317,7 @@ namespace project.Service.Services
             if (compilationResult.Success)
             {
                 // Load the assembly
-                Assembly asm =
-                  AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+                Assembly asm = Assembly.Load(System.IO.File.ReadAllBytes(path));
                 var methodinfo = asm.GetType("RoslynCore.Helper").GetMethod(method.Identifier.ValueText);
                 if (methodinfo.IsStatic)
                 {
@@ -321,8 +325,8 @@ namespace project.Service.Services
                 }
                 else
                 {
-                    Assembly assembly = Assembly.LoadFrom(fileName);
-                    var classType = assembly.DefinedTypes.FirstOrDefault();
+                  //  Assembly assembly = Assembly.LoadFrom(fileName);
+                    var classType = asm.DefinedTypes.FirstOrDefault();
                     var instance = Activator.CreateInstance(classType);
                     return methodinfo.Invoke(instance, parameters);
                 }
