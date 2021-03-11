@@ -17,6 +17,8 @@ namespace project.Service.Helpers.ClassReportBuilder
         public List<string> MismatchingReturnTypeMethods { get; set; } = new List<string>();
         public List<string> MismatchingOutputMethods { get; set; } = new List<string>();
         public List<string> MismatchingParametersMethods { get; set; } = new List<string>();
-        public List<Tuple<MethodDeclarationSyntax, CompilationResult>> CompiledMethods { get; set; } = new List<Tuple<MethodDeclarationSyntax, CompilationResult>>();
+
+        public bool HadCompilationError { get; set; }
+       // public List<Tuple<MethodDeclarationSyntax, CompilationResult>> CompiledMethods { get; set; } = new List<Tuple<MethodDeclarationSyntax, CompilationResult>>();
     }
 }

@@ -37,10 +37,10 @@ namespace project.Service.Services
         }
 
         private string codeAsString;
+        private string compilationPath;
         private SyntaxTree tree;
         private List<string> methodsNotFound;
         private List<MethodDeclarationSyntax> methods;
-        private List<MethodDeclarationSyntax> methodsToAnalyze;
         private MethodModel lastMethod;
         private Dictionary<MethodDeclarationSyntax, MethodModel> methodPairs;
         private ConcurrentBag<object> compilationResults;
@@ -49,11 +49,11 @@ namespace project.Service.Services
         private ClassReportBuilder(string codeToAnalyze)
         {
             this.CodeAsString = codeToAnalyze;
-            BuildAssets();
+            this.compilationPath = Path.Combine(Directory.GetCurrentDirectory(), "compilations", Guid.NewGuid().ToString());
             this.methodsNotFound = new List<string>();
-            this.methodsToAnalyze = new List<MethodDeclarationSyntax>();
             this.methodPairs = new Dictionary<MethodDeclarationSyntax, MethodModel>();
             this.compilationResults = new ConcurrentBag<object>();
+            BuildAssets();
         }
 
         public ICanCallBuild GetReportOf(string codeToAnalyze)
@@ -212,15 +212,28 @@ namespace project.Service.Services
                                    where m.Value.ToBeCompiled
                                    select m.Key;
 
-            Helpers.ClassReportBuilder.HelperMethods.DeleteDirectory(Path.Combine(Directory.GetCurrentDirectory(), "compilations"));
+            if (Directory.Exists(compilationPath))
+            {
+                HelperMethods.DeleteDirectory(compilationPath);
+            }
+            else
+            {
+                Directory.CreateDirectory(compilationPath);
+            }
 
             Parallel.ForEach(methodsToCompile, (method) =>
             {
                 var methodModel = methodPairs[method];
                 var compilationResult = CompileMethod(method, methodModel.CompilationParameters);
                 compilationResults.Add(compilationResult);
-                if (!compilationResult.ToString().Contains("issue") 
-                && compilationResult.ToString() == methodModel.ExpectedOutput?.ToString()
+
+                if (compilationResult.ToString().Contains("Error"))
+                {
+                    classReport.HadCompilationError = true;
+                }
+
+                if (
+                 compilationResult.ToString() == methodModel.ExpectedOutput?.ToString()
                 || compilationResult.ToString() == methodModel.ExpectedStringOutput?.ToString())
                 {
                     classReport.ValidMethodsByOutput.Add(method.Identifier.ValueText);
@@ -231,6 +244,7 @@ namespace project.Service.Services
                 }
             });
 
+            HelperMethods.DeleteDirectory(compilationPath);
             return classReport;
         }
 
@@ -291,33 +305,20 @@ namespace project.Service.Services
         private object CompileMethod(MethodDeclarationSyntax method, object[] parameters)
         {
             string fileName = method.Identifier.ToString() + ".dll";
-            // Detect the file location for the library that defines the object type
             var systemRefLocation = typeof(object).GetTypeInfo().Assembly.Location;
-            // Create a reference to the library
             var systemReference = MetadataReference.CreateFromFile(systemRefLocation);
-            // A single, immutable invocation to the compiler
-            // to produce a library
-
-            Directory.CreateDirectory("compilations");
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "compilations", fileName);
-            //string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), fileName);
-
-            // var methodTree = SyntaxFactory.ParseSyntaxTree(method.Body.ToString());
-
-            
+            string path = Path.Combine(compilationPath, fileName);
 
             var compilation = CSharpCompilation.Create(fileName)
-          .WithOptions(
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-          .AddReferences(systemReference)
-          .AddSyntaxTrees(tree);
+                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                .AddReferences(systemReference)
+                .AddSyntaxTrees(tree);
 
-           EmitResult compilationResult = compilation.Emit(path);
+            EmitResult compilationResult = compilation.Emit(path);
 
             if (compilationResult.Success)
             {
-                // Load the assembly
-                Assembly asm = Assembly.Load(System.IO.File.ReadAllBytes(path));
+                Assembly asm = Assembly.Load(File.ReadAllBytes(path));
                 var methodinfo = asm.GetType("RoslynCore.Helper").GetMethod(method.Identifier.ValueText);
                 if (methodinfo.IsStatic)
                 {
@@ -325,7 +326,6 @@ namespace project.Service.Services
                 }
                 else
                 {
-                  //  Assembly assembly = Assembly.LoadFrom(fileName);
                     var classType = asm.DefinedTypes.FirstOrDefault();
                     var instance = Activator.CreateInstance(classType);
                     return methodinfo.Invoke(instance, parameters);
@@ -333,14 +333,9 @@ namespace project.Service.Services
             }
             else
             {
-                foreach (Diagnostic codeIssue in compilationResult.Diagnostics)
-                {
-                    string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},\nLocation: { codeIssue.Location.GetLineSpan()},\nSeverity: { codeIssue.Severity}";
-                    return issue;
-
-                    //TODO: On compilation error, write error message to methodModel, remove current method from compilation list, and recompile
-                }
-                return "issue";
+                Diagnostic codeIssue = compilationResult.Diagnostics.FirstOrDefault();
+                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},\nLocation: { codeIssue.Location.GetLineSpan()},\nSeverity: { codeIssue.Severity}";
+                return issue;
             }
         }
     }
