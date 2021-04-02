@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -13,6 +14,7 @@ using project.Service.Interfaces;
 
 namespace project.WebAPI.Controllers
 {
+    [EnableCors("cors")]
     [Route("classreport")]
     [ApiController]
     public class ClassReportController : ControllerBase
