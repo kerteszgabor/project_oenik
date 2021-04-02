@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using project.Domain.Models;
 using project.Service.Interfaces;
 using project.Domain.DTO;
+using Microsoft.AspNetCore.Cors;
 
 namespace project.WebAPI.Controllers
 {
+    [EnableCors("cors")]
     [Route("users")]
     public class AuthController : Controller
     {

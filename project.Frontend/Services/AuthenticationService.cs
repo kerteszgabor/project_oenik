@@ -20,7 +20,7 @@ namespace project.Client.Services
 
         public async Task<ClientUserInfo> RegisterUserAsync(RegisterRequest request)
         {
-            var response = await client.PostAsync<ClientUserInfo>($"{baseURL}/register", request);
+            var response = await client.PostAsync<ClientUserInfo>($"{baseURL}/users/register", request);
             //if (response.IsSucceded)
             //{
             //    response.Result.IsSucceded = true;
@@ -36,7 +36,7 @@ namespace project.Client.Services
 
         public async Task<ClientUserInfo> LoginUserAsync(LoginRequest request)
         {
-            var response = await client.PostAsync<ClientUserInfo>($"{baseURL}/login", request);
+            var response = await client.PostAsync<ClientUserInfo>($"{baseURL}/users/login", request);
             //if (response.IsSucceded)
             //{
             //    response.Result.IsSucceded = true;

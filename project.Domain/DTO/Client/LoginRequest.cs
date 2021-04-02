@@ -11,7 +11,6 @@ namespace project.Domain.DTO.Client
     {
         [Required]
         [StringLength(50)]
-        [EmailAddress]
         public string userName { get; set; }
 
         [StringLength(50)]
