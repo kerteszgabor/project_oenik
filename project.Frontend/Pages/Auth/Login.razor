@@ -9,7 +9,7 @@
 
 <MudText GutterBottom="true" Typo="Typo.h5" Align="Align.Center">Login to your account</MudText>
 <EditForm Model="model" OnValidSubmit="LoginUser">
-    @*<AlertMessage Message="@message" MessageType="@messageType" />*@
+    <AlertMessage Message="@message" MessageType="@messageType" />
 
     <DataAnnotationsValidator />
     <MudCard>
@@ -54,7 +54,7 @@
         isBusy = true;
 
         var result = await authService.LoginUserAsync(model);
-        if (!string.IsNullOrWhiteSpace(result.ID))
+        if (!string.IsNullOrWhiteSpace(result.Token))
         {
             message = "Login successful";
             messageType = AlertMessageType.Success;
