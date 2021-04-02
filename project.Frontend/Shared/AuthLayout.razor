@@ -1,0 +1,24 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudContainer Class="mt-16">
+    <MudGrid Justify="Justify.Center" Class="mt-8">
+        <MudItem xs="12" sm="6" md="7">
+            <MudCard Elevation="25" Class="rounded-lg pb-4" Style=" background-color:#Fafbfc">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Style="font-weight:lighter" Typo="Typo.h3" Align="Align.Center">Future starts here.</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    @Body
+                </MudCardContent>
+                <MudCardActions Class="d-flex justify-center">
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>

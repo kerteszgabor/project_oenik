@@ -1,0 +1,13 @@
+﻿@page "/"
+
+@attribute [Authorize]
+
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Welcome @context.User.Claims.FirstOrDefault().Value</h1>
+    </Authorized>
+    <NotAuthorized>
+        <h1>Login <a href="/auth/login">here</a>.</h1>
+    </NotAuthorized>
+</AuthorizeView>

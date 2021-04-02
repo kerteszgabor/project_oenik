@@ -1,0 +1,57 @@
+﻿@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <MudAlert Severity="@alertClass">@Message <span @onclick="HideMessage">x</span></MudAlert>
+}
+
+
+@code {
+    [Parameter]
+    public string Message { get; set; }
+
+    private project.Domain.DTO.Client.AlertMessageType messageType;
+
+    [Parameter]
+    public AlertMessageType MessageType
+    {
+        get => messageType;
+        set
+        {
+            messageType = value;
+            //switch (messageType)
+            //{
+            //    case Models.AlertMessageType.Error:
+            //        alertClass = "alert-danger";
+            //        break;
+            //    case Models.AlertMessageType.Warning:
+            //        alertClass = "alert-warning";
+            //        break;
+            //    case Models.AlertMessageType.Success:
+            //        alertClass = "alert-success";
+            //        break;
+            //    default:
+            //        break;
+            //}
+
+            switch (messageType)
+            {
+                case AlertMessageType.Error:
+                    alertClass = Severity.Error;
+                    break;
+                case AlertMessageType.Warning:
+                    alertClass = Severity.Warning;
+                    break;
+                case AlertMessageType.Success:
+                    alertClass = Severity.Success;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    MudBlazor.Severity alertClass;
+    void HideMessage()
+    {
+        Message = string.Empty;
+    }
+}
