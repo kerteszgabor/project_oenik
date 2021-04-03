@@ -9,13 +9,17 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="@request.Email" Label="User Name" ReadOnly="false" />
+        <MudTextField @bind-Value="@request.Username" Label="User Name" ReadOnly="false" />
         <MudTextField @bind-Value="@request.Password" Label="Password" ReadOnly="false" />
+        <MudTextField @bind-Value="@request.FirstName" Label="First Name" ReadOnly="false" />
+        <MudTextField @bind-Value="@request.LastName" Label="Last Name" ReadOnly="false" />
+        <MudTextField @bind-Value="@request.Email" Label="Email" ReadOnly="false" />
+        <MudTextField @bind-Value="@request.Role" Label="Role" ReadOnly="false" />
 
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Success" OnClick="AddToto">Add Todo</MudButton>
+        <MudButton Color="Color.Success" OnClick="AddToto">Add User</MudButton>
     </DialogActions>
 </MudDialog>
 @code {
@@ -31,7 +35,7 @@
     private void AddToto()
     {
         //In a real world scenario this bool would probably be a service to delete the item from api/database
-        Snackbar.Add("Todo was successfully created!", Severity.Success);
+        Snackbar.Add("User was successfully created!", Severity.Success);
         MudDialog.Close(DialogResult.Ok(request));
     }
 }
