@@ -11,17 +11,10 @@ using System.Linq;
 
 namespace project.Domain.Interfaces
 {
-    public interface IUserRepository<T> where T : User
+    public interface IUserRepository<T> : IRepository<T> where T : User
     {
-        UserManager<User> UserManager { get; set; }
-        IConfiguration Configuration { get; set; }
-        Task<User> Get(string uid);
-        IQueryable<T> List();
-
-        Task<bool> Delete(string uid);
-
-        Task<bool> Update(User updatedUser);
-
+        //UserManager<User> UserManager { get; set; }
+        //IConfiguration Configuration { get; set; }
         Task<bool> Register(RegisterData registerData);
         Task<JwtSecurityToken> Login(LoginData loginData);
     }

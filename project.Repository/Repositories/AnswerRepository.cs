@@ -19,19 +19,19 @@ namespace project.Repository.Repositories
             this.context = context;
         }
 
-        public async Task<bool> Create(Answer entity)
+        public async Task<bool> CreateAsync(Answer entity)
         {
             await context.Answers.AddAsync(entity);
-            var result = Get(entity.ID) == null ? false : true;
+            var result = GetAsync(entity.ID) == null ? false : true;
             return result;
         }
 
-        public async Task<Answer> Get(string id)
+        public async Task<Answer> GetAsync(string id)
         {
             return await context.Answers.FindAsync(id);
         }
 
-        public async IAsyncEnumerable<Answer> GetAll()
+        public async IAsyncEnumerable<Answer> GetAllAsync()
         {
             await foreach (var item in context.Answers)
                 yield return item;
@@ -47,6 +47,16 @@ namespace project.Repository.Repositories
                 .Where(x => x.Question.ID == question.ID)
                 .AsQueryable()
                 .ToListAsync();
+        }
+
+        public Task<bool> DeleteAsync(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> UpdateAsync(Answer entity)
+        {
+            throw new NotImplementedException();
         }
     }
 }

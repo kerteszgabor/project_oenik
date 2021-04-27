@@ -8,6 +8,5 @@ namespace project.Domain.Interfaces
 {
     public interface IAnswerRepository : IRepository<Answer>
     {
-        Task<List<Answer>> GetAllAnswersOfQuestionOfTest(Question question, Test test);
     }
 }
