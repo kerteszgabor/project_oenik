@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using project.Domain.DTO.Auth;
 
 namespace project.Domain.Interfaces
 {

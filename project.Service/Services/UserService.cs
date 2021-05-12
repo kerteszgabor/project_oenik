@@ -10,6 +10,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using project.Domain.Interfaces;
+using project.Domain.DTO.Auth;
 
 namespace project.Service.Services
 {

@@ -10,6 +10,7 @@ using project.Service.Interfaces;
 using project.Domain.DTO;
 using Microsoft.AspNetCore.Cors;
 using System.Linq;
+using project.Domain.DTO.Auth;
 
 namespace project.WebAPI.Controllers
 {

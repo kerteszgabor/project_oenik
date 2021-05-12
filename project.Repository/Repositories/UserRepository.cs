@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using project.Domain.Interfaces;
+using project.Domain.DTO.Auth;
 
 namespace project.Repository.Repositories
 {
@@ -66,7 +67,7 @@ namespace project.Repository.Repositories
         {
             User currentUser = UserManager.FindByNameAsync(registerData.RegisteringUserName).Result;
 
-            var newUser = new User()
+            var newUser = new User()    //maybe automapper would be more elegant
             {
                 Id = Guid.NewGuid().ToString(),
                 Email = registerData.Email,

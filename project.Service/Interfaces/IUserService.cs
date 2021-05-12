@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.DTO;
+using project.Domain.DTO.Auth;
 using project.Domain.Models;
 using System;
 using System.Collections.Generic;

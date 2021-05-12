@@ -23,6 +23,7 @@ namespace project.Repository.Repositories
         {
             await context.Answers.AddAsync(entity);
             var result = GetAsync(entity.ID) == null ? false : true;
+            await context.SaveChangesAsync();
             return result;
         }
 
@@ -49,14 +50,46 @@ namespace project.Repository.Repositories
                 .ToListAsync();
         }
 
-        public Task<bool> DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(string id)
         {
-            throw new NotImplementedException();
+            var answer = await GetAsync(id);
+            if (answer != null)
+            {
+                context.Answers.Remove(answer);
+                var result = await context.SaveChangesAsync();
+                if (result > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    //TODO: check for errors
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+                // throw new UserNotFoundException();
+            }
         }
 
-        public Task<bool> UpdateAsync(Answer entity)
+        public async Task<bool> UpdateAsync(Answer entity)
         {
-            throw new NotImplementedException();
+            if (entity.ID != null)
+            {
+                context.Answers.Remove(entity);
+                var result = await context.SaveChangesAsync();
+                if (result > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
         }
     }
 }
