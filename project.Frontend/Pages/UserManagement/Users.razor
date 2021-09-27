@@ -16,7 +16,7 @@ else
     <MudItem xs="12" md="6" Class="mb-2">
         <MudPaper Class="d-flex flex-row py-2 px-1">
             <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Outlined" Variant="Variant.Outlined"></MudTextField>
-            <MudButton Class="pa-4 mx-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetUsersAsync()">Search</MudButton>
+            <MudButton Class="pa-1 mx-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetUsersAsync()">Search</MudButton>
         </MudPaper>
     </MudItem>
     <MudGrid>
@@ -87,7 +87,7 @@ else
     private async void DeleteUser(string id)
     {
         var parameters = new DialogParameters();
-        parameters.Add("ContentText", "Do you really want to delete this todo? This process cannot be undone.");
+        parameters.Add("ContentText", "Do you really want to delete this user? This process cannot be undone.");
         parameters.Add("ButtonText", "Delete");
         parameters.Add("Color", Color.Error);
 
@@ -122,7 +122,7 @@ else
             userService.AccessToken = userState.User.FindFirst("AccessToken").Value;
 
             var addResult = await userService.RegisterUserAsync(newUser);
-            if (addResult.Id != null)
+            if (addResult)
             {
                 await GetUsersAsync();
                 StateHasChanged();
