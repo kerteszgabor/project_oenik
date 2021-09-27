@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "project.WebAPI", "project.W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "project.Domain", "project.Domain\project.Domain.csproj", "{EC1A2555-922C-4D2F-9EB7-2C5E6E487A45}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlannerApp.Client", "project.Frontend\PlannerApp.Client.csproj", "{091B4D30-4145-4DCE-BE40-A5673B1B5575}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{EC1A2555-922C-4D2F-9EB7-2C5E6E487A45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC1A2555-922C-4D2F-9EB7-2C5E6E487A45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC1A2555-922C-4D2F-9EB7-2C5E6E487A45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{091B4D30-4145-4DCE-BE40-A5673B1B5575}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{091B4D30-4145-4DCE-BE40-A5673B1B5575}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{091B4D30-4145-4DCE-BE40-A5673B1B5575}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{091B4D30-4145-4DCE-BE40-A5673B1B5575}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

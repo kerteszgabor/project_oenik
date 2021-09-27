@@ -102,7 +102,9 @@ namespace project.WebAPI
                 app.UseDeveloperExceptionPage();
             }
 
-         //   app.UseHttpsRedirection();
+            app.UseCors("cors");
+
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 
