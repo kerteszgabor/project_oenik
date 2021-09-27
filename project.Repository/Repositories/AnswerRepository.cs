@@ -19,19 +19,20 @@ namespace project.Repository.Repositories
             this.context = context;
         }
 
-        public async Task<bool> Create(Answer entity)
+        public async Task<bool> CreateAsync(Answer entity)
         {
             await context.Answers.AddAsync(entity);
-            var result = Get(entity.ID) == null ? false : true;
+            var result = GetAsync(entity.ID) == null ? false : true;
+            await context.SaveChangesAsync();
             return result;
         }
 
-        public async Task<Answer> Get(string id)
+        public async Task<Answer> GetAsync(string id)
         {
             return await context.Answers.FindAsync(id);
         }
 
-        public async IAsyncEnumerable<Answer> GetAll()
+        public async IAsyncEnumerable<Answer> GetAllAsync()
         {
             await foreach (var item in context.Answers)
                 yield return item;
@@ -47,6 +48,48 @@ namespace project.Repository.Repositories
                 .Where(x => x.Question.ID == question.ID)
                 .AsQueryable()
                 .ToListAsync();
+        }
+
+        public async Task<bool> DeleteAsync(string id)
+        {
+            var answer = await GetAsync(id);
+            if (answer != null)
+            {
+                context.Answers.Remove(answer);
+                var result = await context.SaveChangesAsync();
+                if (result > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    //TODO: check for errors
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+                // throw new UserNotFoundException();
+            }
+        }
+
+        public async Task<bool> UpdateAsync(Answer entity)
+        {
+            if (entity.ID != null)
+            {
+                context.Answers.Remove(entity);
+                var result = await context.SaveChangesAsync();
+                if (result > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
         }
     }
 }

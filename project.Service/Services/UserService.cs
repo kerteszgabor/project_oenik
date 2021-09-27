@@ -10,6 +10,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using project.Domain.Interfaces;
+using project.Domain.DTO.Auth;
 
 namespace project.Service.Services
 {
@@ -23,17 +24,18 @@ namespace project.Service.Services
 
         public async Task<bool> Delete(string uid)
         {
-            return await userRepo.Delete(uid);
+            return await userRepo.DeleteAsync(uid);
         }
 
         public async Task<User> Get(string uid)
         {
-            return await userRepo.Get(uid);
+            return await userRepo.GetAsync(uid);
         }
 
-        public async Task<IEnumerable<User>> List()
+        public async IAsyncEnumerable<User> List()
         {
-            return await userRepo.List().ToListAsync();
+            await foreach (var item in userRepo.GetAllAsync())
+                yield return item;
         }
 
 
@@ -53,10 +55,10 @@ namespace project.Service.Services
         {
             if (patch != null)
             {
-                var user = await userRepo.Get(uid);
+                var user = await userRepo.GetAsync(uid);
                 patch.ApplyTo(user);
                 user.ModifiedOn = DateTime.Now;
-                await userRepo.Update(user);
+                await userRepo.UpdateAsync(user);
                 return true;
             }
             else
@@ -67,7 +69,8 @@ namespace project.Service.Services
 
         public async Task<User> GetUserByName(string name)
         {
-            return await userRepo.List().FirstOrDefaultAsync(x => x.UserName == name);
+            var allUsers = await userRepo.GetAllAsync().ToListAsync();
+            return allUsers.FirstOrDefault(x => x.UserName == name);
         }
 
         public async Task<JwtSecurityToken> Login(LoginData model)

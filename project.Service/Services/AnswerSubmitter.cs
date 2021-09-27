@@ -18,7 +18,7 @@ namespace project.Service.Services
 
         public async Task<bool> Submit(Answer answer)
         {
-            return await answerRepository.Create(answer);
+            return true;
         }
     }
 }

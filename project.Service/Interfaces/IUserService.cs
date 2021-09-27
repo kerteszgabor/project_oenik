@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.DTO;
+using project.Domain.DTO.Auth;
 using project.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace project.Service.Interfaces
 {
     public interface IUserService
     {
-        Task<IEnumerable<User>> List();
+        IAsyncEnumerable<User> List();
         Task<User> Get(string uid);
         Task<bool> Delete(string uid);
         Task<bool> Update(string uid, JsonPatchDocument<User> patch);

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace project.Domain.DTO
+namespace project.Domain.DTO.Auth
 {
     public class RegisterData
     {
