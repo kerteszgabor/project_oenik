@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using project.Domain.Interfaces;
+using project.Domain.DTO.Auth;
 
 namespace project.Repository.Repositories
 {
@@ -62,13 +63,13 @@ namespace project.Repository.Repositories
                 // throw new UserNotFoundException();
             }
         }
-
         public async Task<bool> Register(RegisterData registerData)
         {
             User currentUser = UserManager.FindByNameAsync(registerData.RegisteringUserName).Result;
 
-            var newUser = new User()
+            var newUser = new User()    //maybe automapper would be more elegant
             {
+                Id = Guid.NewGuid().ToString(),
                 Email = registerData.Email,
                 UserName = registerData.Username,
                 SecurityStamp = Guid.NewGuid().ToString(),
@@ -96,7 +97,7 @@ namespace project.Repository.Repositories
             }
         }
 
-        public async Task<User> Get(string id)
+        public async Task<User> GetAsync(string id)
         {
             var user = await UserManager.FindByIdAsync(id);
             if (user != null)
@@ -109,12 +110,18 @@ namespace project.Repository.Repositories
                 //throw new UserNotFoundException();
             }
         }
-        public IQueryable<User> List()
+        //public IQueryable<User> GetAllAsync()
+        //{
+        //    return UserManager.Users.AsQueryable();
+        //}
+
+        public async IAsyncEnumerable<User> GetAllAsync()
         {
-            return UserManager.Users.AsQueryable();
+            await foreach (var item in UserManager.Users.AsAsyncEnumerable())
+                yield return item;
         }
 
-        public async Task<bool> Delete(string uid)
+        public async Task<bool> DeleteAsync(string uid)
         {
             var user = await UserManager.FindByIdAsync(uid);
             if (user != null)
@@ -137,7 +144,7 @@ namespace project.Repository.Repositories
             }
         }
 
-        public async Task<bool> Update(User updatedUser)
+        public async Task<bool> UpdateAsync(User updatedUser)
         {
             if (updatedUser.Id != null)
             {
@@ -148,6 +155,11 @@ namespace project.Repository.Repositories
                 }
             }
             return false;
+        }
+
+        public Task<bool> CreateAsync(User entity)
+        {
+            throw new NotImplementedException();
         }
     }
 }

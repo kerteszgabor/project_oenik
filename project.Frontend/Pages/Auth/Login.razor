@@ -1,0 +1,88 @@
+﻿@page "/auth/login"
+@layout AuthLayout
+@inject AuthenticationService authService
+@inject NavigationManager navigationManager
+@inject ILocalStorageService storageService
+@inject AuthenticationStateProvider authenticationStateProvider
+
+
+
+<MudText GutterBottom="true" Typo="Typo.h5" Align="Align.Center">Login to your account</MudText>
+<EditForm Model="model" OnValidSubmit="LoginUser">
+    <AlertMessage Message="@message" MessageType="@messageType" />
+
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardContent>
+            <MudTextField Label="Email" Class="mt-3"
+                          @bind-Value="model.userName" For="@(() => model.userName)" />
+            <MudTextField Label="Password" HelperText="Choose a strong password" Class="mt-3"
+                          @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password" />
+        </MudCardContent>
+        <MudCardActions>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudButton Disabled="isBusy" ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled" Color="Color.Primary"
+                               Class="d-flex align-center justify-center mud-width-full py-1">
+                        Login
+                    </MudButton>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudButton Disabled="isBusy" ButtonType="ButtonType.Button"
+                               Variant="Variant.Filled" Color="Color.Secondary"
+                               Class="d-flex align-center justify-center mud-width-full py-1" OnClick="GoToRegister">
+                        Register
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
+
+@code {
+    LoginRequest model = new LoginRequest();
+
+    bool isBusy = false;
+    string message = string.Empty;
+    AlertMessageType messageType = AlertMessageType.Success;
+
+
+
+    public async Task LoginUser()
+    {
+        isBusy = true;
+
+        var result = await authService.LoginUserAsync(model);
+        if (!string.IsNullOrWhiteSpace(result.Token))
+        {
+            message = "Login successful";
+            messageType = AlertMessageType.Success;
+
+            //var userInfo = new ClientUserInfo()
+            //{
+            //    AccessToken = result.AccessToken,
+            //    ID = result.ID,
+            //    FirstName = 
+
+            //};
+
+            await storageService.SetItemAsync("User", result);
+            await authenticationStateProvider.GetAuthenticationStateAsync();
+
+            navigationManager.NavigateTo("/");
+        }
+        else
+        {
+            //messageType = Models.AlertMessageType.Error;
+            //message = result.Errors.FirstOrDefault() ?? "Something went wrong. Please try again!";
+        }
+
+        isBusy = false;
+    }
+
+    void GoToRegister()
+    {
+        navigationManager.NavigateTo("/auth/register");
+    }
+}

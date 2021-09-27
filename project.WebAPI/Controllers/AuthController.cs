@@ -8,9 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 using project.Domain.Models;
 using project.Service.Interfaces;
 using project.Domain.DTO;
+using Microsoft.AspNetCore.Cors;
+using System.Linq;
+using project.Domain.DTO.Auth;
 
 namespace project.WebAPI.Controllers
 {
+    [EnableCors("cors")]
     [Route("users")]
     public class AuthController : Controller
     {
@@ -58,7 +62,7 @@ namespace project.WebAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IEnumerable<User>> List()
         {
-            return await userService.List();
+            return await userService.List().ToListAsync();
         }
 
         [HttpGet("{username}")]
