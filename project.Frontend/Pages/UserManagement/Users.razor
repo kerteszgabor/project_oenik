@@ -4,7 +4,7 @@
 @inject IDialogService DialogService
 @attribute [Authorize]
 
-<h1>Todos</h1>
+<h1>Users</h1>
 
 @if (isBusy)
 {
@@ -13,12 +13,6 @@
 else
 {
 <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
-    @*<MudItem xs="6" sm="6" md="3">
-            <MudTextField Class="d-flex align-left justify-center mud-width-full py-1" @bind-Value="Query" Label="Outlined" Variant="Variant.Outlined"></MudTextField>
-        </MudItem>
-        <MudItem xs="6" sm="6" md="3">
-            <MudButton Class="d-flex align-right justify-center mud-width-full py-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetTodosAsync()">Search</MudButton>
-        </MudItem>*@
     <MudItem xs="12" md="6" Class="mb-2">
         <MudPaper Class="d-flex flex-row py-2 px-1">
             <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Outlined" Variant="Variant.Outlined"></MudTextField>
@@ -32,7 +26,7 @@ else
                 <MudCard Elevation="2" Class="pa-4">
                     <MudCardContent>
                         <MudText>@user.Email</MudText>
-                        <MudText Typo="Typo.body2">Hours: @user.</MudText>
+                        <MudText Typo="Typo.body2">@user</MudText>
                     </MudCardContent>
                     <MudCardActions>
                         <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteUser(user.Id)">Delete</MudButton>
@@ -42,7 +36,7 @@ else
         }
     </MudGrid>
 </MudContainer>
-    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" Class="mt-5" OnClick="AddTodo" />
+    <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" Class="mt-5" OnClick="AddUser" />
 }
 
 
@@ -114,25 +108,25 @@ else
         }
     }
 
-    async Task AddTodo()
+    async Task AddUser()
     {
-        //TodoRequest newTodo = new TodoRequest();
-        //var parameters = new DialogParameters { ["todo"] = newTodo };
+        RegisterRequest newUser = new RegisterRequest();
+        var parameters = new DialogParameters { ["request"] = newUser };
 
-        //var dialog = DialogService.Show<AddTodoDialog>("Add Todo", parameters);
-        //var result = await dialog.Result;
+        var dialog = DialogService.Show<AddUserDialog>("Add new user", parameters);
+        var result = await dialog.Result;
 
-        //if (!result.Cancelled)
-        //{
-        //    var userState = authenticationState.Result;
-        //    todoService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        if (!result.Cancelled)
+        {
+            var userState = authenticationState.Result;
+            userService.AccessToken = userState.User.FindFirst("AccessToken").Value;
 
-        //    var addResult = await todoService.PostTodoAsync(newTodo);
-        //    if (addResult.Id != null)
-        //    {
-        //        await GetUsersAsync();
-        //        StateHasChanged();
-        //    }
-        //}
+            var addResult = await userService.RegisterUserAsync(newUser);
+            if (addResult.Id != null)
+            {
+                await GetUsersAsync();
+                StateHasChanged();
+            }
+        }
     }
 }
