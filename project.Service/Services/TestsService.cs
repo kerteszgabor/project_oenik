@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.DTO.Tests;
 using project.Domain.Interfaces;
 using project.Domain.Models;
+using project.Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace project.Service.Services
 {
-    class TestsService
+    public class TestsService : ITestsService
     {
         private readonly ITestRepository<Test> testRepository;
         public TestsService(ITestRepository<Test> testRepository)
@@ -41,7 +42,8 @@ namespace project.Service.Services
 
             if (newTest != null)
             {
-                var config = new MapperConfiguration(cfg => {
+                var config = new MapperConfiguration(cfg =>
+                {
                     cfg.CreateMap<TestDTO, Test>();
                 });
                 IMapper iMapper = config.CreateMapper();

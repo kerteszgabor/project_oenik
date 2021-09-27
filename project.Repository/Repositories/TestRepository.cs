@@ -9,7 +9,7 @@ using project.Repository.Data;
 
 namespace project.Repository.Repositories
 {
-    class TestRepository : ITestRepository<Test>
+    public class TestRepository : ITestRepository<Test>
     {
         public ApplicationDbContext db { get; set; }
 
@@ -19,6 +19,7 @@ namespace project.Repository.Repositories
         }
         public async Task<bool> CreateAsync(Test entity)
         {
+            entity.ID = Guid.NewGuid().ToString();
             await db.Tests.AddAsync(entity);
             var result = await db.SaveChangesAsync();
             if (result > 0)
