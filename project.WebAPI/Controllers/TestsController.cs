@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -40,6 +41,7 @@ namespace project.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] TestDTO model)
         {
+            model.CreatedBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (await testsService.Insert(model))
             {
                 return Ok();

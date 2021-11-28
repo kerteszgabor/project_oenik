@@ -12,37 +12,37 @@ using System.Threading.Tasks;
 
 namespace project.Service.Services
 {
-    public class TestsService : ITestsService
+    public class QuestionService : IQuestionService
     {
-        private readonly ITestRepository<Test> testRepository;
+        private readonly IQuestionRepository questionRepository;
         private readonly IUserService userService;
-        public TestsService(ITestRepository<Test> testRepository, IUserService userService)
+        public QuestionService(IQuestionRepository questionRepository, IUserService userService)
         {
-            this.testRepository = testRepository;
+            this.questionRepository = questionRepository;
             this.userService = userService;
         }
 
         public async Task<bool> Delete(string uid)
         {
-            return await testRepository.DeleteAsync(uid);
+            return await questionRepository.DeleteAsync(uid);
         }
 
-        public async Task<Test> Get(string uid)
+        public async Task<Question> Get(string uid)
         {
-            return await testRepository.GetAsync(uid);
+            return await questionRepository.GetAsync(uid);
         }
 
-        public async IAsyncEnumerable<Test> List()
+        public async IAsyncEnumerable<Question> List()
         {
-            await foreach (var item in testRepository.GetAllAsync())
+            await foreach (var item in questionRepository.GetAllAsync())
                 yield return item;
         }
 
 
-        public async Task<bool> Insert(TestDTO newTest)
+        public async Task<bool> Insert(QuestionDTO newQuestion)
         {
 
-            if (newTest != null)
+            if (newQuestion != null)
             {
                 var config = new MapperConfiguration(cfg =>
                 {
@@ -51,11 +51,11 @@ namespace project.Service.Services
                 });
                 IMapper iMapper = config.CreateMapper();
 
-                var model = iMapper.Map<TestDTO, Test>(newTest);
-                model.CreatedBy = await userService.GetUserByName(newTest.CreatedBy);
+                var model = iMapper.Map<QuestionDTO, Question>(newQuestion);
+                model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
                 model.CreationTime = DateTime.Now;
 
-                return await testRepository.CreateAsync(model);
+                return await questionRepository.CreateAsync(model);
             }
             else
             {
@@ -63,13 +63,13 @@ namespace project.Service.Services
             }
         }
 
-        public async Task<bool> Update(string uid, JsonPatchDocument<Test> patch)
+        public async Task<bool> Update(string uid, JsonPatchDocument<Question> patch)
         {
             if (patch != null)
             {
-                var test = await testRepository.GetAsync(uid);
-                patch.ApplyTo(test);
-                var result = await testRepository.UpdateAsync(test);
+                var question = await questionRepository.GetAsync(uid);
+                patch.ApplyTo(question);
+                var result = await questionRepository.UpdateAsync(question);
                 return result;
             }
             else

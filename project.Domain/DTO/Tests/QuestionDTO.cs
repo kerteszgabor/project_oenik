@@ -7,20 +7,25 @@ using System.Threading.Tasks;
 
 namespace project.Domain.DTO.Tests
 {
-    public class TestDTO
+    public class QuestionDTO
     {
         public string Title { get; set; }
+        public string Text { get; set; }
 
         public DateTime CreationTime { get; set; }
-
         public string CreatedBy { get; set; }
 
         public bool IsShared { get; set; }
+        public bool CorrectManually { get; set; }
 
-        public bool IsLateSubmissionAllowed { get; set; }
+        public string QuestionType { get; set; }
 
-        public TimeSpan AllowedTakeLength { get; set; }
+        public string CorrectAnswer { get; set; }
 
         public double MaxPoints { get; set; }
+
+        public string PictureExtensionType { get; set; }
+
+        public byte[] PictureData { get; set; }
     }
 }

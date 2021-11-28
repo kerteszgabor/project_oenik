@@ -1,0 +1,72 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using project.Domain.Interfaces;
+using project.Domain.Models;
+using project.Repository.Data;
+
+namespace project.Repository.Repositories
+{
+    public class QuestionRepository : IQuestionRepository
+    {
+        public ApplicationDbContext db { get; set; }
+
+        public QuestionRepository(ApplicationDbContext db)
+        {
+            this.db = db;
+        }
+        public async Task<bool> CreateAsync(Question entity)
+        {
+            entity.ID = Guid.NewGuid().ToString();
+            await db.Questions.AddAsync(entity);
+            var result = await db.SaveChangesAsync();
+            if (result > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteAsync(string id)
+        {
+            db.Questions.Remove(await GetAsync(id));
+            var result = await db.SaveChangesAsync();
+            if (result > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async IAsyncEnumerable<Question> GetAllAsync()
+        {
+            await foreach (var item in db.Questions.AsAsyncEnumerable())
+                yield return item;
+        }
+
+        public async Task<Question> GetAsync(string id)
+        {
+            return await db.Questions.FindAsync(id);
+        }
+
+        public async Task<bool> UpdateAsync(Question entity)
+        {
+            db.Questions.Update(entity);
+            var result = await db.SaveChangesAsync();
+            if (result > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+}
