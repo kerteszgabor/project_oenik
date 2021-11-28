@@ -6,7 +6,7 @@ using project.Domain.Models;
 
 namespace project.Service.Interfaces
 {
-    interface IAnswerSubmitter
+    interface IAnswerService
     {
         Task<bool> Submit(Answer answer);
     }
