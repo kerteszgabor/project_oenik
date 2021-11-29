@@ -9,7 +9,7 @@ using project.Domain.DTO.Tests;
 
 namespace project.Service.Interfaces
 {
-    interface IQuestionService
+    public interface IQuestionService
     {
         Task<bool> Delete(string uid);
         Task<Question> Get(string uid);

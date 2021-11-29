@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using project.Domain.DTO.Tests;
 using project.Domain.Models;
 using project.Service.Interfaces;
+using project.Service.Services;
 
 namespace project.WebAPI.Controllers
 {
@@ -18,33 +19,33 @@ namespace project.WebAPI.Controllers
     [Route("[controller]")]
     [ApiController]
     [Authorize]
-    public class TestsController : ControllerBase
+    public class QuestionsController : ControllerBase
     {
-        private ITestsService testsService;
-        public TestsController(ITestsService testsService)
+        private IQuestionService questionService;
+        public QuestionsController(IQuestionService questionService)
         {
-            this.testsService = testsService;
+            this.questionService = questionService;
         }
         // GET: api/Tests
         [HttpGet]
-        public async Task<IEnumerable<Test>> List()
+        public async Task<IEnumerable<Question>> List()
         {
-            return await testsService.List().ToListAsync();
+            return await questionService.List().ToListAsync();
         }
 
         // GET: api/Tests/5
-        [HttpGet("{id}", Name = "Get")]
-        public async Task<Test> Get(string id)
+        [HttpGet("{id}", Name = "GetQuestion")]
+        public async Task<Question> Get(string id)
         {
-            return await testsService.Get(id);
+            return await questionService.Get(id);
         }
 
-        // POST: api/Tests
+        
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TestDTO model)
+        public async Task<IActionResult> Post([FromBody] QuestionDTO model)
         {
             model.CreatedBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (await testsService.Insert(model))
+            if (await questionService.Insert(model))
             {
                 return Ok();
             }
@@ -54,11 +55,11 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        // DELETE: api/ApiWithActions/5
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (await testsService.Delete(id))
+            if (await questionService.Delete(id))
             {
                 return Ok();
             }
@@ -66,14 +67,14 @@ namespace project.WebAPI.Controllers
             {
                 return BadRequest();
             }
-            
+
         }
 
         [HttpPatch("{uid}")]
-      //  [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Test> patchDoc)
+        //  [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Question> patchDoc)
         {
-            if (await testsService.Update(uid, patchDoc))
+            if (await questionService.Update(uid, patchDoc))
             {
                 return Ok();
             }

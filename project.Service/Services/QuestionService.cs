@@ -46,7 +46,7 @@ namespace project.Service.Services
             {
                 var config = new MapperConfiguration(cfg =>
                 {
-                    cfg.CreateMap<TestDTO, Test>();
+                    cfg.CreateMap<QuestionDTO, Question>();
                     cfg.AddGlobalIgnore("CreatedBy");
                 });
                 IMapper iMapper = config.CreateMapper();

@@ -41,8 +41,10 @@ namespace project.WebAPI
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped(typeof(IUserRepository<User>), typeof(UserRepository));
             services.AddScoped(typeof(ITestRepository<Test>), typeof(TestRepository));
+            services.AddScoped(typeof(IQuestionRepository), typeof(QuestionRepository));
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ITestsService, TestsService>();
+            services.AddTransient<IQuestionService, QuestionService>();
             services.AddTransient<IClassReportBuilder, ClassReportBuilder>();
 
             services.AddDefaultIdentity<User>(
