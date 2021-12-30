@@ -82,5 +82,18 @@ namespace project.WebAPI.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet("addQuestionToTest")]
+        public async Task<IActionResult> AddQuestionToTest(string questionID, string testID)
+        {
+            if (await testsService.AddQuestionToTest(questionID, testID))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
     }
 }
