@@ -66,7 +66,6 @@ namespace project.WebAPI.Controllers
             {
                 return BadRequest();
             }
-            
         }
 
         [HttpPatch("{uid}")]

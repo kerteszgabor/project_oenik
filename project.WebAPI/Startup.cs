@@ -45,6 +45,7 @@ namespace project.WebAPI
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ITestsService, TestsService>();
             services.AddTransient<IQuestionService, QuestionService>();
+            services.AddTransient<ILabelService, LabelService>();
             services.AddTransient<IClassReportBuilder, ClassReportBuilder>();
 
             services.AddDefaultIdentity<User>(
