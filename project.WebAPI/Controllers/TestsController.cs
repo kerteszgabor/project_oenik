@@ -95,5 +95,18 @@ namespace project.WebAPI.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet("removeQuestionFromTest")]
+        public async Task<IActionResult> RemoveQuestionFromTest(string questionID, string testID)
+        {
+            if (await testsService.RemoveQuestionFromTest(questionID, testID))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
     }
 }

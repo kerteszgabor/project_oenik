@@ -84,6 +84,9 @@ namespace project.Service.Services
         {
             var questionToAdd = await questionRepository.GetAsync(questionID);
             var testToUpdate = await Get(testID);
+
+            testToUpdate.MaxPoints += questionToAdd.MaxPoints;
+
             testToUpdate.TestQuestions.Add(new TestQuestion
             {
                 Question = questionToAdd,
@@ -92,6 +95,20 @@ namespace project.Service.Services
                 QuestionID = questionToAdd.ID,
                 TestID = testToUpdate.ID
             });
+
+            return await testRepository.UpdateAsync(testToUpdate);
+        }
+
+        public async Task<bool> RemoveQuestionFromTest(string questionID, string testID)
+        {
+            var questionToDelete = await questionRepository.GetAsync(questionID);
+            var testToUpdate = await Get(testID);
+            var linkingEntity = testToUpdate.TestQuestions.FirstOrDefault(x => x.Question == questionToDelete);
+
+            testToUpdate.MaxPoints -= questionToDelete.MaxPoints;
+
+            testToUpdate.TestQuestions.Remove(linkingEntity);
+            questionToDelete.TestQuestions.Remove(linkingEntity);
 
             return await testRepository.UpdateAsync(testToUpdate);
         }
