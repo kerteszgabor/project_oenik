@@ -66,7 +66,6 @@ namespace project.WebAPI.Controllers
             {
                 return BadRequest();
             }
-            
         }
 
         [HttpPatch("{uid}")]
@@ -74,6 +73,32 @@ namespace project.WebAPI.Controllers
         public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Test> patchDoc)
         {
             if (await testsService.Update(uid, patchDoc))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("addQuestionToTest")]
+        public async Task<IActionResult> AddQuestionToTest(string questionID, string testID)
+        {
+            if (await testsService.AddQuestionToTest(questionID, testID))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("removeQuestionFromTest")]
+        public async Task<IActionResult> RemoveQuestionFromTest(string questionID, string testID)
+        {
+            if (await testsService.RemoveQuestionFromTest(questionID, testID))
             {
                 return Ok();
             }

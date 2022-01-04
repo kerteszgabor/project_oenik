@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using project.Domain.Interfaces;
 using project.Domain.Models;
 using project.Repository.Data;
@@ -54,7 +55,11 @@ namespace project.Repository.Repositories
 
         public async Task<Test> GetAsync(string id)
         {
-            return await db.Tests.FindAsync(id);
+            return await db.Tests
+                .Include(x => x.TestQuestions)
+                .ThenInclude(x => x.Question)
+                .Include(x => x.TestProgQuestions)
+                .FirstOrDefaultAsync(x => x.ID == id);
         }
 
         public async Task<bool> UpdateAsync(Test entity)

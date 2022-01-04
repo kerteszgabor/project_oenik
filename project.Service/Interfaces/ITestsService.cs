@@ -13,5 +13,7 @@ namespace project.Service.Interfaces
         Task<bool> Insert(TestDTO newTest);
         IAsyncEnumerable<Test> List();
         Task<bool> Update(string uid, JsonPatchDocument<Test> patch);
+        Task<bool> AddQuestionToTest(string questionID, string testID);
+        Task<bool> RemoveQuestionFromTest(string questionID, string testID);
     }
 }
