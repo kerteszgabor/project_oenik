@@ -42,10 +42,12 @@ namespace project.WebAPI
             services.AddScoped(typeof(IUserRepository<User>), typeof(UserRepository));
             services.AddScoped(typeof(ITestRepository<Test>), typeof(TestRepository));
             services.AddScoped(typeof(IQuestionRepository), typeof(QuestionRepository));
+            services.AddScoped(typeof(ITestResultRepository), typeof(TestResultRepository));
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ITestsService, TestsService>();
             services.AddTransient<IQuestionService, QuestionService>();
             services.AddTransient<ILabelService, LabelService>();
+            services.AddTransient<ITestManagerService, TestManagerService>();
             services.AddTransient<IClassReportBuilder, ClassReportBuilder>();
 
             services.AddDefaultIdentity<User>(

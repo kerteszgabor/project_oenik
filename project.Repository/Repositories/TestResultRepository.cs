@@ -1,27 +1,28 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using project.Domain.Interfaces;
+using project.Domain.Models;
+using project.Repository.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using project.Domain.Interfaces;
-using project.Domain.Models;
-using project.Repository.Data;
 
 namespace project.Repository.Repositories
 {
-    public class TestRepository : ITestRepository<Test>
+    public class TestResultRepository : ITestResultRepository
     {
         public ApplicationDbContext db { get; set; }
 
-        public TestRepository(ApplicationDbContext db)
+        public TestResultRepository(ApplicationDbContext db)
         {
             this.db = db;
         }
-        public async Task<bool> CreateAsync(Test entity)
+
+        public async Task<bool> CreateAsync(TestResult entity)
         {
             entity.ID = Guid.NewGuid().ToString();
-            await db.Tests.AddAsync(entity);
+            await db.TestResults.AddAsync(entity);
             var result = await db.SaveChangesAsync();
             if (result > 0)
             {
@@ -35,7 +36,7 @@ namespace project.Repository.Repositories
 
         public async Task<bool> DeleteAsync(string id)
         {
-            db.Tests.Remove(await GetAsync(id));
+            db.TestResults.Remove(await GetAsync(id));
             var result = await db.SaveChangesAsync();
             if (result > 0)
             {
@@ -47,26 +48,27 @@ namespace project.Repository.Repositories
             }
         }
 
-        public async IAsyncEnumerable<Test> GetAllAsync()
+        public async IAsyncEnumerable<TestResult> GetAllAsync()
         {
-            await foreach (var item in db.Tests.AsAsyncEnumerable())
+            await foreach (var item in db.TestResults.Include(x => x.Test).AsAsyncEnumerable())
             {
                 yield return item;
             }
         }
 
-        public async Task<Test> GetAsync(string id)
+        public async Task<TestResult> GetAsync(string id)
         {
-            return await db.Tests
-                .Include(x => x.TestQuestions)
+            return await db.TestResults
+                .Include(x => x.Answers)
                 .ThenInclude(x => x.Question)
-                .Include(x => x.TestProgQuestions)
+                .Include(x => x.Course)
+                .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.ID == id);
         }
 
-        public async Task<bool> UpdateAsync(Test entity)
+        public async Task<bool> UpdateAsync(TestResult entity)
         {
-            db.Tests.Update(entity);
+            db.TestResults.Update(entity);
             var result = await db.SaveChangesAsync();
             if (result > 0)
             {

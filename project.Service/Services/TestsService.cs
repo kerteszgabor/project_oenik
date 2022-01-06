@@ -38,7 +38,9 @@ namespace project.Service.Services
         public async IAsyncEnumerable<Test> List()
         {
             await foreach (var item in testRepository.GetAllAsync())
-                yield return item;
+            { 
+               yield return item;
+            }
         }
 
 
