@@ -42,6 +42,7 @@ namespace project.WebAPI
             services.AddScoped(typeof(IUserRepository<User>), typeof(UserRepository));
             services.AddScoped(typeof(ITestRepository<Test>), typeof(TestRepository));
             services.AddScoped(typeof(IQuestionRepository), typeof(QuestionRepository));
+            services.AddScoped(typeof(IProgrammingQuestionRepository), typeof(ProgrammingQuestionRepository));
             services.AddScoped(typeof(ITestResultRepository), typeof(TestResultRepository));
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ITestsService, TestsService>();

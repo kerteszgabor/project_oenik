@@ -15,10 +15,12 @@ namespace project.Service.Services
     public class QuestionService : IQuestionService
     {
         private readonly IQuestionRepository questionRepository;
+        private readonly IProgrammingQuestionRepository progQuestionRepository;
         private readonly IUserService userService;
-        public QuestionService(IQuestionRepository questionRepository, IUserService userService)
+        public QuestionService(IQuestionRepository questionRepository, IProgrammingQuestionRepository progQuestionRepository, IUserService userService)
         {
             this.questionRepository = questionRepository;
+            this.progQuestionRepository = progQuestionRepository;
             this.userService = userService;
         }
 
@@ -38,24 +40,57 @@ namespace project.Service.Services
                 yield return item;
         }
 
-
-        public async Task<bool> Insert(QuestionDTO newQuestion)
+        public async Task<bool> Insert(QuestionDTO newQuestion) 
         {
+            if (newQuestion.GetType() == typeof(QuestionDTO))
+            {
+                return await InsertNormalQuestion(newQuestion);
+            }
+            else
+            {
+                return await InsertProgQuestion((ProgQuestionDTO)newQuestion);
+            }
+        }
 
+        private async Task<bool> InsertNormalQuestion(QuestionDTO newQuestion)
+        {
             if (newQuestion != null)
             {
-                var config = new MapperConfiguration(cfg =>
+                var model = new MapperConfiguration(cfg =>
                 {
                     cfg.CreateMap<QuestionDTO, Question>();
                     cfg.AddGlobalIgnore("CreatedBy");
-                });
-                IMapper iMapper = config.CreateMapper();
+                })
+                    .CreateMapper()
+                    .Map<QuestionDTO, Question>(newQuestion);
 
-                var model = iMapper.Map<QuestionDTO, Question>(newQuestion);
                 model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
                 model.CreationTime = DateTime.Now;
 
                 return await questionRepository.CreateAsync(model);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private async Task<bool> InsertProgQuestion(ProgQuestionDTO newQuestion)
+        {
+            if (newQuestion != null)
+            {
+                var model = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<ProgQuestionDTO, ProgrammingQuestion>();
+                    cfg.AddGlobalIgnore("CreatedBy");
+                })
+                    .CreateMapper()
+                    .Map<ProgQuestionDTO, ProgrammingQuestion>(newQuestion);
+
+                model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
+                model.CreationTime = DateTime.Now;
+
+                return await progQuestionRepository.CreateAsync(model);
             }
             else
             {

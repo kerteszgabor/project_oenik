@@ -42,9 +42,21 @@ namespace project.WebAPI.Controllers
 
         
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] QuestionDTO model)
+        public async Task<IActionResult> Post([FromBody] ProgQuestionDTO model)
         {
             model.CreatedBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (model?.ExpectedOutput == String.Empty)
+            {
+                var normalQuestion = model as QuestionDTO;
+                if (await questionService.Insert(normalQuestion))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
             if (await questionService.Insert(model))
             {
                 return Ok();
