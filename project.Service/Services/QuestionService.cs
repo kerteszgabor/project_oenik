@@ -31,13 +31,28 @@ namespace project.Service.Services
 
         public async Task<Question> Get(string uid)
         {
-            return await questionRepository.GetAsync(uid);
+            var normalQuestion = await questionRepository.GetAsync(uid);
+            if (normalQuestion != null)
+            {
+                return normalQuestion;
+            }
+            else
+            {
+                return await progQuestionRepository.GetAsync(uid);
+            }
         }
 
         public async IAsyncEnumerable<Question> List()
         {
             await foreach (var item in questionRepository.GetAllAsync())
+            {
                 yield return item;
+            }
+
+            await foreach (var item in progQuestionRepository.GetAllAsync())
+            {
+                yield return item;
+            }
         }
 
         public async Task<bool> Insert(QuestionDTO newQuestion) 

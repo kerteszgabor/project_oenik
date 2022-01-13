@@ -25,5 +25,6 @@ namespace project.Domain.Models
         public List<Answer> Answers { get; set; }
 
         public bool IsCorrectionFinished { get; set; }
+        public bool IsClosed { get; set; }
     }
 }

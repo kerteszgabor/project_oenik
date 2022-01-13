@@ -23,6 +23,7 @@ using project.Service.Interfaces;
 using project.Service.Services;
 using Microsoft.AspNetCore.Identity.UI;
 using project.Domain.Interfaces;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace project.WebAPI
 {
@@ -99,6 +100,12 @@ namespace project.WebAPI
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SigningKey"]))
                 };
             });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Project API", Version = "v1" });
+            });
+
             services.AddControllers();
         }
 
@@ -109,6 +116,14 @@ namespace project.WebAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+                c.RoutePrefix = String.Empty;
+            });
 
             app.UseCors("cors");
 

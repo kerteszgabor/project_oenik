@@ -74,6 +74,9 @@ namespace project.Service.Services
                     return await testResultRepository.UpdateAsync(testresult);
                 }
 
+                testresult.IsClosed = true;
+                testresult.FinishTime = DateTime.Now;
+                CorrectTestResult(testresult);
                 return false; // TODO throw exception
                 
             }
@@ -85,6 +88,39 @@ namespace project.Service.Services
                 newResult.Answers.Add(model);
                 return await testResultRepository.CreateAsync(newResult);
             }
+        }
+        private bool IsInTime(DateTime startTime, TimeSpan timeAllowed)
+        {
+            if (startTime + timeAllowed < DateTime.Now)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void CorrectTestResult(TestResult testResult)
+        {
+            testResult.PointResult = 0;
+            testResult.IsCorrectionFinished = false;
+
+            foreach (var item in testResult.Answers)
+            {
+                if (!item.Question.CorrectManually)
+                {
+                    if (item.AnswerText == item.Question.CorrectAnswer)
+                    {
+                        testResult.PointResult += item.Question.MaxPoints;
+                    }
+                }
+            }
+
+            if (testResult.Answers.Any(x => x.CorrectManually))
+            {
+                testResult.IsCorrectionFinished = false;
+            }
+
+            testResultRepository.UpdateAsync(testResult);
         }
 
         private TestResult InitNewTestResult(Test test, Course course, User user)
@@ -100,16 +136,6 @@ namespace project.Service.Services
                 IsCorrectionFinished = false,
                 FinishTime = DateTime.MinValue
             };
-        }
-
-        private bool IsInTime(DateTime startTime, TimeSpan timeAllowed)
-        {
-            if (startTime + timeAllowed < DateTime.Now)
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 }
