@@ -15,5 +15,6 @@ namespace project.Service.Interfaces
         IAsyncEnumerable<TestResult> GetTestsOfCourse(Course course);
         IAsyncEnumerable<TestResult> GetTestsOfUserInCourse(User user, Course course);
         Task<bool> SubmitAnswerToTestResult(AnswerDTO answer);
+        Task<bool> StartTestCompletion(TestStartDTO startDTO);
     }
 }

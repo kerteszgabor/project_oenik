@@ -73,22 +73,24 @@ namespace project.Service.Services
                     testresult.Answers.Add(model);
                     return await testResultRepository.UpdateAsync(testresult);
                 }
+                else if (!testresult.IsClosed)
+                {
+                    CorrectTestResult(testresult);
+                    return false; // TODO throw exception
+                }
+            }
 
-                testresult.IsClosed = true;
-                testresult.FinishTime = DateTime.Now;
-                CorrectTestResult(testresult);
-                return false; // TODO throw exception
-                
-            }
-            else
-            {
-                Test relatedTest = await testsService.Get(answerDTO.TestID);
-                //TODO change null when course service is implemented
-                TestResult newResult = InitNewTestResult(relatedTest, null, answerDTO.User);
-                newResult.Answers.Add(model);
-                return await testResultRepository.CreateAsync(newResult);
-            }
+            return false;
         }
+
+        public async Task<bool> StartTestCompletion(TestStartDTO startDTO)
+        {
+            Test relatedTest = await testsService.Get(startDTO.TestID);
+            //TODO change null when course service is implemented
+            TestResult newResult = InitNewTestResult(relatedTest, null, startDTO.User);
+            return await testResultRepository.CreateAsync(newResult);
+        }
+
         private bool IsInTime(DateTime startTime, TimeSpan timeAllowed)
         {
             if (startTime + timeAllowed < DateTime.Now)
@@ -102,7 +104,8 @@ namespace project.Service.Services
         private void CorrectTestResult(TestResult testResult)
         {
             testResult.PointResult = 0;
-            testResult.IsCorrectionFinished = false;
+            testResult.IsClosed = true;
+            testResult.FinishTime = DateTime.Now;
 
             foreach (var item in testResult.Answers)
             {
@@ -115,9 +118,9 @@ namespace project.Service.Services
                 }
             }
 
-            if (testResult.Answers.Any(x => x.CorrectManually))
+            if (!testResult.Answers.Any(x => x.CorrectManually))
             {
-                testResult.IsCorrectionFinished = false;
+                testResult.IsCorrectionFinished = true;
             }
 
             testResultRepository.UpdateAsync(testResult);

@@ -48,6 +48,20 @@ namespace project.WebAPI.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> StartTestCompletion([FromBody] TestStartDTO model)
+        {
+            model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (await testManagerService.StartTestCompletion(model))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
         // GET: api/Tests/5
         [HttpGet("{id}")]
         public async Task<TestResult> Get(string id)
