@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using project.Domain.DTO.TestResults;
 using project.Domain.Models;
-using project.Service.Interfaces;
+using project.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Service.Helpers.ClassReportBuilder
+namespace project.Domain.Helpers.ClassReportBuilder
 {
-    class HelperMethods
+    public class HelperMethods
     {
         public static void DeleteDirectory(string target_dir)
         {

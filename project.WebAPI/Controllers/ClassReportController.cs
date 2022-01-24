@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using project.Domain.DTO.ClassReport;
-using project.Service.Helpers.ClassReportBuilder;
-using project.Service.Interfaces;
+using project.Domain.Helpers.ClassReportBuilder;
+using project.Domain.Interfaces;
 
 namespace project.WebAPI.Controllers
 {

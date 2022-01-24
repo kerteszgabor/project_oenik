@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using project.Domain.DTO.ClassReport;
-using project.Service.Helpers.ClassReportBuilder;
-using project.Service.Interfaces;
-using RoslynAPITest.Exceptions;
+using project.Domain.Helpers.Exceptions;
+using project.Domain.Helpers.ClassReportBuilder;
+using project.Domain.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Service.Services
+namespace project.Domain.Services
 {
     public class ClassReportBuilder : ICanCallBuild, ICanRequireCompilation, ICanCompile, IClassReportBuilder
     {

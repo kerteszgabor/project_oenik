@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Service.Interfaces
+namespace project.Domain.Interfaces
 {
     public interface ITestManagerService
     {

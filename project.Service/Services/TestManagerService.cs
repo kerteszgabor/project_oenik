@@ -2,14 +2,14 @@
 using project.Domain.DTO.TestResults;
 using project.Domain.Interfaces;
 using project.Domain.Models;
-using project.Service.Interfaces;
+using project.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Service.Services
+namespace project.Domain.Services
 {
     public class TestManagerService : ITestManagerService
     {
@@ -53,15 +53,7 @@ namespace project.Service.Services
 
         public async Task<bool> SubmitAnswerToTestResult(AnswerDTO answerDTO)
         {
-            var model = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<AnswerDTO, Answer>();
-                cfg.AddGlobalIgnore("User");
-            })
-                .CreateMapper()
-                .Map<AnswerDTO, Answer>(answerDTO);
-            model.ID = Guid.NewGuid().ToString();
-            model.Question = await questionService.Get(answerDTO.QuestionID);
+            var model = await CreateModelFromDTO(answerDTO);
 
             var testresult = await testResultRepository.GetAllAsync()
                 .FirstOrDefaultAsync(x => x.User == answerDTO.User && x.Test.ID == answerDTO.TestID);
@@ -91,6 +83,22 @@ namespace project.Service.Services
             return await testResultRepository.CreateAsync(newResult);
         }
 
+        private async Task<Answer> CreateModelFromDTO(AnswerDTO answerDTO)
+        {
+            var model = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<AnswerDTO, Answer>();
+                cfg.AddGlobalIgnore("User");
+            })
+                .CreateMapper()
+                .Map<AnswerDTO, Answer>(answerDTO);
+
+            model.ID = Guid.NewGuid().ToString();
+            model.Question = await questionService.Get(answerDTO.QuestionID);
+
+            return model;
+        }
+
         private bool IsInTime(DateTime startTime, TimeSpan timeAllowed)
         {
             if (startTime + timeAllowed < DateTime.Now)
@@ -109,7 +117,7 @@ namespace project.Service.Services
 
             foreach (var item in testResult.Answers)
             {
-                if (!item.Question.CorrectManually)
+                if (!item.Question.CorrectManually && !(item.Question is ProgrammingQuestion))
                 {
                     if (item.AnswerText == item.Question.CorrectAnswer)
                     {
@@ -118,12 +126,19 @@ namespace project.Service.Services
                 }
             }
 
+            CorrectProgrammingQuestions(testResult.Answers);
+
             if (!testResult.Answers.Any(x => x.CorrectManually))
             {
                 testResult.IsCorrectionFinished = true;
             }
 
             testResultRepository.UpdateAsync(testResult);
+        }
+
+        private void CorrectProgrammingQuestions(List<Answer> answers)
+        {
+            throw new NotImplementedException();
         }
 
         private TestResult InitNewTestResult(Test test, Course course, User user)

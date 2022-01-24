@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace project.Service.Helpers.ClassReportBuilder
+namespace project.Domain.Helpers.ClassReportBuilder
 {
-    class MethodModel
+    public class MethodModel
     {
         public string MethodName { get; set; }
         public ParamList ExpectedParameters { get; set; }

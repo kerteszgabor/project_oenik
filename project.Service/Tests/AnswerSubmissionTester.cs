@@ -2,12 +2,11 @@
 using NUnit.Framework;
 using project.Domain.Interfaces;
 using project.Domain.Models;
-using project.Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace project.Service.Tests
+namespace project.Domain.Tests
 {
     [TestFixture]
     class AnswerSubmissionTester

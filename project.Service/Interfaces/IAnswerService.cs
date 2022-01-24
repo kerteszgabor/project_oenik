@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using project.Domain.Models;
 
-namespace project.Service.Interfaces
+namespace project.Domain.Interfaces
 {
     interface IAnswerService
     {

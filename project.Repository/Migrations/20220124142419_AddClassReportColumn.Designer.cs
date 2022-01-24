@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using project.Repository.Data;
 
 namespace project.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220124142419_AddClassReportColumn")]
+    partial class AddClassReportColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,22 +50,22 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0bf65ce1-f114-49d9-b073-96ad19263346",
-                            ConcurrencyStamp = "bc0b7460-679c-4ea0-ae8c-cb8097eea847",
+                            Id = "c0efcdf5-2eab-43ca-99df-74d7498abb5f",
+                            ConcurrencyStamp = "fa9665ef-a9e2-4eaf-a979-ddca348b652e",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "1467e099-d101-48e5-92fc-24d2885961c8",
-                            ConcurrencyStamp = "fe333760-dde9-4fc1-9537-be80c5e0013c",
+                            Id = "9a552749-b4d8-43a2-9eca-e39e0ed70691",
+                            ConcurrencyStamp = "33f94bad-e0df-498c-be13-783da2f16d01",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "6e6f03cf-c406-44c2-9189-f4556aca57a0",
-                            ConcurrencyStamp = "9ca62739-b18d-4cc9-89d6-1283effb31c7",
+                            Id = "88ecdb40-7875-456c-a13f-3951f503adf9",
+                            ConcurrencyStamp = "b37aa976-1a2b-4b26-82d0-71fe9c566399",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         });
@@ -229,8 +231,8 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "9494ec51-b92d-430b-b813-c18dc5dd7568",
-                            RoleId = "0bf65ce1-f114-49d9-b073-96ad19263346"
+                            UserId = "b090d9fa-56c9-4e8d-962d-ec9bb68b77cf",
+                            RoleId = "c0efcdf5-2eab-43ca-99df-74d7498abb5f"
                         });
                 });
 
@@ -559,17 +561,17 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "9494ec51-b92d-430b-b813-c18dc5dd7568",
+                            Id = "b090d9fa-56c9-4e8d-962d-ec9bb68b77cf",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "44f5c0d6-84cf-4773-b4a5-2c6e931c3ff2",
+                            ConcurrencyStamp = "7b30a48e-b374-4bba-afe3-a563b05129f4",
                             Email = "admin@oenik.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@OENIK.hu",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEOgRxmI2icyHTeuiGZXFxOE1xIqxLK2DtciFrN4rd8ZypxntMQYZp3FkJX3Bi/+w8w==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEJKdeGTT/3EiHiMyk1M4gpl6PjViNvCY1kliVsdNlg/LuQ8Ex9NPt8+OFcMUTdm5sw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "f7a6fa24-9014-4e94-bc40-967b29d6e15e",
+                            SecurityStamp = "cadb87f4-aae2-4db6-82f6-de4c19c516d0",
                             TwoFactorEnabled = false,
                             UserName = "admin",
                             CreatedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -583,9 +585,6 @@ namespace project.Repository.Migrations
                     b.HasBaseType("project.Domain.Models.Question");
 
                     b.Property<string>("ExpectedOutput")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Methods")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OptimalNumberOfLines")

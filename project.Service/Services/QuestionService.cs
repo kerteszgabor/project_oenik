@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.DTO.Tests;
 using project.Domain.Interfaces;
 using project.Domain.Models;
-using project.Service.Interfaces;
+using project.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Service.Services
+namespace project.Domain.Services
 {
     public class QuestionService : IQuestionService
     {

@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using project.Domain.DTO.ClassReport;
+using project.Domain.Helpers.ClassReportBuilder;
 using project.Domain.Models;
 using project.Domain.Models.DBConnections;
 using System;
@@ -69,6 +72,17 @@ namespace project.Repository.Data
                 uc.UserID
             });
             //  builder.Entity<CourseTest>().HasNoKey();
+
+            builder.Entity<TestResult>().Property(p => p.ProgQuestionReports)
+            .HasConversion(
+                 v => JsonConvert.SerializeObject(v),
+                 v => JsonConvert.DeserializeObject<List<ClassReport>>(v));
+
+            builder.Entity<ProgrammingQuestion>().Property(p => p.Methods)
+            .HasConversion(
+                 v => JsonConvert.SerializeObject(v),
+                 v => JsonConvert.DeserializeObject<List<MethodInfoData>>(v));
+
             SetupManyToManyMaps(builder);
         }
 

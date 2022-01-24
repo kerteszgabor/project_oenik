@@ -4,7 +4,7 @@ using project.Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace project.Service.Interfaces
+namespace project.Domain.Interfaces
 {
     public interface ITestsService
     {

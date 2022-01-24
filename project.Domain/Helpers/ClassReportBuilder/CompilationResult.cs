@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace project.Service.Helpers.ClassReportBuilder
+namespace project.Domain.Helpers.ClassReportBuilder
 {
     public class CompilationResult
     {
