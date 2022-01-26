@@ -8,17 +8,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using project.Domain.Helpers.ClassReportBuilder;
+using System.Text.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace project.Domain.Services
 {
     public class TestManagerService : ITestManagerService
     {
         private readonly ITestsService testsService;
+        private readonly IClassReportBuilder builder;
         private readonly IQuestionService questionService;
         private readonly ITestResultRepository testResultRepository;
-        public TestManagerService(ITestsService testsService, IQuestionService questionService, ITestResultRepository testResultRepository)
+        public TestManagerService(ITestsService testsService, IClassReportBuilder builder, IQuestionService questionService, ITestResultRepository testResultRepository)
         {
             this.testsService = testsService;
+            this.builder = builder;
             this.questionService = questionService;
             this.testResultRepository = testResultRepository;
         }
@@ -115,9 +121,12 @@ namespace project.Domain.Services
             testResult.IsClosed = true;
             testResult.FinishTime = DateTime.Now;
 
-            foreach (var item in testResult.Answers)
+            var normalQuestions = testResult.Answers.Where(x => x.Question is not ProgrammingQuestion);
+            var programmingQuestions = testResult.Answers.Except(normalQuestions);
+
+            foreach (var item in normalQuestions)
             {
-                if (!item.Question.CorrectManually && !(item.Question is ProgrammingQuestion))
+                if (!item.Question.CorrectManually)
                 {
                     if (item.AnswerText == item.Question.CorrectAnswer)
                     {
@@ -126,7 +135,7 @@ namespace project.Domain.Services
                 }
             }
 
-            CorrectProgrammingQuestions(testResult.Answers);
+            CorrectProgrammingQuestions(programmingQuestions);
 
             if (!testResult.Answers.Any(x => x.CorrectManually))
             {
@@ -136,9 +145,61 @@ namespace project.Domain.Services
             testResultRepository.UpdateAsync(testResult);
         }
 
-        private void CorrectProgrammingQuestions(List<Answer> answers)
+        private void CorrectProgrammingQuestions(IEnumerable<Answer> answers)
         {
-            throw new NotImplementedException();
+            List<ClassReport> reports = new List<ClassReport>();
+            int numberOfMethods = 0;
+
+            foreach (var item in answers)
+            {
+                var question = item.Question as ProgrammingQuestion;
+                var buildObject = builder.GetReportOf(item.AnswerText);
+                foreach (var method in question.Methods)
+                {
+                    numberOfMethods++;
+                    ICanRequireCompilation methodObject = null;
+                    if (method.ParameterList != null && method.ExpectedReturnType != null)
+                    {
+                        methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList, method.ExpectedReturnType);
+                    }
+                    else if (method.ParameterList != null)
+                    {
+                        methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList);
+                    }
+                    else if (method.ExpectedReturnType != null)
+                    {
+                        methodObject = buildObject.WithMethod(method.MethodName, method.ExpectedReturnType);
+                    }
+                    else
+                    {
+                        methodObject = buildObject.WithMethod(method.MethodName);
+                    }
+                    if (method.RequireCompilation)
+                    {
+                        ICanCompile compileObject = methodObject.AlsoCompile();
+                        if (method.Parameters != null)
+                        {
+                            object[] parameters = new object[method.Parameters.Length];
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                parameters[i] = (method.Parameters[i]);
+                            }
+                            compileObject.WithParameters(parameters);
+                        }
+                        if (method.ExpectedStringOutput != null)
+                        {
+                            compileObject = compileObject.SetExpectedStringOutput(method.ExpectedStringOutput);
+                        }
+                        if (method.ExpectedValue != null)
+                        {
+                            compileObject = compileObject.SetExpectedValue(method.ExpectedValue);
+                        }
+                    }
+                }
+                reports.Add(buildObject.Build());
+            }
+
+            //TODO: implement grading mechanism
         }
 
         private TestResult InitNewTestResult(Test test, Course course, User user)

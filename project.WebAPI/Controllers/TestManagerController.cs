@@ -48,7 +48,7 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("StartCompletion")]
         public async Task<IActionResult> StartTestCompletion([FromBody] TestStartDTO model)
         {
             model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));

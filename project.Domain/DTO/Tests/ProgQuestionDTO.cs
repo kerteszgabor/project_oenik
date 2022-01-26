@@ -1,4 +1,5 @@
-﻿using System;
+﻿using project.Domain.DTO.ClassReport;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,6 @@ namespace project.Domain.DTO.Tests
 
         public string ReferenceRuntime { get; set; }
 
-        public string ExpectedOutput { get; set; }
+        public List<MethodInfoData> Methods { get; set; }
     }
 }

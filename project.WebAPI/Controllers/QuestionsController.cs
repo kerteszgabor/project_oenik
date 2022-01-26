@@ -45,7 +45,7 @@ namespace project.WebAPI.Controllers
         public async Task<IActionResult> Post([FromBody] ProgQuestionDTO model)
         {
             model.CreatedBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (model?.ExpectedOutput == String.Empty)
+            if (model?.Methods.Count == 0)
             {
                 var normalQuestion = model as QuestionDTO;
                 if (await questionService.Insert(normalQuestion))

@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace project.Domain.Services
 {
@@ -104,6 +106,28 @@ namespace project.Domain.Services
 
                 model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
                 model.CreationTime = DateTime.Now;
+
+                for (int i = 0; i < newQuestion.Methods.Count; i++)
+                {
+                    var method = newQuestion.Methods[i];
+                    if (method.Parameters != null)
+                    {
+                        object[] parameters = new object[method.Parameters.Length];
+                        for (int j = 0; j < parameters.Length; j++)
+                        {
+                            var node = (JsonElement)method.Parameters[i];
+                            if (node.ValueKind == JsonValueKind.Number)
+                            {
+                                model.Methods.ToArray()[i].Parameters[j] = JsonConvert.DeserializeObject(method.Parameters[i].ToString());
+                            }
+                            else
+                            {
+                                model.Methods.ToArray()[i].Parameters[j] = node.GetString();
+                            }
+
+                        }
+                    }
+                }
 
                 return await progQuestionRepository.CreateAsync(model);
             }
