@@ -135,7 +135,7 @@ namespace project.Domain.Services
                 }
             }
 
-            CorrectProgrammingQuestions(programmingQuestions);
+            CorrectProgrammingQuestions(programmingQuestions, testResult);
 
             if (!testResult.Answers.Any(x => x.CorrectManually))
             {
@@ -145,10 +145,9 @@ namespace project.Domain.Services
             testResultRepository.UpdateAsync(testResult);
         }
 
-        private void CorrectProgrammingQuestions(IEnumerable<Answer> answers)
+        private void CorrectProgrammingQuestions(IEnumerable<Answer> answers, TestResult testResult)
         {
             List<ClassReport> reports = new List<ClassReport>();
-            int numberOfMethods = 0;
 
             foreach (var item in answers)
             {
@@ -156,7 +155,6 @@ namespace project.Domain.Services
                 var buildObject = builder.GetReportOf(item.AnswerText);
                 foreach (var method in question.Methods)
                 {
-                    numberOfMethods++;
                     ICanRequireCompilation methodObject = null;
                     if (method.ParameterList != null && method.ExpectedReturnType != null)
                     {
@@ -199,7 +197,22 @@ namespace project.Domain.Services
                 reports.Add(buildObject.Build());
             }
 
-            //TODO: implement grading mechanism
+            foreach (var item in reports)
+            {
+                if (!item.HadCompilationError)
+                {
+                    int points = item.ValidMethodsByExistence.Count
+                    + item.ValidMethodsByOutput.Count
+                    + item.ValidMethodsByParameters.Count
+                    + item.ValidMethodsByReturnType.Count
+                    - item.MissingMethods.Count
+                    - item.MismatchingOutputMethods.Count
+                    - item.MismatchingParametersMethods.Count
+                    - item.MismatchingReturnTypeMethods.Count;
+
+                    testResult.PointResult += Math.Max(points, 0);
+                }
+            }
         }
 
         private TestResult InitNewTestResult(Test test, Course course, User user)
