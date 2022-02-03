@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using project.Domain.DTO.Tests;
 using project.Domain.Models;
-using project.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using project.Service.Interfaces;
 
 namespace project.WebAPI.Controllers
 {

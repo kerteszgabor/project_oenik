@@ -10,8 +10,9 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using project.Domain.DTO.Auth;
+using project.Service.Interfaces;
 
-namespace project.Domain.Services
+namespace project.Service.Services
 {
     public class UserService : IUserService
     {

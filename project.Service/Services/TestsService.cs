@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using project.Domain.Models.DBConnections;
 using project.Service.Interfaces;
 
-namespace project.Domain.Services
+namespace project.Service.Services
 {
     public class TestsService : ITestsService
     {

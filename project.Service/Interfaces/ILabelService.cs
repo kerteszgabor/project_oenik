@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Domain.Interfaces
+namespace project.Service.Interfaces
 {
     public interface ILabelService
     {

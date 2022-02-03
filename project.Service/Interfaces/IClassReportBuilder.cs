@@ -2,7 +2,7 @@
 using project.Domain.Helpers.ClassReportBuilder;
 using System;
 
-namespace project.Domain.Interfaces
+namespace project.Service.Interfaces
 {
     public interface IClassReportBuilder
     {

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.DTO.Tests;
 using project.Domain.Interfaces;
 using project.Domain.Models;
-using project.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
 using Newtonsoft.Json;
+using project.Service.Interfaces;
 
-namespace project.Domain.Services
+namespace project.Service.Services
 {
     public class QuestionService : IQuestionService
     {

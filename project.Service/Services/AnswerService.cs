@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.Interfaces;
 using project.Domain.Models;
-using project.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using project.Service.Interfaces;
 
-namespace project.Domain.Services
+namespace project.Service.Services
 {
     class AnswerService : IAnswerService
     {

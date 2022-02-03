@@ -1,13 +1,14 @@
 ﻿using project.Domain.DTO.Tests;
 using project.Domain.Interfaces;
 using project.Domain.Models;
+using project.Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Domain.Services
+namespace project.Service.Services
 {
     public class LabelService : ILabelService
     {

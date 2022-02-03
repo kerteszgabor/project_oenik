@@ -10,8 +10,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using project.Domain.DTO.Tests;
 using project.Domain.Models;
-using project.Domain.Interfaces;
-using project.Domain.Services;
+using project.Service.Interfaces;
 
 namespace project.WebAPI.Controllers
 {

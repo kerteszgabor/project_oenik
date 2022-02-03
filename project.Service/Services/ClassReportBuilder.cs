@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.Emit;
 using project.Domain.DTO.ClassReport;
 using project.Domain.Helpers.Exceptions;
 using project.Domain.Helpers.ClassReportBuilder;
-using project.Domain.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,8 +14,9 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
+using project.Service.Interfaces;
 
-namespace project.Domain.Services
+namespace project.Service.Services
 {
     public class ClassReportBuilder : ICanCallBuild, ICanRequireCompilation, ICanCompile, IClassReportBuilder
     {

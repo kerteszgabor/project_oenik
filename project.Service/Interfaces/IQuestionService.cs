@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using project.Domain.DTO.Tests;
 
-namespace project.Domain.Interfaces
+namespace project.Service.Interfaces
 {
     public interface IQuestionService
     {

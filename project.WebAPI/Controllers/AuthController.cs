@@ -6,11 +6,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using project.Domain.Models;
-using project.Domain.Interfaces;
-using project.Domain.DTO;
 using Microsoft.AspNetCore.Cors;
 using System.Linq;
 using project.Domain.DTO.Auth;
+using project.Service.Interfaces;
 
 namespace project.WebAPI.Controllers
 {

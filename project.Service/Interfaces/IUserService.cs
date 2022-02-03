@@ -8,7 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace project.Domain.Interfaces
+namespace project.Service.Interfaces
 {
     public interface IUserService
     {
