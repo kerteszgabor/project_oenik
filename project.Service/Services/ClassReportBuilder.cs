@@ -20,9 +20,6 @@ namespace project.Domain.Services
 {
     public class ClassReportBuilder : ICanCallBuild, ICanRequireCompilation, ICanCompile, IClassReportBuilder
     {
-        public ClassReportBuilder()
-        {
-        }
         public string CodeAsString
         {
             get
@@ -45,7 +42,6 @@ namespace project.Domain.Services
         private Dictionary<MethodDeclarationSyntax, MethodModel> methodPairs;
         private ConcurrentBag<object> compilationResults;
 
-        // TODO: Move code string resource to somewhere else
         private ClassReportBuilder(string codeToAnalyze)
         {
             this.CodeAsString = codeToAnalyze;
