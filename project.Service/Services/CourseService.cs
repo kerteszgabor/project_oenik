@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace project.Service.Services
 {
-    class CourseService : ICourseService
+    public class CourseService : ICourseService
     {
         private readonly ICourseRepository courseRepository;
         private readonly ITestRepository<Test> testRepository;

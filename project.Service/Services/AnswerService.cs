@@ -52,17 +52,5 @@ namespace project.Domain.Services
                 return false;
             }
         }
-
-        //public async Task<List<Answer>> GetAllAnswersOfQuestionOfTest(Question question, Test test)
-        //{
-        //    return await context.TestResults
-        //        .Include(x => x.Answers)
-        //        .AsQueryable()
-        //        .FirstOrDefaultAsync(x => x.Test.ID == test.ID).Result
-        //        .Answers
-        //        .Where(x => x.Question.ID == question.ID)
-        //        .AsQueryable()
-        //        .ToListAsync();
-        //}
     }
 }

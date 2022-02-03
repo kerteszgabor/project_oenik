@@ -22,8 +22,9 @@ using project.Repository.Repositories;
 using project.Domain.Interfaces;
 using project.Domain.Services;
 using Microsoft.AspNetCore.Identity.UI;
-using project.Domain.Interfaces;
 using Swashbuckle.AspNetCore.Swagger;
+using project.Service.Interfaces;
+using project.Service.Services;
 
 namespace project.WebAPI
 {
@@ -45,12 +46,15 @@ namespace project.WebAPI
             services.AddScoped(typeof(IQuestionRepository), typeof(QuestionRepository));
             services.AddScoped(typeof(IProgrammingQuestionRepository), typeof(ProgrammingQuestionRepository));
             services.AddScoped(typeof(ITestResultRepository), typeof(TestResultRepository));
+            services.AddScoped(typeof(ICourseRepository), typeof(CourseRepository));
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ITestsService, TestsService>();
             services.AddTransient<IQuestionService, QuestionService>();
             services.AddTransient<ILabelService, LabelService>();
             services.AddTransient<ITestManagerService, TestManagerService>();
             services.AddTransient<IClassReportBuilder, ClassReportBuilder>();
+            services.AddTransient<ICourseService, CourseService>();
+            services.AddTransient<IResultManagerService, ResultManagerService>();
 
             services.AddDefaultIdentity<User>(
                 option =>

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace project.Repository.Repositories
 {
-    class CourseRepository : ICourseRepository
+    public class CourseRepository : ICourseRepository
     {
         public ApplicationDbContext db { get; set; }
 

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using project.Domain.Helpers.ClassReportBuilder;
 using project.Service.Interfaces;
 
-namespace project.Domain.Services
+namespace project.Service.Interfaces
 {
     public class TestManagerService : ITestManagerService
     {

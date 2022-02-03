@@ -15,5 +15,7 @@ namespace project.Service.Interfaces
         Task<bool> Update(string uid, JsonPatchDocument<Test> patch);
         Task<bool> AddQuestionToTest(string questionID, string testID);
         Task<bool> RemoveQuestionFromTest(string questionID, string testID);
+        IAsyncEnumerable<Test> GetTestsOfUser(string userID);
+        IAsyncEnumerable<Test> GetTestsOfCourse(string courseID);
     }
 }

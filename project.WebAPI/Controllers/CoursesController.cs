@@ -32,7 +32,7 @@ namespace project.WebAPI.Controllers
         }
 
 
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public async Task<Course> Get(string id)
         {
             return await courseService.Get(id);

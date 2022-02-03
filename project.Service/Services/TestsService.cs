@@ -18,11 +18,13 @@ namespace project.Domain.Services
         private readonly ITestRepository<Test> testRepository;
         private readonly IQuestionRepository questionRepository;
         private readonly IUserService userService;
-        public TestsService(ITestRepository<Test> testRepository, IUserService userService, IQuestionRepository questionRepository)
+        private readonly ICourseRepository courseRepository;
+        public TestsService(ITestRepository<Test> testRepository, IUserService userService, IQuestionRepository questionRepository, ICourseRepository courseRepository)
         {
             this.testRepository = testRepository;
             this.userService = userService;
             this.questionRepository = questionRepository;
+            this.courseRepository = courseRepository;
         }
 
         public async Task<bool> Delete(string uid)
@@ -40,6 +42,33 @@ namespace project.Domain.Services
             await foreach (var item in testRepository.GetAllAsync())
             { 
                yield return item;
+            }
+        }
+
+        public async IAsyncEnumerable<Test> GetTestsOfUser(string userID)
+        {
+            var userTests = (await userService.Get(userID))?
+                .UserCourses
+                .SelectMany(x => x.Course.CourseTests)
+                .Select(x => x.Test)
+                .ToAsyncEnumerable();
+
+            await foreach (var item in userTests)
+            {
+                yield return item;
+            }
+        }
+
+        public async IAsyncEnumerable<Test> GetTestsOfCourse(string courseID)
+        {
+            var courseTests = (await courseRepository.GetAsync(courseID))?
+                .CourseTests
+                .Select(x => x.Test)
+                .ToAsyncEnumerable();
+
+            await foreach (var item in courseTests)
+            {
+                yield return item;
             }
         }
 

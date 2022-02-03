@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using project.Service.Interfaces;
 
 namespace project.WebAPI.Controllers
 {
@@ -20,17 +21,19 @@ namespace project.WebAPI.Controllers
     public class TestManagerController : ControllerBase
     {
         private ITestManagerService testManagerService;
+        private IResultManagerService resultManagerService;
         private IUserService userService;
-        public TestManagerController(ITestManagerService testManagerService, IUserService userService)
+        public TestManagerController(ITestManagerService testManagerService, IUserService userService, IResultManagerService resultManagerService)
         {
             this.testManagerService = testManagerService;
             this.userService = userService;
+            this.resultManagerService = resultManagerService;
         }
         // GET: api/Tests
         [HttpGet]
         public async Task<IEnumerable<TestResult>> List()
         {
-            return await testManagerService.GetAllResults().ToListAsync();
+            return await resultManagerService.GetAllResults().ToListAsync();
         }
 
         // POST: api/Tests
@@ -66,7 +69,7 @@ namespace project.WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<TestResult> Get(string id)
         {
-            return await testManagerService.Get(id);
+            return await resultManagerService.Get(id);
         }
 
 
