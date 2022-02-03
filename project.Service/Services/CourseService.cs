@@ -57,7 +57,17 @@ namespace project.Service.Services
                 var model = iMapper.Map<CourseDTO, Course>(newCourse);
                 model.CreationTime = DateTime.Now;
 
-                return await courseRepository.CreateAsync(model);
+                if (await courseRepository.CreateAsync(model))
+                {
+                    string createdCourseID = (await courseRepository
+                        .GetAllAsync()
+                        .FirstOrDefaultAsync(x => x.Name == newCourse.CourseName))?
+                        .ID;
+                    await EnrollStudentInCourse(newCourse.TeacherID, createdCourseID);
+                    return true;
+                }
+
+                return false;
             }
             else
             {

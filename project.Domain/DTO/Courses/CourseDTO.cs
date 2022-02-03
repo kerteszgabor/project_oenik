@@ -8,6 +8,7 @@ namespace project.Domain.DTO.Courses
 {
     public class CourseDTO
     {
-        //TODO 
+        public string CourseName { get; set; }
+        public string TeacherID { get; set; }
     }
 }

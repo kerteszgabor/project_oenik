@@ -2,16 +2,12 @@
 using project.Domain.DTO.TestResults;
 using project.Domain.Interfaces;
 using project.Domain.Models;
-using project.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using project.Domain.Helpers.ClassReportBuilder;
-using System.Text.Json;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using project.Service.Interfaces;
 
 namespace project.Domain.Services
 {
@@ -20,12 +16,14 @@ namespace project.Domain.Services
         private readonly ITestsService testsService;
         private readonly IClassReportBuilder builder;
         private readonly IQuestionService questionService;
+        private readonly ICourseService courseService;
         private readonly ITestResultRepository testResultRepository;
-        public TestManagerService(ITestsService testsService, IClassReportBuilder builder, IQuestionService questionService, ITestResultRepository testResultRepository)
+        public TestManagerService(ITestsService testsService, IClassReportBuilder builder, IQuestionService questionService, ICourseService courseService, ITestResultRepository testResultRepository)
         {
             this.testsService = testsService;
             this.builder = builder;
             this.questionService = questionService;
+            this.courseService = courseService;
             this.testResultRepository = testResultRepository;
         }
 
@@ -84,8 +82,8 @@ namespace project.Domain.Services
         public async Task<bool> StartTestCompletion(TestStartDTO startDTO)
         {
             Test relatedTest = await testsService.Get(startDTO.TestID);
-            //TODO change null when course service is implemented
-            TestResult newResult = InitNewTestResult(relatedTest, null, startDTO.User);
+            Course relatedCourse = await courseService.Get(startDTO.CourseID);
+            TestResult newResult = InitNewTestResult(relatedTest, relatedCourse, startDTO.User);
             return await testResultRepository.CreateAsync(newResult);
         }
 
