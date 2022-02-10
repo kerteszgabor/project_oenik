@@ -71,34 +71,5 @@ namespace project.WebAPI.Controllers
         {
             return await resultManagerService.Get(id);
         }
-
-
-        //// DELETE: api/ApiWithActions/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(string id)
-        //{
-        //    if (await testManagerService.Delete(id))
-        //    {
-        //        return Ok();
-        //    }
-        //    else
-        //    {
-        //        return BadRequest();
-        //    }
-        //}
-
-        //[HttpPatch("{uid}")]
-        ////  [Authorize(Roles = "Admin")]
-        //public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Test> patchDoc)
-        //{
-        //    if (await testManagerService.Update(uid, patchDoc))
-        //    {
-        //        return Ok();
-        //    }
-        //    else
-        //    {
-        //        return BadRequest();
-        //    }
-        //}
     }
 }

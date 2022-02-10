@@ -35,26 +35,6 @@ namespace project.Service.Interfaces
             }
         }
 
-        public async Task<TestResult> Get(string uid)
-        {
-            return await testResultRepository.GetAsync(uid);
-        }
-
-        public IAsyncEnumerable<TestResult> GetTestsOfCourse(Course course)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IAsyncEnumerable<TestResult> GetTestsOfUser(User user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IAsyncEnumerable<TestResult> GetTestsOfUserInCourse(User user, Course course)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<bool> SubmitAnswerToTestResult(AnswerDTO answerDTO)
         {
             var model = await CreateModelFromDTO(answerDTO);
