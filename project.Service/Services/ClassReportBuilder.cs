@@ -52,6 +52,11 @@ namespace project.Service.Services
             BuildAssets();
         }
 
+        public ClassReportBuilder()
+        {
+
+        }
+
         public ICanCallBuild GetReportOf(string codeToAnalyze)
         {
             return new ClassReportBuilder(codeToAnalyze);

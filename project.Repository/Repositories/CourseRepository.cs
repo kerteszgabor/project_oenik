@@ -57,7 +57,10 @@ namespace project.Repository.Repositories
 
         public async Task<Course> GetAsync(string id)
         {
-            return await db.Courses.FirstOrDefaultAsync(x => x.ID == id);
+            return await db.Courses
+                .Include(x => x.UserCourses)
+                .Include(x => x.CourseTests)
+                .FirstOrDefaultAsync(x => x.ID == id);
         }
 
         public async Task<bool> UpdateAsync(Course entity)

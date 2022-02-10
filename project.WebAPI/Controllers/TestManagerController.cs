@@ -29,14 +29,14 @@ namespace project.WebAPI.Controllers
             this.userService = userService;
             this.resultManagerService = resultManagerService;
         }
-        // GET: api/Tests
+
         [HttpGet]
         public async Task<IEnumerable<TestResult>> List()
         {
             return await resultManagerService.GetAllResults().ToListAsync();
         }
 
-        // POST: api/Tests
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] AnswerDTO model)
         {
@@ -65,7 +65,7 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        // GET: api/Tests/5
+
         [HttpGet("{id}")]
         public async Task<TestResult> Get(string id)
         {

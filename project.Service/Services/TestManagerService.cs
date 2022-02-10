@@ -63,8 +63,13 @@ namespace project.Service.Interfaces
         {
             Test relatedTest = await testsService.Get(startDTO.TestID);
             Course relatedCourse = await courseService.Get(startDTO.CourseID);
-            TestResult newResult = InitNewTestResult(relatedTest, relatedCourse, startDTO.User);
-            return await testResultRepository.CreateAsync(newResult);
+            if (relatedCourse.UserCourses.Any(x => x.User == startDTO.User))
+            {
+                TestResult newResult = InitNewTestResult(relatedTest, relatedCourse, startDTO.User);
+                return await testResultRepository.CreateAsync(newResult);
+            }
+
+            return false;
         }
 
         private async Task<Answer> CreateModelFromDTO(AnswerDTO answerDTO)

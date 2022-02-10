@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.Interfaces;
 using project.Domain.Models;
 using project.Service.Interfaces;
@@ -63,6 +64,26 @@ namespace project.Service.Services
             await foreach (var item in results)
             {
                 yield return item;
+            }
+        }
+
+        public async Task<bool> Delete(string uid)
+        {
+            return await testResultRepository.DeleteAsync(uid);
+        }
+
+        public async Task<bool> Update(string uid, JsonPatchDocument<TestResult> patch)
+        {
+            if (patch != null)
+            {
+                var test = await testResultRepository.GetAsync(uid);
+                patch.ApplyTo(test);
+                var result = await testResultRepository.UpdateAsync(test);
+                return result;
+            }
+            else
+            {
+                return false;
             }
         }
     }

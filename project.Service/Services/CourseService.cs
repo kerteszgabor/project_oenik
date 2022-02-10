@@ -61,7 +61,7 @@ namespace project.Service.Services
                 {
                     string createdCourseID = (await courseRepository
                         .GetAllAsync()
-                        .FirstOrDefaultAsync(x => x.Name == newCourse.CourseName))?
+                        .FirstOrDefaultAsync(x => x.Name == newCourse.Name))?
                         .ID;
                     await EnrollStudentInCourse(newCourse.TeacherID, createdCourseID);
                     return true;

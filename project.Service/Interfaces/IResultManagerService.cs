@@ -1,4 +1,5 @@
-﻿using project.Domain.Models;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using project.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace project.Service.Interfaces
     public interface IResultManagerService
     {
         Task<TestResult> Get(string uid);
+        Task<bool> Delete(string uid);
+        Task<bool> Update(string uid, JsonPatchDocument<TestResult> patch);
         IAsyncEnumerable<TestResult> GetAllResults();
         IAsyncEnumerable<TestResult> GetTestResultsOfUser(string userID);
         IAsyncEnumerable<TestResult> GetTestResultsOfTestOfCourse(string courseID, string testID);
