@@ -52,7 +52,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpPost("StartCompletion")]
-        public async Task<IActionResult> StartTestCompletion([FromBody] TestStartDTO model)
+        public async Task<IActionResult> StartTestCompletion([FromBody] TestStartStopDTO model)
         {
             model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (await testManagerService.StartTestCompletion(model))
@@ -63,6 +63,14 @@ namespace project.WebAPI.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [HttpPost("StopCompletion")]
+        public async Task<IActionResult> StopTestCompletion([FromBody] TestStartStopDTO model)
+        {
+            model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await testManagerService.EndTestCompletion(model);
+            return Ok();
         }
 
 

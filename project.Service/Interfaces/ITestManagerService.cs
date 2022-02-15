@@ -10,6 +10,7 @@ namespace project.Service.Interfaces
     public interface ITestManagerService
     {
         Task<bool> SubmitAnswerToTestResult(AnswerDTO answer);
-        Task<bool> StartTestCompletion(TestStartDTO startDTO);
+        Task<bool> StartTestCompletion(TestStartStopDTO startDTO);
+        Task EndTestCompletion(TestStartStopDTO stopDTO);
     }
 }

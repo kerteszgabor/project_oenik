@@ -27,20 +27,10 @@ namespace project.Service.Interfaces
             this.testResultRepository = testResultRepository;
         }
 
-        public async IAsyncEnumerable<TestResult> GetAllResults()
-        {
-            await foreach (var item in testResultRepository.GetAllAsync())
-            {
-                yield return item;
-            }
-        }
-
         public async Task<bool> SubmitAnswerToTestResult(AnswerDTO answerDTO)
         {
             var model = await CreateModelFromDTO(answerDTO);
-
-            var testresult = await testResultRepository.GetAllAsync()
-                .FirstOrDefaultAsync(x => x.User == answerDTO.User && x.Test.ID == answerDTO.TestID);
+            var testresult = await GetExistingTestResult(answerDTO.TestID, answerDTO.User);
 
             if (await testResultRepository.GetAsync(testresult?.ID) != null)
             {
@@ -59,7 +49,7 @@ namespace project.Service.Interfaces
             return false;
         }
 
-        public async Task<bool> StartTestCompletion(TestStartDTO startDTO)
+        public async Task<bool> StartTestCompletion(TestStartStopDTO startDTO)
         {
             Test relatedTest = await testsService.Get(startDTO.TestID);
             Course relatedCourse = await courseService.Get(startDTO.CourseID);
@@ -70,6 +60,11 @@ namespace project.Service.Interfaces
             }
 
             return false;
+        }
+
+        public async Task EndTestCompletion(TestStartStopDTO stopDTO)
+        {
+            CorrectTestResult(await GetExistingTestResult(stopDTO.TestID, stopDTO.User));
         }
 
         private async Task<Answer> CreateModelFromDTO(AnswerDTO answerDTO)
@@ -90,12 +85,7 @@ namespace project.Service.Interfaces
 
         private bool IsInTime(DateTime startTime, TimeSpan timeAllowed)
         {
-            if (startTime + timeAllowed < DateTime.Now)
-            {
-                return false;
-            }
-
-            return true;
+            return startTime + timeAllowed > DateTime.Now;
         }
 
         private void CorrectTestResult(TestResult testResult)
@@ -211,6 +201,12 @@ namespace project.Service.Interfaces
                 IsCorrectionFinished = false,
                 FinishTime = DateTime.MinValue
             };
+        }
+
+        private async Task<TestResult> GetExistingTestResult(string testID, User user)
+        {
+            return await testResultRepository.GetAllAsync()
+                .FirstOrDefaultAsync(x => x.User == user && x.Test.ID == testID);
         }
     }
 }
