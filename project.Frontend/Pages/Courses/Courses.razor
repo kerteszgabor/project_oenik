@@ -1,0 +1,131 @@
+﻿@page "/courses"
+
+@inject CoursesService coursesService
+@inject IDialogService DialogService
+@attribute [Authorize]
+
+<h1>Courses</h1>
+
+@if (isBusy)
+{
+    <MudProgressCircular Color="Color.Success" Indeterminate="true" />
+}
+else
+{
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.False">
+    <MudItem xs="12" md="6" Class="mb-2">
+        <MudPaper Class="d-flex flex-row py-2 px-1">
+            <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Outlined" Variant="Variant.Outlined"></MudTextField>
+            <MudButton Class="pa-1 mx-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetCoursesAsync()">Search</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudGrid>
+        @foreach (var course in courses)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Elevation="2" Class="pa-4">
+                    <MudCardContent>
+                        <MudText>@course.Name</MudText>
+                        <MudText Typo="Typo.body2">@course</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCourse(course.ID)">Delete</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
+   // <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" Class="mt-5" OnClick="AddUser" />
+}
+
+
+
+@code {
+    [Parameter]
+    public int? PageNumber { get; set; }
+
+    [Parameter]
+    public string Query { get; set; } = String.Empty;
+
+    bool isBusy = false;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    List<Course> courses = new List<Course>();
+
+    async Task GetCoursesAsync()
+    {
+        isBusy = true;
+
+        var userState = authenticationState.Result;
+        coursesService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        IEnumerable<Course> result;
+
+        if (string.IsNullOrWhiteSpace(Query))
+        {
+            result = await coursesService.GetOwnCoursesAsync();
+        }
+        else
+        {
+            result = (await coursesService.GetOwnCoursesAsync()).Where(x => x.Name.Contains(Query));
+        }
+
+        courses = result.ToList();
+
+        isBusy = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCoursesAsync();
+    }
+
+    private async void DeleteCourse(string id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you really want to delete this user? This process cannot be undone.");
+        parameters.Add("ButtonText", "Delete");
+        parameters.Add("Color", Color.Error);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var result = await DialogService.Show<Dialog>("Delete", parameters, options).Result;
+        if (!result.Cancelled)
+        {
+            var userState = authenticationState.Result;
+            coursesService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+            var deleteResult = await coursesService.DeleteCourseAsync(id);
+            if (deleteResult)
+            {
+                await GetCoursesAsync();
+                StateHasChanged();
+            }
+        }
+    }
+
+   @* async Task AddUser()
+    {
+        RegisterRequest newUser = new RegisterRequest();
+        var parameters = new DialogParameters { ["request"] = newUser };
+
+        var dialog = DialogService.Show<AddUserDialog>("Add new user", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var userState = authenticationState.Result;
+            userService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+            var addResult = await userService.RegisterUserAsync(newUser);
+            if (addResult)
+            {
+                await GetCoursesAsync();
+                StateHasChanged();
+            }
+        }
+    }*@
+}

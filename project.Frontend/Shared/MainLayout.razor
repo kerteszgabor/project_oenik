@@ -8,7 +8,7 @@
         <MudLayout>
             <MudAppBar Elevation="1" Dense="true" Class="teal darken-1">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-                <MudAppBarSpacer />
+                <MudSpacer />
                 <UserStatus />
             </MudAppBar>
             <MudDrawer @bind-Open="@open" ClipMode="DrawerClipMode.Docked" Elevation="1" Variant="@DrawerVariant.Responsive">
@@ -17,7 +17,7 @@
                 </MudDrawerHeader>
                 <MudNavMenu>
                     <MudNavLink Href="/users" Match="NavLinkMatch.All">Users</MudNavLink>
-                    <MudNavLink Match="NavLinkMatch.All">Dummy</MudNavLink>
+                    <MudNavLink Href="/courses" Match="NavLinkMatch.All">Courses</MudNavLink>
                     <MudNavLink Match="NavLinkMatch.All">Also Dummy</MudNavLink>
                 </MudNavMenu>
             </MudDrawer>

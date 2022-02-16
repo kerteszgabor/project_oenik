@@ -8,7 +8,9 @@ using project.Domain.Models;
 using project.Service.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace project.WebAPI.Controllers
@@ -128,6 +130,14 @@ namespace project.WebAPI.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [HttpGet("OwnCourses")]
+        [Authorize]
+        public async Task<IEnumerable<Course>> GetOwnCourses()
+        {
+            var idOfCaller = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return await courseService.GetCoursesOfUser(idOfCaller).ToListAsync();
         }
     }
 }

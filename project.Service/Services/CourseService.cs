@@ -147,5 +147,14 @@ namespace project.Service.Services
 
             return await courseRepository.UpdateAsync(courseToUpdate);
         }
+
+        public async IAsyncEnumerable<Course> GetCoursesOfUser(string userID)
+        {
+            var results = List().Where(x => x.UserCourses.Any(y => y.UserID == userID));
+            await foreach (var item in results)
+            {
+                yield return item;
+            }
+        }
     }
 }

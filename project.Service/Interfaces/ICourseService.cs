@@ -20,6 +20,7 @@ namespace project.Service.Interfaces
         Task<bool> RemoveTestFromCourse(string testID, string courseID);
         Task<bool> EnrollStudentInCourse(string studentID, string courseID);
         Task<bool> RemoveStudentFromCourse(string studentID, string courseID);
+        IAsyncEnumerable<Course> GetCoursesOfUser(string userID);
 
     }
 }

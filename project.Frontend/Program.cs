@@ -35,6 +35,11 @@ namespace project.Client
                 return new UserService(URL);
             });
 
+            builder.Services.AddScoped<CoursesService>(s =>
+            {
+                return new CoursesService(URL);
+            });
+
             builder.Services.AddScoped<AuthenticationStateProvider, LocalAuthenticationStateProvider>();
 
             builder.Services.AddMudServices();

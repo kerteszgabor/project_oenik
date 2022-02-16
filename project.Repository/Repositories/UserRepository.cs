@@ -35,8 +35,10 @@ namespace project.Repository.Repositories
             if (currentUser != null && await UserManager.CheckPasswordAsync(currentUser, loginData.Password))
             {
                 var claim = new[] {
-                    new Claim(JwtRegisteredClaimNames.Sub, currentUser.UserName),
-                    new Claim(ClaimTypes.Role, userRoles.FirstOrDefault())
+                    new Claim(JwtRegisteredClaimNames.Sub, currentUser.Id),
+                    new Claim(ClaimTypes.Role, userRoles.FirstOrDefault()),
+                    new Claim(ClaimTypes.NameIdentifier, currentUser.UserName),
+                    new Claim(ClaimTypes.Email, currentUser.Email)
                 };
                 var signinKey = new SymmetricSecurityKey(
                   Encoding.UTF8.GetBytes(Configuration["Jwt:SigningKey"]));
