@@ -15,9 +15,9 @@ namespace project.Repository.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.0");
+                .HasAnnotation("ProductVersion", "5.0.3")
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -48,22 +48,22 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "30df0a43-212e-4956-8b6a-f724b4ecae57",
-                            ConcurrencyStamp = "301f3394-8e09-4505-ae0d-5fcd8ddb55d0",
+                            Id = "0bf65ce1-f114-49d9-b073-96ad19263346",
+                            ConcurrencyStamp = "bc0b7460-679c-4ea0-ae8c-cb8097eea847",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "f865e952-09f1-4a03-a2e0-d7c56e224f5e",
-                            ConcurrencyStamp = "3ce7af4f-7e68-4d8f-98b7-c4302df9a2e2",
+                            Id = "1467e099-d101-48e5-92fc-24d2885961c8",
+                            ConcurrencyStamp = "fe333760-dde9-4fc1-9537-be80c5e0013c",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "33104f63-7f06-408e-a067-20c2770e41af",
-                            ConcurrencyStamp = "892dfa85-f756-4e0e-bbf2-849573a295e3",
+                            Id = "6e6f03cf-c406-44c2-9189-f4556aca57a0",
+                            ConcurrencyStamp = "9ca62739-b18d-4cc9-89d6-1283effb31c7",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         });
@@ -74,7 +74,7 @@ namespace project.Repository.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -169,7 +169,7 @@ namespace project.Repository.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -229,8 +229,8 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "b8006249-a533-41ea-bf7b-f0a6d08a3a52",
-                            RoleId = "30df0a43-212e-4956-8b6a-f724b4ecae57"
+                            UserId = "9494ec51-b92d-430b-b813-c18dc5dd7568",
+                            RoleId = "0bf65ce1-f114-49d9-b073-96ad19263346"
                         });
                 });
 
@@ -492,11 +492,17 @@ namespace project.Repository.Migrations
                     b.Property<DateTime>("FinishTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsCorrectionFinished")
                         .HasColumnType("bit");
 
                     b.Property<double>("PointResult")
                         .HasColumnType("float");
+
+                    b.Property<string>("ProgQuestionReports")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -553,17 +559,17 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b8006249-a533-41ea-bf7b-f0a6d08a3a52",
+                            Id = "9494ec51-b92d-430b-b813-c18dc5dd7568",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "a3972074-024f-46bc-9bae-e15f20642b16",
+                            ConcurrencyStamp = "44f5c0d6-84cf-4773-b4a5-2c6e931c3ff2",
                             Email = "admin@oenik.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@OENIK.hu",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEHkxL77stHEelyleDT/Sdlba5pzbBFCfNMfSCAdKXmOIdrRZ/w76iM5zg51BPncLDA==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEOgRxmI2icyHTeuiGZXFxOE1xIqxLK2DtciFrN4rd8ZypxntMQYZp3FkJX3Bi/+w8w==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "8f3aa5ad-22fb-4d10-b792-86328fee360b",
+                            SecurityStamp = "f7a6fa24-9014-4e94-bc40-967b29d6e15e",
                             TwoFactorEnabled = false,
                             UserName = "admin",
                             CreatedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -577,6 +583,9 @@ namespace project.Repository.Migrations
                     b.HasBaseType("project.Domain.Models.Question");
 
                     b.Property<string>("ExpectedOutput")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Methods")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OptimalNumberOfLines")
@@ -659,11 +668,13 @@ namespace project.Repository.Migrations
                 {
                     b.HasOne("project.Domain.Models.Course", "Course")
                         .WithMany("CourseTests")
-                        .HasForeignKey("CourseID");
+                        .HasForeignKey("CourseID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("project.Domain.Models.Test", "Test")
                         .WithMany("CourseTests")
-                        .HasForeignKey("TestID");
+                        .HasForeignKey("TestID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Course");
 
@@ -674,11 +685,13 @@ namespace project.Repository.Migrations
                 {
                     b.HasOne("project.Domain.Models.ProgrammingQuestion", "ProgrammingQuestion")
                         .WithMany("TestProgQuestions")
-                        .HasForeignKey("ProgrammingQuestionID");
+                        .HasForeignKey("ProgrammingQuestionID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("project.Domain.Models.Test", "Test")
                         .WithMany("TestProgQuestions")
-                        .HasForeignKey("TestID");
+                        .HasForeignKey("TestID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ProgrammingQuestion");
 
@@ -689,11 +702,13 @@ namespace project.Repository.Migrations
                 {
                     b.HasOne("project.Domain.Models.Question", "Question")
                         .WithMany("TestQuestions")
-                        .HasForeignKey("QuestionID");
+                        .HasForeignKey("QuestionID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("project.Domain.Models.Test", "Test")
                         .WithMany("TestQuestions")
-                        .HasForeignKey("TestID");
+                        .HasForeignKey("TestID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Question");
 

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using project.Domain.DTO.ClassReport;
-using project.Service.Helpers.ClassReportBuilder;
+using project.Domain.Helpers.ClassReportBuilder;
 using project.Service.Interfaces;
 
 namespace project.WebAPI.Controllers

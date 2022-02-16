@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using project.Domain.Models;
-using project.Service.Interfaces;
-using project.Domain.DTO;
 using Microsoft.AspNetCore.Cors;
 using System.Linq;
 using project.Domain.DTO.Auth;
+using project.Service.Interfaces;
+using project.Domain.Exceptions;
 
 namespace project.WebAPI.Controllers
 {
@@ -73,7 +73,6 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpDelete("{uid}")]
-        [Route("delete")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string uid)
         {

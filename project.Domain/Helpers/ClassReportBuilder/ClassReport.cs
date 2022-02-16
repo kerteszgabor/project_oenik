@@ -1,9 +1,8 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace project.Service.Helpers.ClassReportBuilder
+namespace project.Domain.Helpers.ClassReportBuilder
 {
     //TODO: Store dictonaries here
     public class ClassReport

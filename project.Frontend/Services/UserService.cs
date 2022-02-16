@@ -46,16 +46,16 @@ namespace project.Client.Services
             return response.IsSucceded;
         }
 
-        public async Task<User> RegisterUserAsync(RegisterRequest registerRequest)
+        public async Task<bool> RegisterUserAsync(RegisterRequest registerRequest)
         {
             var response = await client.PostProtectedAsync<User>($"{baseURL}/users/register", registerRequest);
             if (response.IsSucceded)
             {
-                return response.Result;
+                return true;
             }
             else
             {
-                return null;
+                return false;
             }
         }
         public async Task<User> UpdateUserAsync(string id)

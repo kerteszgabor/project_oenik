@@ -1,5 +1,5 @@
 ﻿using project.Domain.Models;
-using project.Service.Interfaces;
+using project.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.JsonPatch;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
-using project.Domain.Interfaces;
 using project.Domain.DTO.Auth;
+using project.Service.Interfaces;
 
 namespace project.Service.Services
 {

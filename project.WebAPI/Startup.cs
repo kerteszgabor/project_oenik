@@ -19,10 +19,11 @@ using Microsoft.IdentityModel.Tokens;
 using project.Domain.Models;
 using project.Repository.Data;
 using project.Repository.Repositories;
+using project.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity.UI;
+using Swashbuckle.AspNetCore.Swagger;
 using project.Service.Interfaces;
 using project.Service.Services;
-using Microsoft.AspNetCore.Identity.UI;
-using project.Domain.Interfaces;
 
 namespace project.WebAPI
 {
@@ -40,8 +41,19 @@ namespace project.WebAPI
         {
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped(typeof(IUserRepository<User>), typeof(UserRepository));
+            services.AddScoped(typeof(ITestRepository<Test>), typeof(TestRepository));
+            services.AddScoped(typeof(IQuestionRepository), typeof(QuestionRepository));
+            services.AddScoped(typeof(IProgrammingQuestionRepository), typeof(ProgrammingQuestionRepository));
+            services.AddScoped(typeof(ITestResultRepository), typeof(TestResultRepository));
+            services.AddScoped(typeof(ICourseRepository), typeof(CourseRepository));
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ITestsService, TestsService>();
+            services.AddTransient<IQuestionService, QuestionService>();
+            services.AddTransient<ILabelService, LabelService>();
+            services.AddTransient<ITestManagerService, TestManagerService>();
             services.AddTransient<IClassReportBuilder, ClassReportBuilder>();
+            services.AddTransient<ICourseService, CourseService>();
+            services.AddTransient<IResultManagerService, ResultManagerService>();
 
             services.AddDefaultIdentity<User>(
                 option =>
@@ -91,16 +103,34 @@ namespace project.WebAPI
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SigningKey"]))
                 };
             });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Project API", Version = "v1" });
+            });
+
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (env.EnvironmentName == "Windows" || env.EnvironmentName == "Macos")
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseExceptionHandler("/error");
+            }
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+                c.RoutePrefix = String.Empty;
+            });
 
             app.UseCors("cors");
 

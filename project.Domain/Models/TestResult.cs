@@ -1,4 +1,5 @@
-﻿using System;
+﻿using project.Domain.Helpers.ClassReportBuilder;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -25,5 +26,9 @@ namespace project.Domain.Models
         public List<Answer> Answers { get; set; }
 
         public bool IsCorrectionFinished { get; set; }
+
+        public bool IsClosed { get; set; }
+        
+        public List<ClassReport> ProgQuestionReports { get; set; }
     }
 }

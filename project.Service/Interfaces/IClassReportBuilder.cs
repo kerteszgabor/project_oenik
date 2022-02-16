@@ -1,5 +1,5 @@
 ﻿using project.Domain.DTO.ClassReport;
-using project.Service.Helpers.ClassReportBuilder;
+using project.Domain.Helpers.ClassReportBuilder;
 using System;
 
 namespace project.Service.Interfaces

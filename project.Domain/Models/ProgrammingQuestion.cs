@@ -1,4 +1,5 @@
-﻿using project.Domain.Models.DBConnections;
+﻿using project.Domain.DTO.ClassReport;
+using project.Domain.Models.DBConnections;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,5 +19,7 @@ namespace project.Domain.Models
         public string ExpectedOutput { get; set; }
 
         public ICollection<TestProgQuestion> TestProgQuestions { get; set; }
+
+        public ICollection<MethodInfoData> Methods { get; set; }
     }
 }

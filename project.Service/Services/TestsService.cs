@@ -8,15 +8,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using project.Domain.Models.DBConnections;
+using project.Service.Interfaces;
 
 namespace project.Service.Services
 {
-    class TestsService
+    public class TestsService : ITestsService
     {
         private readonly ITestRepository<Test> testRepository;
-        public TestsService(ITestRepository<Test> testRepository)
+        private readonly IQuestionRepository questionRepository;
+        private readonly IUserService userService;
+        private readonly ICourseRepository courseRepository;
+        public TestsService(ITestRepository<Test> testRepository, IUserService userService, IQuestionRepository questionRepository, ICourseRepository courseRepository)
         {
             this.testRepository = testRepository;
+            this.userService = userService;
+            this.questionRepository = questionRepository;
+            this.courseRepository = courseRepository;
         }
 
         public async Task<bool> Delete(string uid)
@@ -32,21 +40,52 @@ namespace project.Service.Services
         public async IAsyncEnumerable<Test> List()
         {
             await foreach (var item in testRepository.GetAllAsync())
-                yield return item;
+            { 
+               yield return item;
+            }
         }
 
+        public async IAsyncEnumerable<Test> GetTestsOfUser(string userID)
+        {
+            var userTests = (await userService.Get(userID))?
+                .UserCourses
+                .SelectMany(x => x.Course.CourseTests)
+                .Select(x => x.Test)
+                .ToAsyncEnumerable();
+
+            await foreach (var item in userTests)
+            {
+                yield return item;
+            }
+        }
+
+        public async IAsyncEnumerable<Test> GetTestsOfCourse(string courseID)
+        {
+            var courseTests = (await courseRepository.GetAsync(courseID))?
+                .CourseTests
+                .Select(x => x.Test)
+                .ToAsyncEnumerable();
+
+            await foreach (var item in courseTests)
+            {
+                yield return item;
+            }
+        }
 
         public async Task<bool> Insert(TestDTO newTest)
         {
-
             if (newTest != null)
             {
-                var config = new MapperConfiguration(cfg => {
+                var config = new MapperConfiguration(cfg =>
+                {
                     cfg.CreateMap<TestDTO, Test>();
+                    cfg.AddGlobalIgnore("CreatedBy");
                 });
                 IMapper iMapper = config.CreateMapper();
 
                 var model = iMapper.Map<TestDTO, Test>(newTest);
+                model.CreatedBy = await userService.GetUserByName(newTest.CreatedBy);
+                model.CreationTime = DateTime.Now;
 
                 return await testRepository.CreateAsync(model);
             }
@@ -69,6 +108,39 @@ namespace project.Service.Services
             {
                 return false;
             }
+        }
+
+        public async Task<bool> AddQuestionToTest(string questionID, string testID)
+        {
+            var questionToAdd = await questionRepository.GetAsync(questionID);
+            var testToUpdate = await Get(testID);
+
+            testToUpdate.MaxPoints += questionToAdd.MaxPoints;
+
+            testToUpdate.TestQuestions.Add(new TestQuestion
+            {
+                Question = questionToAdd,
+                Test = testToUpdate,
+                ID = Guid.NewGuid().ToString(),
+                QuestionID = questionToAdd.ID,
+                TestID = testToUpdate.ID
+            });
+
+            return await testRepository.UpdateAsync(testToUpdate);
+        }
+
+        public async Task<bool> RemoveQuestionFromTest(string questionID, string testID)
+        {
+            var questionToDelete = await questionRepository.GetAsync(questionID);
+            var testToUpdate = await Get(testID);
+            var linkingEntity = testToUpdate.TestQuestions.FirstOrDefault(x => x.Question == questionToDelete);
+
+            testToUpdate.MaxPoints -= questionToDelete.MaxPoints;
+
+            testToUpdate.TestQuestions.Remove(linkingEntity);
+            questionToDelete.TestQuestions.Remove(linkingEntity);
+
+            return await testRepository.UpdateAsync(testToUpdate);
         }
     }
 }

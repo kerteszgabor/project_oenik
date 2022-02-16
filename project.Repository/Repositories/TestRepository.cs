@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using project.Domain.Interfaces;
 using project.Domain.Models;
 using project.Repository.Data;
 
 namespace project.Repository.Repositories
 {
-    class TestRepository : ITestRepository<Test>
+    public class TestRepository : ITestRepository<Test>
     {
         public ApplicationDbContext db { get; set; }
 
@@ -19,6 +20,7 @@ namespace project.Repository.Repositories
         }
         public async Task<bool> CreateAsync(Test entity)
         {
+            entity.ID = Guid.NewGuid().ToString();
             await db.Tests.AddAsync(entity);
             var result = await db.SaveChangesAsync();
             if (result > 0)
@@ -48,12 +50,18 @@ namespace project.Repository.Repositories
         public async IAsyncEnumerable<Test> GetAllAsync()
         {
             await foreach (var item in db.Tests.AsAsyncEnumerable())
+            {
                 yield return item;
+            }
         }
 
         public async Task<Test> GetAsync(string id)
         {
-            return await db.Tests.FindAsync(id);
+            return await db.Tests
+                .Include(x => x.TestQuestions)
+                .ThenInclude(x => x.Question)
+                .Include(x => x.TestProgQuestions)
+                .FirstOrDefaultAsync(x => x.ID == id);
         }
 
         public async Task<bool> UpdateAsync(Test entity)

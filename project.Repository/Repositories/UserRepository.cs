@@ -87,7 +87,7 @@ namespace project.Repository.Repositories
 
             if (result.Succeeded)
             {
-                await UserManager.AddToRoleAsync(newUser, registerData.Role);
+                var roleResult = await UserManager.AddToRoleAsync(newUser, registerData.Role);
                 return true;
             }
             else

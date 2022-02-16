@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using project.Domain.DTO.ClassReport;
+using project.Domain.Helpers.ClassReportBuilder;
 using project.Domain.Models;
 using project.Domain.Models.DBConnections;
 using System;
@@ -68,8 +71,19 @@ namespace project.Repository.Data
                 uc.CourseID,
                 uc.UserID
             });
-          //  builder.Entity<CourseTest>().HasNoKey();
-              SetupManyToManyMaps(builder);
+            //  builder.Entity<CourseTest>().HasNoKey();
+
+            builder.Entity<TestResult>().Property(p => p.ProgQuestionReports)
+            .HasConversion(
+                 v => JsonConvert.SerializeObject(v),
+                 v => JsonConvert.DeserializeObject<List<ClassReport>>(v));
+
+            builder.Entity<ProgrammingQuestion>().Property(p => p.Methods)
+            .HasConversion(
+                 v => JsonConvert.SerializeObject(v),
+                 v => JsonConvert.DeserializeObject<List<MethodInfoData>>(v));
+
+            SetupManyToManyMaps(builder);
         }
 
         private void SetupManyToManyMaps(ModelBuilder builder)
@@ -77,42 +91,50 @@ namespace project.Repository.Data
             builder.Entity<UserCourse>()
                 .HasOne(uc => uc.Course)
                 .WithMany(c => c.UserCourses)
-                .HasForeignKey(uc => uc.CourseID);
+                .HasForeignKey(uc => uc.CourseID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<UserCourse>()
                 .HasOne(uc => uc.User)
                 .WithMany(c => c.UserCourses)
-                .HasForeignKey(uc => uc.UserID);
+                .HasForeignKey(uc => uc.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CourseTest>()
                .HasOne(ct => ct.Course)
                .WithMany(t => t.CourseTests)
-               .HasForeignKey(ct => ct.CourseID);
+               .HasForeignKey(ct => ct.CourseID)
+               .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CourseTest>()
                 .HasOne(ct => ct.Test)
                 .WithMany(c => c.CourseTests)
-                .HasForeignKey(ct => ct.TestID);
+                .HasForeignKey(ct => ct.TestID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<TestProgQuestion>()
                .HasOne(tp => tp.Test)
                .WithMany(t => t.TestProgQuestions)
-               .HasForeignKey(tp => tp.TestID);
+               .HasForeignKey(tp => tp.TestID)
+               .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<TestProgQuestion>()
                 .HasOne(tp => tp.ProgrammingQuestion)
                 .WithMany(p => p.TestProgQuestions)
-                .HasForeignKey(tp => tp.ProgrammingQuestionID);
+                .HasForeignKey(tp => tp.ProgrammingQuestionID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<TestQuestion>()
                .HasOne(tq => tq.Test)
                .WithMany(t => t.TestQuestions)
-               .HasForeignKey(tq => tq.TestID);
+               .HasForeignKey(tq => tq.TestID)
+               .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<TestQuestion>()
                 .HasOne(tq => tq.Question)
                 .WithMany(q => q.TestQuestions)
-                .HasForeignKey(tq => tq.QuestionID);
+                .HasForeignKey(tq => tq.QuestionID)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public DbSet<Course> Courses { get; set; }

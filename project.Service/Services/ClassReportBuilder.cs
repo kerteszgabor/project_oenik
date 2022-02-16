@@ -3,9 +3,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using project.Domain.DTO.ClassReport;
-using project.Service.Helpers.ClassReportBuilder;
-using project.Service.Interfaces;
-using RoslynAPITest.Exceptions;
+using project.Domain.Helpers.Exceptions;
+using project.Domain.Helpers.ClassReportBuilder;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,14 +14,12 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
+using project.Service.Interfaces;
 
 namespace project.Service.Services
 {
     public class ClassReportBuilder : ICanCallBuild, ICanRequireCompilation, ICanCompile, IClassReportBuilder
     {
-        public ClassReportBuilder()
-        {
-        }
         public string CodeAsString
         {
             get
@@ -45,7 +42,6 @@ namespace project.Service.Services
         private Dictionary<MethodDeclarationSyntax, MethodModel> methodPairs;
         private ConcurrentBag<object> compilationResults;
 
-        // TODO: Move code string resource to somewhere else
         private ClassReportBuilder(string codeToAnalyze)
         {
             this.CodeAsString = codeToAnalyze;
@@ -54,6 +50,11 @@ namespace project.Service.Services
             this.methodPairs = new Dictionary<MethodDeclarationSyntax, MethodModel>();
             this.compilationResults = new ConcurrentBag<object>();
             BuildAssets();
+        }
+
+        public ClassReportBuilder()
+        {
+
         }
 
         public ICanCallBuild GetReportOf(string codeToAnalyze)
