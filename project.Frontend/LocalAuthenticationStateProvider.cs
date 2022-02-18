@@ -25,9 +25,11 @@ namespace project.Client
 
                 var claims = new[]
                 {
-                  //  new Claim(ClaimTypes.NameIdentifier, userInfo.ID),
+//                    new Claim(ClaimTypes.NameIdentifier, userInfo.ID),
                     new Claim("AccessToken", userInfo.Token), 
-                    new Claim("Expiration", userInfo.Expiration.ToString())
+                    new Claim("Expiration", userInfo.Expiration.ToString()),
+                    new Claim(ClaimTypes.Role, userInfo.Role),
+                    new Claim(ClaimTypes.Name, userInfo.Username)
                 };
 
                 var identity = new ClaimsIdentity(claims, "BearerToken");
