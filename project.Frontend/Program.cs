@@ -40,6 +40,16 @@ namespace project.Client
             {
                 return new CoursesService(URL);
             });
+            
+            builder.Services.AddScoped<TestsService>(s =>
+            {
+                return new TestsService(URL);
+            });
+            
+            builder.Services.AddScoped<QuestionsService>(s =>
+            {
+                return new QuestionsService(URL);
+            });
 
             builder.Services.AddScoped<AuthenticationStateProvider, LocalAuthenticationStateProvider>();
 

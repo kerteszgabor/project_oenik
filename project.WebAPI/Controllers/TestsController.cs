@@ -107,5 +107,20 @@ namespace project.WebAPI.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet("OwnTests")]
+        [Authorize]
+        public async Task<IEnumerable<Test>> GetOwnTests()
+        {
+            var idOfCaller = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return await testsService.GetTestsOfUser(idOfCaller).ToListAsync();
+        }
+
+        [HttpGet("GetTestsOfCourse/{courseID}")]
+        [Authorize]
+        public async Task<IEnumerable<Test>> GetTestsOfCourse(string courseID)
+        {
+            return await testsService.GetTestsOfCourse(courseID).ToListAsync();
+        }
     }
 }

@@ -1,0 +1,26 @@
+﻿@page "/questions"
+@using project.Client.Pages.Courses
+
+<MudGrid Justify="Justify.SpaceEvenly">
+    <MudItem xs="12" md="6">
+        <MudPaper Class="d-flex align-right justify-center mud-width-full py-8">
+            <div class="row">
+                <div class="col-12"><MudText Typo="Typo.h2" Align="Align.Center">Teszt kiválasztása</MudText></div>
+                <div class="col-12"><TestSelector></TestSelector></div>
+            </div>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="6" >
+        <MudPaper Class="d-flex align-left justify-center mud-width-full py-8">
+            <div class="row">
+                <div class="col-12"><MudText Typo="Typo.h2" Align="Align.Center">Kérdésbank</MudText></div>
+                <div class="col-12"><QuestionBank></QuestionBank></div>
+            </div>
+            </MudPaper>
+    </MudItem>
+</MudGrid>
+
+
+@code {
+
+}
