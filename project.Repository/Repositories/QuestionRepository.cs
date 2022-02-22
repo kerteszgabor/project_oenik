@@ -49,7 +49,7 @@ namespace project.Repository.Repositories
 
         public async IAsyncEnumerable<Question> GetAllAsync()
         {
-            await foreach (var item in db.Questions.AsAsyncEnumerable())
+            await foreach (var item in db.Questions.Include(x => x.CreatedBy).AsAsyncEnumerable())
                 yield return item;
         }
 

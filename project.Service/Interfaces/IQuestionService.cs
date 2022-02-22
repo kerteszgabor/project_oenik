@@ -16,5 +16,6 @@ namespace project.Service.Interfaces
         Task<bool> Insert(QuestionDTO newQuestion);
         IAsyncEnumerable<Question> List();
         Task<bool> Update(string uid, JsonPatchDocument<Question> patch);
+        IAsyncEnumerable<Question> GetQuestionsOfUser(string userID);
     }
 }

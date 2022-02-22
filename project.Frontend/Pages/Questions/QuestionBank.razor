@@ -11,24 +11,45 @@
 else
 {
     <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.Small">
-        <MudItem xs="12" Class="mb-2">
+        
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+            <MudTabPanel Text="Saját kérdéseim" ToolTip="Az általad hozáadott kérdések böngészése">
+                <MudItem xs="12" Class="mb-2">
+            <MudPaper Class="d-flex flex-row py-2 px-1">
+                <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Keresett címke" Variant="Variant.Outlined"></MudTextField>
+                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetOwnQuestionsAsync()">Keresés</MudButton>
+            </MudPaper>
+        </MudItem>
+                <MudList Clickable="false">
+                    @foreach (var question in usersQuestions)
+                    {
+                        <MudListItem Icon="@Icons.Filled.QuestionAnswer" IconColor="Color.Tertiary">
+                            @question.Title
+                             <MudChip Color="Color.Primary" Icon="@Icons.Filled.CropFree" OnClick="() => OpenQuestion(question)">Megnyitás</MudChip>
+                            <MudChip Icon="@Icons.Filled.Delete" OnClick="() => DeleteQuestion(question.ID)">Törlés</MudChip>
+                            </MudListItem>
+                        <MudDivider />
+                    }
+                </MudList>
+            </MudTabPanel>
+            <MudTabPanel Text="Kérdésbank" ToolTip="Mások által létrehozott kérdések böngészése">
+                <MudItem xs="12" Class="mb-2">
             <MudPaper Class="d-flex flex-row py-2 px-1">
                 <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Keresett címke" Variant="Variant.Outlined"></MudTextField>
                 <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetQuestionsAsync()">Keresés</MudButton>
             </MudPaper>
         </MudItem>
-        <MudList Clickable="false">
-            @foreach (var question in questions)
-            {
-                <MudListItem Icon="@Icons.Filled.QuestionAnswer" IconColor="Color.Tertiary">
-                    @question.Title
-                     <MudChip Color="Color.Primary" Icon="@Icons.Filled.CropFree" OnClick="() => OpenQuestion(question)">Megnyitás</MudChip>
-                    <MudChip Icon="@Icons.Filled.Delete" OnClick="() => DeleteQuestion(question.ID)">Törlés</MudChip>
-                    </MudListItem>
-                <MudDivider />
-            }
-
-        </MudList>
+                @foreach (var question in allQuestions)
+                    {
+                        <MudListItem Icon="@Icons.Filled.QuestionAnswer" IconColor="Color.Tertiary">
+                            @question.Title
+                             <MudChip Color="Color.Primary" Icon="@Icons.Filled.CropFree" OnClick="() => OpenQuestion(question)">Megnyitás</MudChip>
+                            </MudListItem>
+                        <MudDivider />
+                    }
+            </MudTabPanel>
+</MudTabs>
+        
     </MudContainer>
     // <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" Class="mt-5" OnClick="AddUser" />
 }
@@ -42,12 +63,16 @@ else
     [Parameter]
     public string Query { get; set; } = String.Empty;
 
+    [CascadingParameter]
+    private Test selectedTest { get; set; }
+
     bool isBusy = false;
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
 
-    List<Question> questions = new List<Question>();
+    List<Question> allQuestions = new List<Question>();
+    List<Question> usersQuestions = new List<Question>();
 
     async Task GetQuestionsAsync()
     {
@@ -67,13 +92,37 @@ else
             result = await questionService.GetLabelledQuestions(Query);
         }
 
-        questions = result.ToList();
+        allQuestions = result.ToList();
+
+        isBusy = false;
+    }
+
+    async Task GetOwnQuestionsAsync()
+    {
+        isBusy = true;
+
+        var userState = authenticationState.Result;
+        questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        IEnumerable<Question> result;
+
+        if (string.IsNullOrWhiteSpace(Query))
+        {
+            result = await questionService.GetOwnQuestionsAsync();
+        }
+        else
+        {
+            result = (await questionService.GetOwnQuestionsAsync()).Where(x => x.Title != null && x.Title.Contains(Query));
+        }
+
+        usersQuestions = result.ToList();
 
         isBusy = false;
     }
 
     protected override async Task OnInitializedAsync()
     {
+        await GetOwnQuestionsAsync();
         await GetQuestionsAsync();
     }
 

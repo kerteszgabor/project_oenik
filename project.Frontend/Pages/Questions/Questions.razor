@@ -1,12 +1,17 @@
 ﻿@page "/questions"
 @using project.Client.Pages.Courses
+@inject ISnackbar Snackbar
 
 <MudGrid Justify="Justify.SpaceEvenly">
     <MudItem xs="12" md="6">
         <MudPaper Class="d-flex align-right justify-center mud-width-full py-8">
             <div class="row">
                 <div class="col-12"><MudText Typo="Typo.h2" Align="Align.Center">Teszt kiválasztása</MudText></div>
-                <div class="col-12"><TestSelector></TestSelector></div>
+                <div class="col-12">
+                    <CascadingValue Value=@chipText>
+                        <TestSelector OnClick="ClickHandler" @ref="testSelector"></TestSelector>
+                    </CascadingValue>
+                </div>
             </div>
         </MudPaper>
     </MudItem>
@@ -14,7 +19,9 @@
         <MudPaper Class="d-flex align-left justify-center mud-width-full py-8">
             <div class="row">
                 <div class="col-12"><MudText Typo="Typo.h2" Align="Align.Center">Kérdésbank</MudText></div>
-                <div class="col-12"><QuestionBank></QuestionBank></div>
+                <CascadingValue Value=@selectedTest>
+                    <div class="col-12"><QuestionBank></QuestionBank></div>
+                </CascadingValue>
             </div>
             </MudPaper>
     </MudItem>
@@ -22,5 +29,16 @@
 
 
 @code {
+    private Test selectedTest { get; set; }
 
+    TestSelector testSelector;
+
+    string chipText { get; set; } = "Nincs kiválasztott teszt";
+
+    void ClickHandler(Test selectedTest)
+    {
+        this.selectedTest = selectedTest;
+        Snackbar.Add($"Kiválasztott teszt: {selectedTest.Title}", Severity.Info);
+        chipText = "Kiválasztott teszt: " + selectedTest.Title;
+    }
 }

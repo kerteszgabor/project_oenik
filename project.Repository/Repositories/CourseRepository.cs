@@ -60,6 +60,7 @@ namespace project.Repository.Repositories
             return await db.Courses
                 .Include(x => x.UserCourses)
                 .Include(x => x.CourseTests)
+                .ThenInclude(x => x.Test)
                 .FirstOrDefaultAsync(x => x.ID == id);
         }
 

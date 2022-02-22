@@ -94,5 +94,13 @@ namespace project.WebAPI.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet("OwnQuestions")]
+        [Authorize]
+        public async Task<IEnumerable<Question>> GetOwnQuestions()
+        {
+            var idOfCaller = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return await questionService.GetQuestionsOfUser(idOfCaller).ToListAsync();
+        }
     }
 }

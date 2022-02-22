@@ -11,14 +11,15 @@ else
         <MudListSubheader>
             Itt láthatod a saját tesztjeidet, kurzusonként rendezve.
         </MudListSubheader>
+        <div class="col mb-2"><MudChip Icon="@Icons.Filled.ListAlt" Color="Color.Info">@chipText</MudChip></div>
         @foreach(var course in courses)
         {
             <MudListItem Icon="@Icons.Material.Filled.Send" Text="@course.Name" InitiallyExpanded="false" ExpandedChanged="() => GetTestsOfCourse(course)">
                 <NestedList>
                 @foreach(var test in tests)
                 {
-                    <MudListItem Icon="@Icons.Material.Filled.StarRate">
-                    test.Name
+                    <MudListItem OnClick="(() => OnClick.InvokeAsync(test))" Icon="@Icons.Material.Filled.Kitesurfing">
+                    @test.Title
                     </MudListItem>
                 }
             </NestedList>
@@ -31,6 +32,15 @@ else
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
+
+    [CascadingParameter]
+    private Test selectedTest { get; set; }
+
+    [Parameter] 
+    public EventCallback<Test> OnClick { get; set; }
+
+    [CascadingParameter] 
+    public string chipText{ get; set; }
 
     List<Course> courses = new List<Course>();
     List<Test> tests = new List<Test>();
@@ -52,11 +62,16 @@ else
     async Task GetTestsOfCourse(Course course)
     {
         var userState = authenticationState.Result;
-        coursesService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        testService.AccessToken = userState.User.FindFirst("AccessToken").Value;
         IEnumerable<Test> result;
 
         result = await testService.GetTestsOfCourse(course.ID);
         tests = result.ToList();
+    }
+
+    void SetSelectedTest(Test test)
+    {
+        selectedTest = test;
     }
 
     protected override async Task OnInitializedAsync()

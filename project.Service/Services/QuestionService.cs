@@ -151,5 +151,14 @@ namespace project.Service.Services
                 return false;
             }
         }
+
+        public async IAsyncEnumerable<Question> GetQuestionsOfUser(string userID)
+        {
+            var results = List().Where(x => x.CreatedBy.Id == userID);
+            await foreach (var item in results)
+            {
+                yield return item;
+            }
+        }
     }
 }
