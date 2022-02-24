@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -21,9 +22,12 @@ namespace project.WebAPI.Controllers
     public class QuestionsController : ControllerBase
     {
         private IQuestionService questionService;
-        public QuestionsController(IQuestionService questionService)
+        private IUserService userService;
+
+        public QuestionsController(IQuestionService questionService, IUserService userService)
         {
             this.questionService = questionService;
+            this.userService = userService;
         }
         // GET: api/Tests
         [HttpGet]
@@ -43,7 +47,7 @@ namespace project.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProgQuestionDTO model)
         {
-            model.CreatedBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            model.CreatedBy = (await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier))).UserName;
             if (model?.Methods.Count == 0)
             {
                 var normalQuestion = model as QuestionDTO;

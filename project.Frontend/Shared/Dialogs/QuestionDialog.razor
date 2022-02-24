@@ -1,6 +1,4 @@
-﻿@inject ISnackbar Snackbar
-
-<MudDialog>
+﻿<MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Filled.QuestionAnswer" Class="mr-3 mb-n1"/>
@@ -30,7 +28,6 @@
 
     private void AddToTest()
     {
-        Snackbar.Add("Saját teszthez hozzáadva!", Severity.Success);
         MudDialog.Close(DialogResult.Ok(question.ID));
     }
 }

@@ -1,5 +1,6 @@
 ﻿@inject IDialogService DialogService
 @inject QuestionsService questionService
+@inject ISnackbar Snackbar
 @attribute [Authorize]
 
 
@@ -159,7 +160,22 @@ else
 
         if (!result.Cancelled)
         {
-            
+            if (selectedTest == null)
+            {
+                Snackbar.Add("Kérdés hozzáadása sikertelen: nincs kijelölve teszt!", Severity.Error);
+            }
+            else
+            {
+                var additionResult = await questionService.AddQuestionToTest(question.ID, selectedTest.ID);
+                if (additionResult)
+                {
+                    Snackbar.Add("Kérdés hozzáadása sikeres!", Severity.Success);
+                }
+                else
+                {
+                    Snackbar.Add("Kérdés hozzáadása sikertelen: ismeretlen hiba történt!", Severity.Error);
+                }
+            }
         }
     }
 }
