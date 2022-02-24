@@ -27,6 +27,10 @@
                 {
                     <MudNavLink Href="/questions" Match="NavLinkMatch.All">Kérdésbank</MudNavLink>
                 }
+                @if (isTeacher || isAdmin)
+                {
+                    <MudNavLink Href="/QuestionEditor" Match="NavLinkMatch.All">Kérdések szerkesztése</MudNavLink>
+                }
             </MudNavMenu>
         </MudDrawer>
         <MudMainContent Class="pt-16 px-16">

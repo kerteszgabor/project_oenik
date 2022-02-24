@@ -1,0 +1,38 @@
+﻿@page "/questions/newQuestion"
+@inject NavigationManager navigationManager
+
+    <MudContainer MaxWidth="MaxWidth.Small">
+        <MudPaper Class="pa-4 sm-6">
+            <MudText Typo="Typo.h4">Válaszd ki a kérdés típusát!</MudText>
+            <MudForm Class="mt-3">
+                <MudSelect @bind-Value="selectedType" T="QuestionType" Label="Kérdés típusa" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                    <MudSelectItem T="QuestionType" Value="QuestionType.Text">@GetOption(QuestionType.Text)</MudSelectItem>
+                    <MudSelectItem T="QuestionType" Value="QuestionType.FillIn">@GetOption(QuestionType.FillIn)</MudSelectItem>
+                    <MudSelectItem T="QuestionType" Value="QuestionType.MultipleChoice">@GetOption(QuestionType.MultipleChoice)</MudSelectItem>
+                    <MudSelectItem T="QuestionType" Value="QuestionType.MultipleChoiceMultipleAnswer">@GetOption(QuestionType.MultipleChoiceMultipleAnswer) </MudSelectItem>
+                    <MudSelectItem T="QuestionType" Value="QuestionType.Number">@GetOption(QuestionType.Number)</MudSelectItem>
+                    <MudSelectItem T="QuestionType" Value="QuestionType.Order">@GetOption(QuestionType.Order)</MudSelectItem>
+                    <MudSelectItem T="QuestionType" Value="QuestionType.Pairing">@GetOption(QuestionType.Pairing)</MudSelectItem>
+                    <MudSelectItem T="QuestionType" Value="QuestionType.TrueOrFalse">@GetOption(QuestionType.TrueOrFalse)</MudSelectItem>
+                    <MudSelectItem T="QuestionType" Value="QuestionType.ProgrammingQuestion">@GetOption(QuestionType.ProgrammingQuestion)</MudSelectItem>
+                </MudSelect>
+                <div class="d-flex align-center justify-space-between mt-6">
+                    <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mx-auto" OnClick="() => AddQuestion()">Hozzáadás</MudButton>
+                </div>
+            </MudForm>
+        </MudPaper>
+    </MudContainer>
+    @code {
+
+        QuestionType selectedType;
+        string GetOption(QuestionType q)
+        {
+            return EnumReader<QuestionType>.GetDescription(q);
+        }
+
+        async void AddQuestion()
+        {
+            navigationManager.NavigateTo($"/questions/newQuestion/{selectedType.ToString()}");
+        }
+    }
+

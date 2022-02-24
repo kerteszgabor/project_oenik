@@ -10,6 +10,8 @@ namespace project.Domain.Models
     {
         [Description("Feleletválasztós")]
         MultipleChoice,
+        [Description("Feleletválasztós - több helyes megoldás")]
+        MultipleChoiceMultipleAnswer,
         [Description("Igaz - hamis")]
         TrueOrFalse,
         [Description("Párosítós")]
@@ -18,9 +20,11 @@ namespace project.Domain.Models
         FillIn,
         [Description("Szám")]
         Number,
-        [Description("Számok")]
-        Numbers,
+        [Description("Sorrendbe helyezés")]
+        Order,
         [Description("Szöveg")]
-        Text
+        Text,
+        [Description("Programozási feladat")]
+        ProgrammingQuestion
     }
 }

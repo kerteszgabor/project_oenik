@@ -11,8 +11,10 @@
 
   <ItemGroup>
     <None Remove="Exceptions\" />
+    <None Remove="DTO\Client\QuestionEditor\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Exceptions\" />
+    <Folder Include="DTO\Client\QuestionEditor\" />
   </ItemGroup>
 </Project>
