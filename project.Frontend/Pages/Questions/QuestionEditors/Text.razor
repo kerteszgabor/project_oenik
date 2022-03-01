@@ -1,6 +1,63 @@
-﻿<h3>Component1</h3>
+﻿@page "/test"
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Class="pa-4 sm-6">
+        <MudText Typo="Typo.h4">Új szöveges választ igénylő kérdés hozzáadása</MudText>
+        <MudForm Class="mt-3">
+            <MudTextField T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Text="" Lines="3" />
+            <MudTextField T="string" Label="Helyes válasz" Variant="Variant.Outlined" Text="" Lines="3" />
+            <div class="d-flex align-center justify-space-between mt-6">
+                <MudCheckBox @bind-Checked="@ChipsEnabled" T="bool" Class="ml-n2" Label="Kérdés megosztása" />
+                <MudCheckBox @bind-Checked="@manualCorrection" T="bool" Class="ml-n2" Label="Kézzel javítandó" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto">Hozzáadás</MudButton>
+            </div>
+             @if (ChipsEnabled)
+            {
+                <div class="d-flex align-center justify-space-between mt-6">
+                    <MudTextField @bind-Value="newLabel" Label="Új címke neve" Variant="Variant.Text"></MudTextField>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => AddLabel()"></MudIconButton>
+                </div>
+
+                <MudChipSet AllClosable="true" OnClose="Closed">
+                    @foreach (var value in labels)
+                    {
+                        <MudChip Color="Color.Primary" Text="@value"></MudChip>
+                    }
+                </MudChipSet>
+            }
+        </MudForm>
+    </MudPaper>
+    @foreach (var item in _components)
+    {
+        <DynamicComponent Type="@item" />
+    }
+</MudContainer>
 
 @code {
+    private bool success;
+    private bool chipsEnabled;
+    private bool manualCorrection;
+    private string newLabel;
+    List<string> labels = new List<string>();
 
+    bool ChipsEnabled {get { return chipsEnabled; } set { chipsEnabled = value; labels = new List<string>(); StateHasChanged(); }}
+
+    readonly List<Type> _components = new List<Type>
+    {
+        typeof(QuestionBank),
+        typeof(QuestionBank)
+    };
+
+
+    public async void AddLabel()
+    {
+        labels.Add(newLabel);
+        newLabel = "";
+    }
+    public void Closed(MudChip chip) => labels.Remove(chip.Text);
+    async void Submit()
+    {
+
+    }
 }
 

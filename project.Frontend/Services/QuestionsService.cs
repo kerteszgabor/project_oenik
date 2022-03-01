@@ -60,6 +60,24 @@ namespace project.Client.Services
             return response.Result;
         }
 
+        public async Task<bool> AddLabelsToQuestion(List<string> labels, string questionID)
+        {
+            bool result = true;
+            foreach (var label in labels)
+            {
+                LabelDTO model = new LabelDTO()
+                {
+                    LabelText = label,
+                    QuestionID = questionID
+                };
+                if (result)
+                {
+                    result = (await Client.PostProtectedAsync<LabelDTO>($"{BaseURL}/labels/", model)).IsSucceded;
+                } 
+            }
+            return result;
+        }
+
         public async Task<bool> AddQuestionToTest(string questionID, string testID)
         {
             var response = await Client.GetProtectedAsync<bool>($"{BaseURL}/tests/addQuestionToTest?questionID={questionID}&testID={testID}");
