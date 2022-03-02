@@ -19,7 +19,7 @@ namespace project.Client
         }
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            if (await _storageService.ContainKeyAsync("User"))
+            if (await _storageService.ContainKeyAsync("User") && !(await TokenExpired()))
             {
                 var userInfo = await _storageService.GetItemAsync<ClientUserInfo>("User");
 
@@ -27,7 +27,7 @@ namespace project.Client
                 {
 //                    new Claim(ClaimTypes.NameIdentifier, userInfo.ID),
                     new Claim("AccessToken", userInfo.Token), 
-                    new Claim("Expiration", userInfo.Expiration.ToString()),
+                    new Claim("Expiration", userInfo.Expiration.AddHours(1).ToString()),
                     new Claim(ClaimTypes.Role, userInfo.Role),
                     new Claim(ClaimTypes.Name, userInfo.Username)
                 };
@@ -48,5 +48,7 @@ namespace project.Client
             await _storageService.RemoveItemAsync("User");
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal())));
         }
+
+        private async Task<bool> TokenExpired() => (await _storageService.GetItemAsync<ClientUserInfo>("User"))?.Expiration < DateTime.Now;
     }
 }

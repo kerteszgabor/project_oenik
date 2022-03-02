@@ -1,4 +1,5 @@
 ﻿@using System.Security.Claims
+@inject NavigationManager navigationManager
 @inherits LayoutComponentBase
 @attribute [Authorize]
 
@@ -40,7 +41,7 @@
         </MudMainContent>
     </MudLayout>
     @code {
-        bool open = false;
+        bool open = true;
         bool isAdmin = false;
         bool isTeacher = false;
 
@@ -56,6 +57,10 @@
         {
             base.OnInitialized();
             var state = await authenticationState;
+            if(state.User.Identity == null)
+            {
+                navigationManager.NavigateTo("/courses");
+            }
             var user = state.User.FindFirst(ClaimTypes.Role)?.Value;
             switch (user)
             {

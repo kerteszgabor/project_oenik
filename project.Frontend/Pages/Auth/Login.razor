@@ -68,6 +68,7 @@
 
             //};
 
+            result.Expiration = result.Expiration.AddHours(1);
             await storageService.SetItemAsync("User", result);
             await authenticationStateProvider.GetAuthenticationStateAsync();
             Snackbar.Add($"Üdv {result.Username}", Severity.Success);

@@ -1,0 +1,45 @@
+﻿<MudContainer Class="mt-16" MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">OExam</MudText>
+    <MudText Align="Align.Center">Üdvözlünk az Óbudai Egyetem vizsgáztató oldalán! Kérjük, jelentkezz be a folytatáshoz!</MudText>
+    <MudGrid Justify="Justify.Center"  Class="mt-8">
+        <MudItem xs="12" lg="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Align="Align.Center">Bejelentkezés</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <div class="d-flex justify-center">
+                        <MudText Align="Align.Center" Typo="Typo.h5" Class="mt-1" Color="Color.Primary">Jelenleg nem vagy bejelentkezve. Kattints a továbblépéshez!</MudText>
+                    </div>
+                </MudCardContent>
+                <MudCardActions Class="d-flex justify-center">
+                    <MudButton Link="/auth/login" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;">Belépés</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+         <MudItem xs="12" lg="4">
+            <MudCard Elevation="25" Class="rounded-lg pb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5" Align="Align.Center">Hasznos linkek</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <div class="d-flex justify-center">
+                        <MudText Typo="Typo.h4" Class="mr-1">I</MudText>
+                        <MudIcon Class="mt-1" Size="Size.Large" Icon="@Icons.Material.Filled.Favorite" Title="Favorite" Color="Color.Secondary" />
+                        <MudText Typo="Typo.h4" Class="ml-1" Color="Color.Secondary">OE</MudText>
+                    </div>
+                    <MudList Class="mx-auto mt-4" Style="width:300px;" Clickable="true" DisableGutters="true">
+                        <MudListItem Href="https://elearning.uni-obuda.hu/" Text="OE Moodle" Icon="@Icons.Filled.Computer" IconColor="Color.Tertiary" />
+                        <MudListItem Href="https://neptun.uni-obuda.hu/hallgato/login.aspx" Text="Neptun" Icon="@Icons.Filled.Bookmark" IconColor="Color.Primary" />
+                        <MudListItem Href="https://neptun.uni-obuda.hu/eler/to" Text="Tanulmányi irodák" Icon="@Icons.Filled.Info" IconColor="Color.Secondary" />
+                    </MudList>
+                    
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
