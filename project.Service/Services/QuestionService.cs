@@ -19,11 +19,14 @@ namespace project.Service.Services
         private readonly IQuestionRepository questionRepository;
         private readonly IProgrammingQuestionRepository progQuestionRepository;
         private readonly IUserService userService;
-        public QuestionService(IQuestionRepository questionRepository, IProgrammingQuestionRepository progQuestionRepository, IUserService userService)
+        private ILabelService labelService;
+
+        public QuestionService(IQuestionRepository questionRepository, IProgrammingQuestionRepository progQuestionRepository, IUserService userService, ILabelService labelService)
         {
             this.questionRepository = questionRepository;
             this.progQuestionRepository = progQuestionRepository;
             this.userService = userService;
+            this.labelService = labelService;
         }
 
         public async Task<bool> Delete(string uid)
@@ -83,8 +86,20 @@ namespace project.Service.Services
 
                 model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
                 model.CreationTime = DateTime.Now;
+                if (String.IsNullOrEmpty(model.Title))
+                {
+                    var textBody = model.Text.Split(' ');
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (textBody.Length > i)
+                        {
+                            model.Title += $"{textBody[i]} ";
+                        }
+                    }
+                }
 
-                return await questionRepository.CreateAsync(model);
+                await questionRepository.CreateAsync(model);
+                return await AddLabelsToNewQuestions(newQuestion, model.CreatedBy);
             }
             else
             {
@@ -129,7 +144,8 @@ namespace project.Service.Services
                     }
                 }
 
-                return await progQuestionRepository.CreateAsync(model);
+                await progQuestionRepository.CreateAsync(model);
+                return await AddLabelsToNewQuestions(newQuestion, model.CreatedBy);
             }
             else
             {
@@ -159,6 +175,20 @@ namespace project.Service.Services
             {
                 yield return item;
             }
+        }
+
+        private async Task<bool> AddLabelsToNewQuestions(QuestionDTO newQuestion, User user)
+        {
+            var question = await GetQuestionsOfUser(user.Id).LastOrDefaultAsync();
+            if (question != null)
+            {
+                foreach (var label in newQuestion.Labels)
+                {
+                    label.QuestionID = question.ID;
+                    await labelService.Insert(label);
+                }
+            }
+            return question != null;
         }
     }
 }

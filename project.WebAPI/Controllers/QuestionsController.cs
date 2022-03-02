@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -48,9 +49,15 @@ namespace project.WebAPI.Controllers
         public async Task<IActionResult> Post([FromBody] ProgQuestionDTO model)
         {
             model.CreatedBy = (await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier))).UserName;
-            if (model?.Methods.Count == 0)
+            if (model?.Methods == null || model?.Methods?.Count == 0)
             {
-                var normalQuestion = model as QuestionDTO;
+                var normalQuestion = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<ProgQuestionDTO, QuestionDTO>();
+                })
+                    .CreateMapper()
+                    .Map<ProgQuestionDTO, QuestionDTO>(model);
+
                 if (await questionService.Insert(normalQuestion))
                 {
                     return Ok();
@@ -105,6 +112,13 @@ namespace project.WebAPI.Controllers
         {
             var idOfCaller = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return await questionService.GetQuestionsOfUser(idOfCaller).ToListAsync();
+        }
+
+        [HttpGet("SharedQuestions")]
+        [Authorize]
+        public async Task<IEnumerable<Question>> GetSharedQuestions()
+        {
+            return await questionService.List().Where(x => x.IsShared).ToListAsync();
         }
     }
 }
