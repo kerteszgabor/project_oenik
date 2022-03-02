@@ -1,15 +1,22 @@
-﻿@page "/test"
+﻿@page "/questions/newQuestion/Text"
+@using project.Domain.DTO.Tests
+@inject QuestionsService questionService
+@inject ISnackbar Snackbar
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Teacher")]
 
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudPaper Class="pa-4 sm-6">
         <MudText Typo="Typo.h4">Új szöveges választ igénylő kérdés hozzáadása</MudText>
-        <MudForm Class="mt-3">
-            <MudTextField T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Text="" Lines="3" />
-            <MudTextField T="string" Label="Helyes válasz" Variant="Variant.Outlined" Text="" Lines="3" />
+        <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
+        <DataAnnotationsValidator/>
+            <MudTextField For="@(() => model.Text)" @bind-Value="model.Text" T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="3" />
+            <MudTextField For="@(() => model.CorrectAnswer)" @bind-Value="model.CorrectAnswer" T="string" Label="Helyes válasz" Variant="Variant.Outlined" Lines="3" />
+            <MudNumericField For="@(() => model.MaxPoints)" @bind-Value="model.MaxPoints" Label="Pontok száma" Format="F1" Variant="Variant.Outlined" />
             <div class="d-flex align-center justify-space-between mt-6">
                 <MudCheckBox @bind-Checked="@ChipsEnabled" T="bool" Class="ml-n2" Label="Kérdés megosztása" />
-                <MudCheckBox @bind-Checked="@manualCorrection" T="bool" Class="ml-n2" Label="Kézzel javítandó" />
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto">Hozzáadás</MudButton>
+                <MudCheckBox For="@(() => model.CorrectManually)" @bind-Checked="@model.CorrectManually" T="bool" Class="ml-n2" Label="Kézzel javítandó" />
+                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Hozzáadás</MudButton>
             </div>
              @if (ChipsEnabled)
             {
@@ -21,43 +28,68 @@
                 <MudChipSet AllClosable="true" OnClose="Closed">
                     @foreach (var value in labels)
                     {
-                        <MudChip Color="Color.Primary" Text="@value"></MudChip>
+                        <MudChip Color="Color.Primary" Text="@value.LabelText"></MudChip>
                     }
                 </MudChipSet>
             }
-        </MudForm>
+        </EditForm>
     </MudPaper>
-    @foreach (var item in _components)
-    {
-        <DynamicComponent Type="@item" />
-    }
 </MudContainer>
 
 @code {
-    private bool success;
+    private QuestionDTO model = new QuestionDTO();
     private bool chipsEnabled;
-    private bool manualCorrection;
+    private bool isBusy;
     private string newLabel;
-    List<string> labels = new List<string>();
+    List<LabelDTO> labels = new List<LabelDTO>();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
 
-    bool ChipsEnabled {get { return chipsEnabled; } set { chipsEnabled = value; labels = new List<string>(); StateHasChanged(); }}
+    bool ChipsEnabled {get { return chipsEnabled; } set { chipsEnabled = value; labels = new List<LabelDTO>(); StateHasChanged(); }}
 
-    readonly List<Type> _components = new List<Type>
+    //readonly List<Type> _components = new List<Type>
+    //{
+    //    typeof(QuestionBank),
+    //    typeof(QuestionBank)
+    //};
+
+    // @foreach (var item in _components)
+    //{
+    //    <DynamicComponent Type="@item" />
+    //}
+
+
+    public void AddLabel()
     {
-        typeof(QuestionBank),
-        typeof(QuestionBank)
-    };
-
-
-    public async void AddLabel()
-    {
-        labels.Add(newLabel);
+        labels.Add(new LabelDTO(){ LabelText = newLabel});
         newLabel = "";
     }
-    public void Closed(MudChip chip) => labels.Remove(chip.Text);
+
+    public void Closed(MudChip chip) => labels.Remove(labels.FirstOrDefault(x => x.LabelText == chip.Text));
+
     async void Submit()
     {
+        isBusy = true;
+        if(labels.Count > 0)
+        {
+            model.Labels = labels;
+        }
 
+        model.QuestionType = "Text";
+        model.IsShared = chipsEnabled;
+
+        var userState = authenticationState.Result;
+        questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        if (await questionService.AddQuestionAsync(model))
+        {
+            Snackbar.Add("Kérdés sikeresen hozzáadva!", Severity.Success);
+            navigationManager.NavigateTo("/questions/newQuestion");
+        }
+        else
+        {
+            Snackbar.Add("Hiba történt!", Severity.Success);
+            isBusy = false;
+        }
     }
 }
 

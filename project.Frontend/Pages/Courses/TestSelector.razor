@@ -1,5 +1,6 @@
 ﻿@inject CoursesService coursesService
 @inject TestsService testService
+@attribute [Authorize(Roles = "Teacher")]
 
 @if (isBusy)
 {

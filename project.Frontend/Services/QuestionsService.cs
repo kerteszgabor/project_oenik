@@ -24,6 +24,12 @@ namespace project.Client.Services
             return response.Result;
         }
 
+        public async Task<IEnumerable<Question>> GetSharedQuestions()
+        {
+            var response = await Client.GetProtectedAsync<IEnumerable<Question>>($"{BaseURL}/questions/SharedQuestions");
+            return response.Result;
+        }
+
         public async Task<Question> GetQuestionAsync(string id)
         {
             var response = await Client.GetProtectedAsync<Question>($"{BaseURL}/questions/{id}");

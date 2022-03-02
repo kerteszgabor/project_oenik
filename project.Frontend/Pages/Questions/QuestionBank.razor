@@ -1,7 +1,7 @@
 ﻿@inject IDialogService DialogService
 @inject QuestionsService questionService
 @inject ISnackbar Snackbar
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Teacher")]
 
 
 
@@ -13,7 +13,7 @@ else
 {
     <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.Small">
         
-        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabs @bind-ActivePanelIndex="activeIndex" Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
             <MudTabPanel Text="Saját kérdéseim" ToolTip="Az általad hozáadott kérdések böngészése">
                 <MudItem xs="12" Class="mb-2">
             <MudPaper Class="d-flex flex-row py-2 px-1">
@@ -67,7 +67,9 @@ else
     [CascadingParameter]
     private Test selectedTest { get; set; }
 
-    bool isBusy = false;
+    bool isBusy = true;
+
+    int activeIndex = 0;
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
@@ -77,8 +79,6 @@ else
 
     async Task GetQuestionsAsync()
     {
-        isBusy = true;
-
         var userState = authenticationState.Result;
         questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
 
@@ -86,7 +86,7 @@ else
 
         if (string.IsNullOrWhiteSpace(Query))
         {
-            result = await questionService.GetAllQuestionsAsync();
+            result = await questionService.GetSharedQuestions();
         }
         else
         {
@@ -94,14 +94,12 @@ else
         }
 
         allQuestions = result.ToList();
-
         isBusy = false;
+        activeIndex = 1;
     }
 
     async Task GetOwnQuestionsAsync()
     {
-        isBusy = true;
-
         var userState = authenticationState.Result;
         questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
 
@@ -117,14 +115,14 @@ else
         }
 
         usersQuestions = result.ToList();
-
         isBusy = false;
+        activeIndex = 0;
     }
 
     protected override async Task OnInitializedAsync()
     {
-        await GetOwnQuestionsAsync();
         await GetQuestionsAsync();
+        await GetOwnQuestionsAsync();
     }
 
     private async void DeleteQuestion(string id)

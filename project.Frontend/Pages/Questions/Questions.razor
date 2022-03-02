@@ -1,4 +1,5 @@
 ﻿@page "/questions"
+@attribute [Authorize(Roles = "Teacher")]
 @using project.Client.Pages.Courses
 @inject ISnackbar Snackbar
 

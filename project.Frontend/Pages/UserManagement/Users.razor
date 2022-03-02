@@ -2,7 +2,7 @@
 
 @inject UserService userService
 @inject IDialogService DialogService
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 
 <h1>Users</h1>
 
