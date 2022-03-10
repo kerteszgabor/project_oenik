@@ -26,7 +26,6 @@ namespace project.Domain.DTO.Tests
 
         public string QuestionType { get; set; }
 
-        [Required]
         public string CorrectAnswer { get; set; }
 
         [Required]

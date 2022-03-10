@@ -25,8 +25,4 @@
     <None Remove="Pages\Questions\QuestionEditors\" />
     <None Remove="Services\Helpers\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Pages\Questions\QuestionEditors\" />
-    <Folder Include="Services\Helpers\" />
-  </ItemGroup>
 </Project>
