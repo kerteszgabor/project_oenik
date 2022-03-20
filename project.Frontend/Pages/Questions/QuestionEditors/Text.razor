@@ -47,18 +47,6 @@
 
     bool ChipsEnabled {get { return chipsEnabled; } set { chipsEnabled = value; labels = new List<LabelDTO>(); StateHasChanged(); }}
 
-    //readonly List<Type> _components = new List<Type>
-    //{
-    //    typeof(QuestionBank),
-    //    typeof(QuestionBank)
-    //};
-
-    // @foreach (var item in _components)
-    //{
-    //    <DynamicComponent Type="@item" />
-    //}
-
-
     public void AddLabel()
     {
         labels.Add(new LabelDTO(){ LabelText = newLabel});

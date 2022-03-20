@@ -8,13 +8,16 @@ namespace project.Client.Services.Helpers
     {
         public static string SerializeList(List<string> strings)
         {
-            var options = new JsonSerializerOptions
+            return JsonSerializer.Serialize(strings, GetSerializerOption());
+        }
+
+        public static JsonSerializerOptions GetSerializerOption()
+        {
+            return new JsonSerializerOptions
             {
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                 WriteIndented = false
             };
-
-            return JsonSerializer.Serialize(strings, options);
         }
     }
 }

@@ -12,20 +12,34 @@
         <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
             <DataAnnotationsValidator />
 
-            @*@for (int i = 0; i < options.Count; i++)
-            {
-                @if (options.Count > 0)
-                {
-                    <DynamicComponent @ref="@options[i]" Type="@typeof(TrueOrFalseComponent)" />
-                    // 
-                }
-            }*@
+            @*<MudTable Items="@options" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@isBusy" LoadingProgressColor="Color.Info">
+                <HeaderContent>
+                <MudTh>Igaz</MudTh>
+                <MudTh>Szöveg</MudTh>
+                </HeaderContent>
+                <RowTemplate Context="item">
+                <MudTd DataLabel="Igaz">@((item.Instance as TrueOrFalseComponent).isChecked)</MudTd>
+                <MudTd DataLabel="Szöveg">@((item.Instance as TrueOrFalseComponent).text)</MudTd>
+                </RowTemplate>
+                </MudTable>*@
 
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField For="@(() => model.Text)" @bind-Value="model.Text" T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="2" />
+                </MudItem>
+                <MudItem xs="2">
+                    <MudText Typo="Typo.button" Class="d-flex align-center justify-center mud-width-full py-1">Igaz</MudText>
+                </MudItem>
+                <MudItem xs="10">
+                    <MudText Typo="Typo.button" Class="d-flex align-center justify-center mud-width-full py-1">Szöveg</MudText>
+                </MudItem>
+            </MudGrid>
+            <MudDivider />
             @foreach (var option in options)
-                {
-                    Console.WriteLine("Hello");
-            <DynamicComponent  Type="@typeof(TrueOrFalseComponent)" />
-           }
+            {
+                int idx = options.FindIndex(x => x == option);
+                <DynamicComponent @ref="options[idx]" Type="@typeof(TrueOrFalseComponent)" />
+            }
 
             <div class="d-flex align-center justify-space-between mt-6">
                 <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mx-auto" OnClick="() => AddNewOption()">Lehetőség hozzáadása</MudButton>
@@ -62,7 +76,7 @@
     private string newLabel;
     private Type type = Type.GetType("TrueOrFalseComponent");
     List<LabelDTO> labels = new List<LabelDTO>();
-    List<DynamicComponent> options = new List<DynamicComponent>();
+    List<DynamicComponent> options = new List<DynamicComponent>() { new DynamicComponent() };
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
@@ -77,15 +91,9 @@
 
     public void Closed(MudChip chip) => labels.Remove(labels.FirstOrDefault(x => x.LabelText == chip.Text));
 
-    protected override async Task OnInitializedAsync()
-    {
-        base.OnInitializedAsync();
-        options.Add(new DynamicComponent() { Type = typeof(TrueOrFalseComponent)});
-    }
-
     private void AddNewOption()
     {
-        options.Add(new DynamicComponent() { Type = typeof(TrueOrFalseComponent) });
+        options.Add(new DynamicComponent());
     }
 
     async void Submit()
@@ -96,8 +104,9 @@
             model.Labels = labels;
         }
 
-        model.QuestionType = "Text";
+        model.QuestionType = "TrueOrFalse";
         model.IsShared = chipsEnabled;
+        model.CorrectAnswer = GenerateCorrectAnswerString();
 
         var userState = authenticationState.Result;
         questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
@@ -111,6 +120,19 @@
             Snackbar.Add("Hiba történt!", Severity.Success);
             isBusy = false;
         }
+    }
+
+    private string GenerateCorrectAnswerString()
+    {
+        List<Tuple<bool, string>> itemsToSerialize = new List<Tuple<bool, string>>(); 
+
+        foreach(var item in options)
+        {
+            var option = item.Instance as TrueOrFalseComponent;
+            itemsToSerialize.Add(Tuple.Create(option.isChecked, option.text));
+        }
+
+        return JsonSerializer.Serialize(itemsToSerialize, JsonHelpers.GetSerializerOption());
     }
 }
 
