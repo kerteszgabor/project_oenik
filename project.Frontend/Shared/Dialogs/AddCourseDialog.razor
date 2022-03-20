@@ -1,0 +1,33 @@
+﻿@inject ILocalStorageService storageService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.NoteAdd" Class="mr-3 mb-n1" />
+            Új kurzus hozzáadása
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@request.Name" Label="Új kurzus neve" ReadOnly="false" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Vissza</MudButton>
+        <MudButton Color="Color.Success" OnClick="Add">Hozzáadás</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public CourseDTO request { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private async void Add()
+    {
+        request.TeacherID = (await storageService.GetItemAsync<ClientUserInfo>("User"))?.ID;
+        MudDialog.Close(DialogResult.Ok(request));
+    }
+}
