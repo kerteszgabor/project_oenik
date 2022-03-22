@@ -18,13 +18,13 @@ namespace project.Service.Services
         private readonly ITestRepository<Test> testRepository;
         private readonly IQuestionRepository questionRepository;
         private readonly IUserService userService;
-        private readonly ICourseRepository courseRepository;
-        public TestsService(ITestRepository<Test> testRepository, IUserService userService, IQuestionRepository questionRepository, ICourseRepository courseRepository)
+        private readonly ICourseService courseService;
+        public TestsService(ITestRepository<Test> testRepository, IUserService userService, IQuestionRepository questionRepository, ICourseService courseService)
         {
             this.testRepository = testRepository;
             this.userService = userService;
             this.questionRepository = questionRepository;
-            this.courseRepository = courseRepository;
+            this.courseService = courseService;
         }
 
         public async Task<bool> Delete(string uid)
@@ -47,13 +47,13 @@ namespace project.Service.Services
 
         public async IAsyncEnumerable<Test> GetTestsOfUser(string userID)
         {
-            var userTests = (await userService.Get(userID))?
-                .UserCourses
-                .SelectMany(x => x.Course.CourseTests)
-                .Select(x => x.Test)
-                .ToAsyncEnumerable();
+            var userTests = new List<Test>();
+            (await courseService.GetCoursesOfUser(userID).ToListAsync())
+            .ForEach(x => userTests.AddRange(x.UserCourses?
+            .SelectMany(x => x.Course?.CourseTests)?
+            .Select(x => x?.Test))); 
 
-            await foreach (var item in userTests)
+            await foreach (var item in userTests.ToAsyncEnumerable())
             {
                 yield return item;
             }
@@ -61,7 +61,7 @@ namespace project.Service.Services
 
         public async IAsyncEnumerable<Test> GetTestsOfCourse(string courseID)
         {
-            var courseTests = (await courseRepository.GetAsync(courseID))?
+            var courseTests = (await courseService.Get(courseID))?
                 .CourseTests
                 .Select(x => x.Test)
                 .ToAsyncEnumerable();

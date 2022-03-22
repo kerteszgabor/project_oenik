@@ -2,6 +2,7 @@
 
 @inject CoursesService coursesService
 @inject IDialogService DialogService
+@inject NavigationManager navigationManager
 @attribute [Authorize]
 
 <h1>Courses</h1>
@@ -25,11 +26,11 @@ else
             <MudItem xs="12" sm="6" md="4">
                 <MudCard Elevation="2" Class="pa-4">
                     <MudCardContent>
-                        <a href=""><MudText>@course.Name</MudText></a>
+                        <a href="@(url + course.ID)"><MudText>@course.Name</MudText></a>
                         <MudText Typo="Typo.body2">Felhasználók száma: @course.UserCourses.Count</MudText>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => DeleteCourse(course.ID)">Megnyitás</MudButton>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => navigationManager.NavigateTo(url + course.ID)">Megnyitás</MudButton>
                         <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCourse(course.ID)">Törlés</MudButton>
                     </MudCardActions>
                 </MudCard>
@@ -50,6 +51,7 @@ else
     public string Query { get; set; } = String.Empty;
 
     bool isBusy = false;
+    private string url = "/courses/displayCourse/";
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }

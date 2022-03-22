@@ -1,5 +1,77 @@
-﻿<h3>DisplayCourse</h3>
+﻿@page "/courses/displayCourse/{courseID}"
+@inject CoursesService courseService
+@inject NavigationManager navigationManager
+@inject TestsService testService
 
+@if (isBusy)
+{
+    <MudProgressCircular Color="Color.Success" Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        @for (int i = 1; i < 15; i++)
+        {
+            <MudItem xs="12">
+                <MudCard Elevation="2" Class="pa-4">
+                    <MudCardContent>
+                        <MudText Typo="Typo.subtitle1">@($"{i}.hét")</MudText>
+                        @foreach (var test in Tests)
+                        {
+                            <MudCard Outlined="true">
+                                <MudCardContent>
+                                    <MudText>@test.Title</MudText>
+                                    <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton Variant="Variant.Text" Color="Color.Primary">Learn More</MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+
+
+    </MudGrid>
+
+    <MudText Typo=Typo.h1>@course?.Name</MudText>
+    if (isTeacher)
+    {
+
+    }
+    else
+    {
+
+    }
+}
 @code {
+    [Parameter]
+    public string courseID { get; set; }
+    public Course course { get; set; }
+    public bool isBusy { get; set; }
+    public bool isTeacher { get; set; } = false;
+    public List<Test> Tests { get; set; } = new List<Test>();
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isBusy = true;
+        course = await courseService.GetCourseAsync(courseID);
+
+        var state = await authenticationState;
+        if (state.User.Identity == null)
+        {
+            navigationManager.NavigateTo("/courses");
+        }
+
+        isTeacher = state.User.FindFirst(ClaimTypes.Role)?.Value == "Teacher";
+
+        Tests = (await testService.GetOwnTestsAsync()).ToList();
+
+        isBusy = false;
+    }
 }
