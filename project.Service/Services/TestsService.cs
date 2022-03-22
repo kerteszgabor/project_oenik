@@ -40,18 +40,28 @@ namespace project.Service.Services
         public async IAsyncEnumerable<Test> List()
         {
             await foreach (var item in testRepository.GetAllAsync())
-            { 
-               yield return item;
+            {
+                yield return item;
             }
         }
 
         public async IAsyncEnumerable<Test> GetTestsOfUser(string userID)
         {
             var userTests = new List<Test>();
-            (await courseService.GetCoursesOfUser(userID).ToListAsync())
-            .ForEach(x => userTests.AddRange(x.UserCourses?
-            .SelectMany(x => x.Course?.CourseTests)?
-            .Select(x => x?.Test))); 
+            //(await courseService.GetCoursesOfUser(userID).ToListAsync())
+            //.ForEach(x => userTests.AddRange(x.UserCourses?
+            //.SelectMany(x => x.Course?.CourseTests)?
+            //.Select(x => x?.Test)));
+
+            await foreach (var course in courseService.GetCoursesOfUser(userID))
+            {
+                if (course.CourseTests is not null)
+                {
+                    userTests.AddRange(course.CourseTests
+                        .SelectMany(x => x.Course?.CourseTests)?
+                        .Select(x => x?.Test));
+                }
+            }
 
             await foreach (var item in userTests.ToAsyncEnumerable())
             {

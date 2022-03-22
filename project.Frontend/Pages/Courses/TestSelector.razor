@@ -12,7 +12,10 @@ else
         <MudListSubheader>
             Itt láthatod a saját tesztjeidet, kurzusonként rendezve.
         </MudListSubheader>
-        <div class="col mb-2"><MudChip Icon="@Icons.Filled.ListAlt" Color="Color.Info">@chipText</MudChip></div>
+        @if (IsChipNeeded)
+        {
+            <div class="col mb-2"><MudChip Icon="@Icons.Filled.ListAlt" Color="Color.Info">@chipText</MudChip></div>
+        }
         @foreach(var course in courses)
         {
             <MudListItem Icon="@Icons.Material.Filled.Send" Text="@course.Name" InitiallyExpanded="false" ExpandedChanged="() => GetTestsOfCourse(course)">
@@ -39,6 +42,9 @@ else
 
     [Parameter] 
     public EventCallback<Test> OnClick { get; set; }
+
+    [Parameter]
+    public bool IsChipNeeded { get; set; } = true;
 
     [CascadingParameter] 
     public string chipText{ get; set; }

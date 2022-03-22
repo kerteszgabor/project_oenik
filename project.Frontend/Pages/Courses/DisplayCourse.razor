@@ -12,28 +12,30 @@ else
     <MudGrid>
         @for (int i = 1; i < 15; i++)
         {
+            int j = i;
             <MudItem xs="12">
-                <MudCard Elevation="2" Class="pa-4">
+                <MudCard Elevation="2" Class="pa-5">
                     <MudCardContent>
-                        <MudText Typo="Typo.subtitle1">@($"{i}.hét")</MudText>
-                        @foreach (var test in Tests)
+                        <MudText Typo="Typo.h2">@($"{j}.hét")</MudText>
+                        @if (Tests is not null && Tests.Count > 0)
                         {
-                            <MudCard Outlined="true">
-                                <MudCardContent>
-                                    <MudText>@test.Title</MudText>
-                                    <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
-                                </MudCardContent>
-                                <MudCardActions>
-                                    <MudButton Variant="Variant.Text" Color="Color.Primary">Learn More</MudButton>
-                                </MudCardActions>
-                            </MudCard>
+                            @foreach (var test in Tests)
+                            {
+                                <MudCard Outlined="true">
+                                    <MudCardContent>
+                                        <MudText>@test.Title</MudText>
+                                        <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
+                                    </MudCardContent>
+                                    <MudCardActions>
+                                        <MudButton Variant="Variant.Text" Color="Color.Primary">Learn More</MudButton>
+                                    </MudCardActions>
+                                </MudCard>
+                            }
                         }
                     </MudCardContent>
                 </MudCard>
             </MudItem>
         }
-
-
     </MudGrid>
 
     <MudText Typo=Typo.h1>@course?.Name</MudText>
@@ -70,7 +72,7 @@ else
 
         isTeacher = state.User.FindFirst(ClaimTypes.Role)?.Value == "Teacher";
 
-        Tests = (await testService.GetOwnTestsAsync()).ToList();
+        Tests = (await testService.GetOwnTestsAsync())?.ToList();
 
         isBusy = false;
     }
