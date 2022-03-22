@@ -8,6 +8,7 @@ using MudBlazor;
 using MudBlazor.Services;
 using project.Client;
 using project.Client.Services;
+using project.Client.Shared.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -50,6 +51,8 @@ namespace project.Client
             {
                 return new QuestionsService(URL);
             });
+
+            builder.Services.AddSingleton<PageHistoryState>();
 
             builder.Services.AddScoped<AuthenticationStateProvider, LocalAuthenticationStateProvider>();
 
