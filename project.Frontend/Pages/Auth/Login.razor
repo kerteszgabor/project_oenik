@@ -42,13 +42,11 @@
 </EditForm>
 
 @code {
-    LoginRequest model = new LoginRequest();
 
+    LoginRequest model = new LoginRequest();
     bool isBusy = false;
     string message = string.Empty;
     AlertMessageType messageType = AlertMessageType.Success;
-
-
 
     public async Task LoginUser()
     {
@@ -60,15 +58,7 @@
             message = "Login successful";
             messageType = AlertMessageType.Success;
 
-            //var userInfo = new ClientUserInfo()
-            //{
-            //    AccessToken = result.AccessToken,
-            //    ID = result.ID,
-            //    FirstName = 
-
-            //};
-
-            result.Expiration = result.Expiration.AddHours(1);
+            result.Expiration = result.Expiration.AddHours(2);
             await storageService.SetItemAsync("User", result);
             await authenticationStateProvider.GetAuthenticationStateAsync();
             Snackbar.Add($"Üdv {result.Username}", Severity.Success);
