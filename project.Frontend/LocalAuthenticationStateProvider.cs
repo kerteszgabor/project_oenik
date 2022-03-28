@@ -27,7 +27,7 @@ namespace project.Client
                 {
 //                    new Claim(ClaimTypes.NameIdentifier, userInfo.ID),
                     new Claim("AccessToken", userInfo.Token), 
-                    new Claim("Expiration", userInfo.Expiration.AddHours(1).ToString()),
+                    new Claim("Expiration", userInfo.Expiration.AddHours(2).ToString()),
                     new Claim(ClaimTypes.Role, userInfo.Role),
                     new Claim(ClaimTypes.Name, userInfo.Username)
                 };

@@ -2,30 +2,95 @@
 @inherits PageBase
 
 @inject TestsService testService
+@inject CoursesService courseService
+@inject ILocalStorageService storageService
 @attribute [Authorize(Roles = "Teacher")]
 
 <MudContainer MaxWidth=MaxWidth.ExtraLarge>
-    <MudGrid Justify=Justify.SpaceBetween>
-        <MudItem md="7">
-            <MudCard Class="d-flex align-right justify-center mud-width-full py-8" Outlined=true Elevation=6>
-                <MudText GutterBottom="true" Typo=Typo.h6>Új teszt hozzáadása</MudText>
-                <MudDivider DividerType="DividerType.Middle" Class="my-6"/>
-                <MudTextField T="string" Label="A kérdés szövege" Variant="Variant.Outlined"/>
-                <MudButton OnClick="() => test()"></MudButton>
-            </MudCard>
-        </MudItem>
-        <MudItem md="3">
-            <MudPaper Class="d-flex align-right justify-center mud-width-full py-8">
-                <MudText Typo=Typo.h6>Tesztjeim</MudText>
-                <TestSelector IsChipNeeded=false></TestSelector>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
+    @if (isBusy)
+    {
+        <MudProgressCircular Color="Color.Success" Indeterminate="true" />
+    }
+    else
+    {
+        <div class="row justify-content-between">
+            <div class="col-md-7">
+                <MudCard Class="d-flex p-2 justify-center mud-width-full py-8" Outlined=true Elevation=6>
+                    <div class="row my-2">
+                        <div class="col-12 my-2">
+                            <MudText Typo=Typo.h6>Új teszt hozzáadása</MudText>
+                        </div>
+                        <div class="col-12 my-2">
+                            <MudTextField @bind-Value="testName" TextChanged="() => SaveTestName()" T="string" Label="A teszt címe" Variant="Variant.Outlined" />
+                            <MudSelect @bind-Text="selectedCourse.Name" @bind-Value="selectedCourse" SelectedValuesChanged="() => SaveSelectedState()" T="Course" Label="" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                                @foreach (var c in courses)
+                                {
+                                    <MudSelectItem T="Course" Value="c">@c.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </div>
+                        <div class="col-12 my-2">
+                            <NewQuestion></NewQuestion>
+                        </div>
+                    </div>
+                </MudCard>
+            </div>
+
+            <div class="col-md-3">
+                <MudPaper Class="d-flex justify-center mud-width-full p-2 py-8">
+                    <div class="row">
+                        <div class="col-12">
+                            <MudText Typo=Typo.h6>Tesztjeim</MudText>
+                        </div>
+                        <div class="col-12">
+                            <TestSelector IsChipNeeded=false></TestSelector>
+                        </div>
+                    </div>
+                </MudPaper>
+            </div>
+        </div>
+    }
 </MudContainer>
 
 @code {
-    void test()
+
+    private bool isBusy;
+    private Course? selectedCourse;
+    private string? testName;
+    private IEnumerable<Course> courses = new List<Course>();
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    void AddQuestion()
     {
-        _navManager.NavigateTo("/questions/newQuestion/Text");
+        _navManager.NavigateTo("/questions/newQuestion/");
+    }
+
+    async void SaveSelectedState()
+    {
+        await storageService.SetItemAsync("selectedCourse", selectedCourse);
+    }
+
+    async void SaveTestName()
+    {
+        await storageService.SetItemAsync("newTestName", testName);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isBusy = true;
+        var userState = await authenticationState;
+        courseService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        courses = await courseService.GetOwnCoursesAsync();
+
+        string? getSavedName = await storageService.GetItemAsync<string>("newTestName");
+        Course? getSavedSelected = await storageService.GetItemAsync<Course>("selectedCourse");
+
+        testName = getSavedName == null ? String.Empty : getSavedName;
+        selectedCourse = getSavedSelected == null ? null : getSavedSelected;
+
+        await base.OnInitializedAsync();
+        isBusy = false;
     }
 }
