@@ -3,6 +3,7 @@
 
 @inject TestsService testService
 @inject CoursesService courseService
+@inject QuestionsService questionService
 @inject ILocalStorageService storageService
 @attribute [Authorize(Roles = "Teacher")]
 
@@ -22,12 +23,16 @@
                         </div>
                         <div class="col-12 my-2">
                             <MudTextField @bind-Value="testName" TextChanged="() => SaveTestName()" T="string" Label="A teszt címe" Variant="Variant.Outlined" />
-                            <MudSelect @bind-Text="selectedCourse.Name" @bind-Value="selectedCourse" SelectedValuesChanged="() => SaveSelectedState()" T="Course" Label="" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
-                                @foreach (var c in courses)
-                                {
-                                    <MudSelectItem T="Course" Value="c">@c.Name</MudSelectItem>
-                                }
-                            </MudSelect>
+                            @if (courses.Count() > 0)
+                            {
+                                <MudSelect @bind-Text="selectedCourse.Name" @bind-Value="selectedCourse" SelectedValuesChanged="() => SaveSelectedState()" T="Course" Label="" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                                    @foreach (var c in courses)
+                                    {
+                                        <MudSelectItem T="Course" Value="c">@c.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+
                         </div>
                         <div class="col-12 my-2">
                             <NewQuestion></NewQuestion>
@@ -49,6 +54,35 @@
                 </MudPaper>
             </div>
         </div>
+        <div class="row justify-content-between mt-3">
+            <div class="col-md-7">
+                <MudCard Class="d-flex p-2 justify-center mud-width-full py-8" Outlined=true Elevation=6>
+                    <div class="row">
+                        <div class="col-12">
+                            <MudText Typo=Typo.h6>Hozzáadott új kérdések</MudText>
+                        </div>
+                        <div class="col-12">
+                            @if (addedQuestions.Count() > 0)
+                            {
+                                <MudPaper Class="col-12">
+                                    <MudList>
+                                        @foreach (Question q in addedQuestions)
+                                        {
+                                            <MudListItem Avatar="@Icons.Material.Filled.QuestionMark">
+                                                @q.Title
+                                            </MudListItem>
+                                        }
+                                    </MudList>
+                                </MudPaper>
+                            }
+                        </div>
+                        <div class="col-12 d-flex align-center justify-space-between mt-6">
+                            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mx-auto" OnClick="() => SubmitTest()">Teszt hozzáadása</MudButton>
+                        </div>
+                    </div>
+                </MudCard>
+            </div>
+        </div>
     }
 </MudContainer>
 
@@ -57,6 +91,7 @@
     private bool isBusy;
     private Course? selectedCourse;
     private string? testName;
+    private List<Question>? addedQuestions;
     private IEnumerable<Course> courses = new List<Course>();
 
     [CascadingParameter]
@@ -77,18 +112,50 @@
         await storageService.SetItemAsync("newTestName", testName);
     }
 
+    async void SaveQuestions()
+    {
+        await storageService.SetItemAsync("savedQuestions", addedQuestions);
+    }
+
+    async void SubmitTest()
+    {
+        await testService.AddTestAsync(new TestDTO()
+        {
+            Title = testName,
+            AllowedTakeLength = TimeSpan.FromMinutes(2),
+            IsLateSubmissionAllowed = true,
+            IsShared = true
+        });
+        await storageService.RemoveItemsAsync(new List<string>()
+            {
+                "selectedCourse",
+                "newTestName",
+                "savedQuestions"
+            });
+    }
+
     protected override async Task OnInitializedAsync()
     {
         isBusy = true;
         var userState = await authenticationState;
         courseService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        testService.AccessToken = userState.User.FindFirst("AccessToken").Value;
         courses = await courseService.GetOwnCoursesAsync();
 
         string? getSavedName = await storageService.GetItemAsync<string>("newTestName");
         Course? getSavedSelected = await storageService.GetItemAsync<Course>("selectedCourse");
+        List<Question>? getSavedQuestions = await storageService.GetItemAsync<List<Question>>("savedQuestions");
 
         testName = getSavedName == null ? String.Empty : getSavedName;
-        selectedCourse = getSavedSelected == null ? null : getSavedSelected;
+        selectedCourse = getSavedSelected == null ? courses.FirstOrDefault() : getSavedSelected;
+        addedQuestions = getSavedQuestions == null ? new List<Question>() : getSavedQuestions;
+
+        if (_pageState.PreviousPage().Contains("newQuestion"))
+        {
+            addedQuestions.Add((await questionService.GetOwnQuestionsAsync()).OrderByDescending(x => x.CreationTime).FirstOrDefault());
+            SaveQuestions();
+
+        }
 
         await base.OnInitializedAsync();
         isBusy = false;
