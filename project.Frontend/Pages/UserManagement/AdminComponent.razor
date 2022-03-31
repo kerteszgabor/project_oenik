@@ -1,0 +1,126 @@
+@page "/Admin"
+@inherits PageBase
+@inject UserService userService
+@attribute [Authorize(Roles = "Admin")]
+
+@using System.Net.Http.Json
+
+<MudTable ServerData="@(new Func<TableState, Task<TableData<User>>>(ServerReload))"
+          Dense="true" Hover="true" @ref="table">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Felhasználók</MudText>
+        <MudSpacer />
+        <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortLabel="nr_field" T="User">Nr</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="firstname_field" T="User">Utónév</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="lastname_field" T="User">Családi név</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="username_field" T="User">Felhasználónév</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="email_field" T="User">Email</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="lastlogin_field" T="User">Utolsó belépés</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="lastip_field" T="User">Utolsó IP cím</MudTableSortLabel></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nr">@idx++</MudTd>
+        <MudTd DataLabel="Utónév">@context.FirstName</MudTd>
+        <MudTd DataLabel="Családi név">@context.LastName</MudTd>
+        <MudTd DataLabel="Felhasználónév">@context.UserName</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd DataLabel="Utolsó belépés">@context.LastLogin</MudTd>
+        <MudTd DataLabel="Utolsó IP cím">@context.LastIP</MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No matching records found</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudProgressCircular Color="Color.Success" Indeterminate="true" />
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+@code {
+    private IEnumerable<User> pagedData;
+    private MudTable<User> table;
+
+    private int totalItems;
+    private int idx = 1;
+    private string searchString = null;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    private async Task<TableData<User>> ServerReload(TableState state)
+    {
+        var userState = authenticationState.Result;
+        userService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        IEnumerable<User> data = await userService.GetAllUsersAsync();
+        data = data.Where(element =>
+        {
+            if (string.IsNullOrWhiteSpace(searchString))
+                return true;
+            if (element.Sign.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+            if ($"{element.Number} {element.Position} {element.Molar}".Contains(searchString))
+                return true;
+            return false;
+        }).ToArray();
+        totalItems = data.Count();
+        switch (state.SortLabel)
+        {
+            case "nr_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.Number);
+                break;
+            case "sign_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.Sign);
+                break;
+            case "name_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.Name);
+                break;
+            case "position_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.Position);
+                break;
+            case "mass_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.Molar);
+                break;
+        }
+
+        pagedData = data.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
+        return new TableData<Element>() { TotalItems = totalItems, Items = pagedData };
+    }
+
+    async Task GetUsersAsync()
+    {
+        isBusy = true;
+
+        var userState = authenticationState.Result;
+        userService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        IEnumerable<User> result;
+
+        if (string.IsNullOrWhiteSpace(Query))
+        {
+            result = await userService.GetAllUsersAsync();
+        }
+        else
+        {
+            result = await userService.GetAllUsersAsync();
+            result = result.Where(x => x.UserName.Contains(Query));
+        }
+
+        users = result.ToList();
+
+        isBusy = false;
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
+    }
+}
