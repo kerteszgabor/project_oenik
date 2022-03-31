@@ -1,4 +1,6 @@
 ﻿@page "/questions/newQuestion/ProgrammingQuestion"
+@inherits PageBase
+
 @using project.Domain.DTO.ClassReport
 @using project.Domain.DTO.Tests
 @inject QuestionsService questionService
@@ -108,7 +110,7 @@
         if (await questionService.AddQuestionAsync(model))
         {
             Snackbar.Add("Kérdés sikeresen hozzáadva!", Severity.Success);
-            navigationManager.NavigateTo("/questions/newQuestion");
+            _navManager.NavigateTo(_pageState.PreviousPage());
         }
         else
         {

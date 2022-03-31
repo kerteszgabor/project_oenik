@@ -1,4 +1,6 @@
 ﻿@page "/questions/newQuestion/TrueOrFalse"
+@inherits PageBase
+
 @using project.Domain.DTO.Tests
 @using project.Client.Pages.Questions.QuestionEditors.HelperComponents
 @inject QuestionsService questionService
@@ -113,7 +115,7 @@
         if (await questionService.AddQuestionAsync(model))
         {
             Snackbar.Add("Kérdés sikeresen hozzáadva!", Severity.Success);
-            navigationManager.NavigateTo("/questions/newQuestion");
+            _navManager.NavigateTo(_pageState.PreviousPage());
         }
         else
         {
@@ -124,7 +126,7 @@
 
     private string GenerateCorrectAnswerString()
     {
-        List<Tuple<bool, string>> itemsToSerialize = new List<Tuple<bool, string>>(); 
+        List<Tuple<bool, string>> itemsToSerialize = new List<Tuple<bool, string>>();
 
         foreach(var item in options)
         {

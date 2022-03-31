@@ -1,4 +1,6 @@
 ﻿@page "/questions/newQuestion/Fillin"
+@inherits PageBase
+
 @inject QuestionsService questionService
 @inject ISnackbar Snackbar
 @inject NavigationManager navigationManager
@@ -71,7 +73,7 @@
         if (await questionService.AddQuestionAsync(model))
         {
             Snackbar.Add("Kérdés sikeresen hozzáadva!", Severity.Success);
-            navigationManager.NavigateTo("/questions/newQuestion");
+            _navManager.NavigateTo(_pageState.PreviousPage());
         }
         else
         {
