@@ -132,6 +132,11 @@
                 "newTestName",
                 "savedQuestions"
             });
+        var newTest = (await testService.GetOwnTestsAsync()).OrderByDescending(x => x.CreationTime).FirstOrDefault();
+        foreach (var q in addedQuestions)
+        {
+            await questionService.AddQuestionToTest(q.ID, newTest.ID);
+        }
     }
 
     protected override async Task OnInitializedAsync()
