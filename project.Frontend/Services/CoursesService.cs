@@ -54,5 +54,11 @@ namespace project.Client.Services
             var response = await Client.GetProtectedAsync<Course>($"{BaseURL}/courses/{id}");
             return response.Result;
         }
+
+        public async Task<bool> EnrollUserInCourse(string userId, string courseID)
+        {
+            var response = await Client.GetProtectedAsync<Course>($"{BaseURL}/courses/enrollStudentInCourse/?studentID={userId}&courseID={courseID}");
+            return response.IsSucceded;
+        }
     }
 }

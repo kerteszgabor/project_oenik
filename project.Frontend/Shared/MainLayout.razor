@@ -21,7 +21,9 @@
             <MudNavMenu>
                 @if (isAdmin)
                 {
-                    <MudNavLink Href="/users" Match="NavLinkMatch.All">Admin felület</MudNavLink>
+                    <MudNavLink Href="/users" Match="NavLinkMatch.All">Felhasználók kezelése</MudNavLink>
+                    <MudNavLink Href="/admin" Match="NavLinkMatch.All">Admin felület</MudNavLink>
+                    <MudDivider />
                 }
                 <MudNavLink Href="/courses" Match="NavLinkMatch.All">Kurzusok</MudNavLink>
                 @if (isTeacher || isAdmin)

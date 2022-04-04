@@ -86,15 +86,8 @@ namespace project.Client.Services
 
         public async Task<bool> AddQuestionToTest(string questionID, string testID)
         {
-            var response = await Client.GetProtectedAsync<bool>($"{BaseURL}/tests/addQuestionToTest?questionID={questionID}&testID={testID}");
-            if (response.IsSucceded)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            var response = await Client.GetProtectedAsync<Question>($"{BaseURL}/tests/addQuestionToTest?questionID={questionID}&testID={testID}");
+            return response.IsSucceded;
         }
     }
 }
