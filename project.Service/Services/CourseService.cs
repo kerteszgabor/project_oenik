@@ -124,16 +124,21 @@ namespace project.Service.Services
             var student = await userRepository.GetAsync(studentID);
             var course = await Get(courseID);
 
-            course.UserCourses.Add(new UserCourse()
+            if (!course.UserCourses.Any(x => x.UserID == student.Id && x.CourseID == course.ID))
             {
-                ID = Guid.NewGuid().ToString(),
-                Course = course,
-                CourseID = course.ID,
-                User = student,
-                UserID = student.Id
-            });
+                course.UserCourses.Add(new UserCourse()
+                {
+                    ID = Guid.NewGuid().ToString(),
+                    Course = course,
+                    CourseID = course.ID,
+                    User = student,
+                    UserID = student.Id
+                });
 
-            return await courseRepository.UpdateAsync(course);
+                return await courseRepository.UpdateAsync(course);
+            }
+
+            return false;
         }
 
         public async Task<bool> RemoveStudentFromCourse(string studentID, string courseID)

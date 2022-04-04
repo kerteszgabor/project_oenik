@@ -125,18 +125,23 @@ namespace project.Service.Services
             var questionToAdd = await questionRepository.GetAsync(questionID);
             var testToUpdate = await Get(testID);
 
-            testToUpdate.MaxPoints += questionToAdd.MaxPoints;
-
-            testToUpdate.TestQuestions.Add(new TestQuestion
+            if (!testToUpdate.TestQuestions.Any(x => x.QuestionID == questionID && x.TestID == testID))
             {
-                Question = questionToAdd,
-                Test = testToUpdate,
-                ID = Guid.NewGuid().ToString(),
-                QuestionID = questionToAdd.ID,
-                TestID = testToUpdate.ID
-            });
+                testToUpdate.MaxPoints += questionToAdd.MaxPoints;
 
-            return await testRepository.UpdateAsync(testToUpdate);
+                testToUpdate.TestQuestions.Add(new TestQuestion
+                {
+                    Question = questionToAdd,
+                    Test = testToUpdate,
+                    ID = Guid.NewGuid().ToString(),
+                    QuestionID = questionToAdd.ID,
+                    TestID = testToUpdate.ID
+                });
+
+                return await testRepository.UpdateAsync(testToUpdate);
+            }
+
+            return false;
         }
 
         public async Task<bool> RemoveQuestionFromTest(string questionID, string testID)
