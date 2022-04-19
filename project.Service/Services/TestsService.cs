@@ -94,7 +94,7 @@ namespace project.Service.Services
                 IMapper iMapper = config.CreateMapper();
 
                 var model = iMapper.Map<TestDTO, Test>(newTest);
-                model.CreatedBy = await userService.GetUserByName(newTest.CreatedBy);
+                model.CreatedBy = await userService.Get(newTest.CreatedBy);
                 model.CreationTime = DateTime.Now;
 
                 return await testRepository.CreateAsync(model);

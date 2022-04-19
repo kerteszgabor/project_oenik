@@ -1,0 +1,150 @@
+﻿@page "/questions/newQuestion/Pairing"
+@inherits PageBase
+
+@inject QuestionsService questionService
+@inject ISnackbar Snackbar
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Teacher")]
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudGrid Class="mb-5">
+        <MudItem xs="12">
+            <MudPaper Class="pa-4 sm-6">
+                <MudText Typo="Typo.h4">Új párosítós feladat hozzáadása</MudText>
+                <MudText Typo="Typo.h6">Adj hozzá elemeket mindkét listához, majd húzd egymás mellé az egybetartozókat!</MudText>
+                <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
+                    <DataAnnotationsValidator />
+                    <MudTextField For="@(() => model.Text)" @bind-Value="model.Text" T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="2" />
+                    <div class="row">
+                        <div class="col-sm-6 d-flex align-center justify-content-center mb-2">
+                            <div class="d-flex align-center justify-space-between mt-6">
+                                <MudTextField @bind-Value="newElement1" Label="Új elem az első listába" Variant="Variant.Text"></MudTextField>
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => AddElement(1)"></MudIconButton>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 d-flex align-center justify-content-center mb-2">
+                            <div class="d-flex align-center justify-space-between mt-6">
+                                <MudTextField @bind-Value="newElement2" Label="Új elem a második listába" Variant="Variant.Text"></MudTextField>
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => AddElement(2)"></MudIconButton>
+                            </div>
+                        </div>
+                    </div>
+                    <MudNumericField For="@(() => model.MaxPoints)" @bind-Value="model.MaxPoints" Label="Pontok száma" Format="F1" Variant="Variant.Outlined" />
+                    <div class="d-flex align-center justify-space-between mt-6">
+                        <MudCheckBox @bind-Checked="@ChipsEnabled" T="bool" Class="ml-n2" Label="Kérdés megosztása" />
+                        <MudCheckBox For="@(() => model.CorrectManually)" @bind-Checked="@model.CorrectManually" T="bool" Class="ml-n2" Label="Kézzel javítandó" />
+                        <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Hozzáadás</MudButton>
+                    </div>
+                    @if (ChipsEnabled)
+                    {
+                        <div class="d-flex align-center justify-space-between mt-6">
+                            <MudTextField @bind-Value="newLabel" Label="Új címke neve" Variant="Variant.Text"></MudTextField>
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => AddLabel()"></MudIconButton>
+                        </div>
+
+                        <MudChipSet AllClosable="true" OnClose="Closed">
+                            @foreach (var value in labels)
+                            {
+                                <MudChip Color="Color.Primary" Text="@value.LabelText"></MudChip>
+                            }
+                        </MudChipSet>
+                    }
+                </EditForm>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6">
+            <MudPaper>
+                <CascadingValue Value=@Elements1>
+                    <OrderedComponent @ref="orderedComponent1" OnOrderChanged="HandleOnChangedEvent1"></OrderedComponent>
+                </CascadingValue>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6">
+            <MudPaper>
+                <CascadingValue Value=@Elements2>
+                    <OrderedComponent @ref="orderedComponent2" OnOrderChanged="HandleOnChangedEvent2"></OrderedComponent>
+                </CascadingValue>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+</MudContainer>
+
+@code {
+    private QuestionDTO model = new QuestionDTO();
+    private bool chipsEnabled;
+    private bool isBusy;
+    private string newLabel;
+    private string newElement1;
+    private string newElement2;
+    List<LabelDTO> labels = new List<LabelDTO>();
+    List<string> Elements1 = new List<string>();
+    List<string> Elements2 = new List<string>();
+
+    OrderedComponent orderedComponent1 { get; set; }
+    OrderedComponent orderedComponent2 { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    bool ChipsEnabled { get { return chipsEnabled; } set { chipsEnabled = value; labels = new List<LabelDTO>(); StateHasChanged(); } }
+
+    public void AddLabel()
+    {
+        labels.Add(new LabelDTO() { LabelText = newLabel });
+        newLabel = "";
+    }
+
+    public void AddElement(int listNumber)
+    {
+        if (listNumber == 1)
+        {
+            Elements1.Add(newElement1);
+            newElement1 = "";
+        }
+        else
+        {
+            Elements2.Add(newElement2);
+            newElement2 = "";
+        }
+    }
+
+    public void Closed(MudChip chip) => labels.Remove(labels.FirstOrDefault(x => x.LabelText == chip.Text));
+
+    private void HandleOnChangedEvent1(List<string> orderedElements)
+    {
+        Elements1 = orderedElements;
+    }
+
+    private void HandleOnChangedEvent2(List<string> orderedElements)
+    {
+        Elements2 = orderedElements;
+    }
+
+    async void Submit()
+    {
+        isBusy = true;
+        if (labels.Count > 0)
+        {
+            model.Labels = labels;
+        }
+
+        model.QuestionType = "Pairing";
+        model.IsShared = chipsEnabled;
+        model.CorrectAnswer = JsonHelpers.SerializeList(Elements1) + JsonHelpers.SerializeList(Elements2);
+
+        var userState = authenticationState.Result;
+        questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        if (await questionService.AddQuestionAsync(model))
+        {
+            Snackbar.Add("Kérdés sikeresen hozzáadva!", Severity.Success);
+            _navManager.NavigateTo(_pageState.PreviousPage());
+        }
+        else
+        {
+            Snackbar.Add("Hiba történt!", Severity.Success);
+            isBusy = false;
+        }
+    }
+}
+

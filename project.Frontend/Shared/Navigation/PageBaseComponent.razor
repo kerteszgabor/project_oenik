@@ -5,6 +5,8 @@
         [Inject]
         public NavigationManager _navManager { get; set; }
         [Inject]
+        public ISnackbar Snackbar { get; set; }
+        [Inject]
         public PageHistoryState _pageState { get; set; }
         public PageBase(NavigationManager navManager, PageHistoryState pageState)
         {
@@ -12,7 +14,7 @@
             _pageState = pageState;
         }
 
-         public PageBase()
+        public PageBase()
         {
         }
 

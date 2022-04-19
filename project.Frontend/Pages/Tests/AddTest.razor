@@ -25,7 +25,7 @@
                             <MudTextField @bind-Value="testName" TextChanged="() => SaveTestName()" T="string" Label="A teszt címe" Variant="Variant.Outlined" />
                             @if (courses.Count() > 0)
                             {
-                                <MudSelect @bind-Text="selectedCourse.Name" @bind-Value="selectedCourse" SelectedValuesChanged="() => SaveSelectedState()" T="Course" Label="" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                                <MudSelect Label="Kurzus kiválasztása" @bind-Value="selectedCourse" SelectedValuesChanged="() => SaveSelectedState()" T="Course" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
                                     @foreach (var c in courses)
                                     {
                                         <MudSelectItem T="Course" Value="c">@c.Name</MudSelectItem>
@@ -54,7 +54,7 @@
                 </MudPaper>
             </div>
         </div>
-        <div class="row justify-content-between mt-3">
+        <div class="row justify-content-between mt-3 mb-5">
             <div class="col-md-7">
                 <MudCard Class="d-flex p-2 justify-center mud-width-full py-8" Outlined=true Elevation=6>
                     <div class="row">
@@ -133,9 +133,16 @@
                 "savedQuestions"
             });
         var newTest = (await testService.GetOwnTestsAsync()).OrderByDescending(x => x.CreationTime).FirstOrDefault();
-        foreach (var q in addedQuestions)
+        if (newTest != null)
         {
-            await questionService.AddQuestionToTest(q.ID, newTest.ID);
+            foreach (var q in addedQuestions)
+            {
+                await questionService.AddQuestionToTest(q.ID, newTest.ID);
+            }
+        }
+        else
+        {
+            Snackbar.Add("Hiba: a teszt hozzáadása sikertelen volt!", Severity.Error);
         }
     }
 
@@ -152,14 +159,21 @@
         List<Question>? getSavedQuestions = await storageService.GetItemAsync<List<Question>>("savedQuestions");
 
         testName = getSavedName == null ? String.Empty : getSavedName;
-        selectedCourse = getSavedSelected == null ? courses.FirstOrDefault() : getSavedSelected;
+        if (getSavedSelected != null)
+        {
+            selectedCourse = getSavedSelected;
+        }
+        else
+        {
+            selectedCourse = new Course() { Name = "Kurzus kiválasztása" };
+        }
+
         addedQuestions = getSavedQuestions == null ? new List<Question>() : getSavedQuestions;
 
         if (_pageState.PreviousPage().Contains("newQuestion"))
         {
             addedQuestions.Add((await questionService.GetOwnQuestionsAsync()).OrderByDescending(x => x.CreationTime).FirstOrDefault());
             SaveQuestions();
-
         }
 
         await base.OnInitializedAsync();
