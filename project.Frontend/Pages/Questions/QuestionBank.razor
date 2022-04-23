@@ -112,6 +112,7 @@ else
         else
         {
             result = (await questionService.GetOwnQuestionsAsync()).Where(x => x.Title != null && x.Title.Contains(Query));
+            result.ToList().AddRange((await questionService.GetLabelledQuestions(Query)));
         }
 
         usersQuestions = result.ToList();

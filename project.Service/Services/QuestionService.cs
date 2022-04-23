@@ -179,7 +179,7 @@ namespace project.Service.Services
 
         private async Task<bool> AddLabelsToNewQuestions(QuestionDTO newQuestion, User user)
         {
-            var question = await GetQuestionsOfUser(user.Id).LastOrDefaultAsync();
+            var question = await GetQuestionsOfUser(user.Id).OrderByDescending(x => x.CreationTime).FirstOrDefaultAsync();
             if (question != null)
             {
                 foreach (var label in newQuestion.Labels)
