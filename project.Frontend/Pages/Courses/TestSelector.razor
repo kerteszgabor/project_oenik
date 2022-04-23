@@ -8,7 +8,7 @@
 }
 else
 {
-<MudList Clickable="true">
+    <MudList Clickable="true">
         <MudListSubheader>
             Itt láthatod a saját tesztjeidet, kurzusonként rendezve.
         </MudListSubheader>
@@ -16,17 +16,20 @@ else
         {
             <div class="col mb-2"><MudChip Icon="@Icons.Filled.ListAlt" Color="Color.Info">@chipText</MudChip></div>
         }
-        @foreach(var course in courses)
+        @foreach (var course in courses)
         {
             <MudListItem Icon="@Icons.Material.Filled.Send" Text="@course.Name" InitiallyExpanded="false" ExpandedChanged="() => GetTestsOfCourse(course)">
                 <NestedList>
-                @foreach(var test in tests)
-                {
-                    <MudListItem OnClick="(() => OnClick.InvokeAsync(test))" Icon="@Icons.Material.Filled.Kitesurfing">
-                    @test.Title
-                    </MudListItem>
-                }
-            </NestedList>
+                    @foreach (var test in tests)
+                    {
+                        if (course.CourseTests.Any(x => x.TestID == test.ID))
+                        {
+                            <MudListItem OnClick="(() => OnClick.InvokeAsync(test))" Icon="@Icons.Material.Filled.Kitesurfing">
+                                @test.Title
+                            </MudListItem>
+                        }
+                    }
+                </NestedList>
             </MudListItem>
         }
     </MudList>
@@ -40,14 +43,14 @@ else
     [CascadingParameter]
     private Test selectedTest { get; set; }
 
-    [Parameter] 
+    [Parameter]
     public EventCallback<Test> OnClick { get; set; }
 
     [Parameter]
     public bool IsChipNeeded { get; set; } = true;
 
-    [CascadingParameter] 
-    public string chipText{ get; set; }
+    [CascadingParameter]
+    public string chipText { get; set; }
 
     List<Course> courses = new List<Course>();
     List<Test> tests = new List<Test>();

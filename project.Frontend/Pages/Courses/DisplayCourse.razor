@@ -10,43 +10,34 @@
 else
 {
     <MudGrid>
-        @for (int i = 1; i < 15; i++)
-        {
-            int j = i;
-            <MudItem xs="12">
-                <MudCard Elevation="2" Class="pa-5">
-                    <MudCardContent>
-                        <MudText Typo="Typo.h2">@($"{j}.hét")</MudText>
-                        @if (Tests is not null && Tests.Count > 0)
-                        {
-                            @foreach (var test in Tests)
-                            {
-                                <MudCard Outlined="true">
-                                    <MudCardContent>
-                                        <MudText>@test.Title</MudText>
-                                        <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
-                                    </MudCardContent>
-                                    <MudCardActions>
-                                        <MudButton Variant="Variant.Text" Color="Color.Primary">Learn More</MudButton>
-                                    </MudCardActions>
-                                </MudCard>
-                            }
-                        }
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-        }
+        <MudItem xs="12">
+            <MudCard Outlined="true" Class="pa-5">
+                <MudText Typo=Typo.h2>@course?.Name</MudText>
+                @if (Tests.Count() > 0)
+                {
+                    @foreach (var test in Tests)
+                    {
+                        <MudCard Outlined="true" Elevation="2" Class="pa-5">
+                            <MudCardContent>
+                                <MudText Typo=Typo.h6>@test.Title</MudText>
+                                if (isTeacher)
+                                {
+                                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Filled.DoneAll" Color="Color.Primary">Eredmények megtekintése</MudButton>
+                                }
+                                else
+                                {
+
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                }
+            </MudCard>
+        </MudItem>
     </MudGrid>
 
-    <MudText Typo=Typo.h1>@course?.Name</MudText>
-    if (isTeacher)
-    {
 
-    }
-    else
-    {
 
-    }
 }
 @code {
     [Parameter]
@@ -54,7 +45,7 @@ else
     public Course course { get; set; }
     public bool isBusy { get; set; }
     public bool isTeacher { get; set; } = false;
-    public List<Test> Tests { get; set; } = new List<Test>();
+    public IEnumerable<Test> Tests { get; set; } = new List<Test>();
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
@@ -62,7 +53,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         isBusy = true;
-        course = await courseService.GetCourseAsync(courseID);
 
         var state = await authenticationState;
         if (state.User.Identity == null)
@@ -70,9 +60,12 @@ else
             navigationManager.NavigateTo("/courses");
         }
 
+        courseService.AccessToken = state.User.FindFirst("AccessToken").Value;
+        testService.AccessToken = state.User.FindFirst("AccessToken").Value;
         isTeacher = state.User.FindFirst(ClaimTypes.Role)?.Value == "Teacher";
 
-        Tests = (await testService.GetOwnTestsAsync())?.ToList();
+        course = await courseService.GetCourseAsync(courseID);
+        Tests = await testService.GetTestsOfCourse(course.ID);
 
         isBusy = false;
     }

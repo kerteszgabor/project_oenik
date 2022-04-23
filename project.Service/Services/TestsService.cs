@@ -48,10 +48,6 @@ namespace project.Service.Services
         public async IAsyncEnumerable<Test> GetTestsOfUser(string userID)
         {
             var userTests = new List<Test>();
-            //(await courseService.GetCoursesOfUser(userID).ToListAsync())
-            //.ForEach(x => userTests.AddRange(x.UserCourses?
-            //.SelectMany(x => x.Course?.CourseTests)?
-            //.Select(x => x?.Test)));
 
             await foreach (var course in courseService.GetCoursesOfUser(userID))
             {
