@@ -1,4 +1,5 @@
 ﻿using AKSoftware.WebApi.Client;
+using project.Domain.DTO.Client;
 using project.Domain.DTO.Courses;
 using project.Domain.Models;
 using System.Collections.Generic;
@@ -58,6 +59,18 @@ namespace project.Client.Services
         public async Task<bool> EnrollUserInCourse(string userId, string courseID)
         {
             var response = await Client.GetProtectedAsync<Course>($"{BaseURL}/courses/enrollStudentInCourse/?studentID={userId}&courseID={courseID}");
+            return response.IsSucceded;
+        }
+
+        //public async Task<bool> AddTestToCourse(string testID, string courseID)
+        //{
+        //    var response = await Client.GetProtectedAsync<Course>($"{BaseURL}/Courses/addTestToCourse/?testID={testID}&courseID={courseID}");
+        //    return response.IsSucceded;
+        //}
+
+        public async Task<bool> AddTestToCourse(TestInCourseDTO model)
+        {
+            var response = await Client.PostProtectedAsync<Course>($"{BaseURL}/Courses/addTestToCourse/", model);
             return response.IsSucceded;
         }
     }

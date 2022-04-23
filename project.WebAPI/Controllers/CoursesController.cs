@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using project.Domain.DTO.Client;
 using project.Domain.DTO.Courses;
 using project.Domain.Models;
 using project.Service.Interfaces;
@@ -80,10 +81,10 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        [HttpGet("addTestToCourse")]
-        public async Task<IActionResult> AddTestToCourse(string testID, string courseID)
+        [HttpPost("addTestToCourse")]
+        public async Task<IActionResult> AddTestToCourse(TestInCourseDTO model)
         {
-            if (await courseService.AddTestToCourse(testID, courseID))
+            if (await courseService.AddTestToCourse(model))
             {
                 return Ok();
             }

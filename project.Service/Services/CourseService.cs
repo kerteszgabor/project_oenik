@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
+using project.Domain.DTO.Client;
 using project.Domain.DTO.Courses;
 using project.Domain.Interfaces;
 using project.Domain.Models;
@@ -90,19 +91,32 @@ namespace project.Service.Services
             }
         }
 
-        public async Task<bool> AddTestToCourse(string testID, string courseID)
+        public async Task<bool> AddTestToCourse(TestInCourseDTO model)
         {
-            var test = await testRepository.GetAsync(testID);
-            var course = await Get(courseID);
+            var test = await testRepository.GetAsync(model.TestID);
+            var course = await Get(model.CourseID);
 
-            course.CourseTests.Add(new CourseTest()
+            //course.CourseTests.Add(new CourseTest()
+            //{
+            //    Course = course,
+            //    Test = test,
+            //    TestID = test.ID,
+            //    CourseID = course.ID,
+            //    ID = Guid.NewGuid().ToString()
+            //});
+
+            var mapped = new MapperConfiguration(cfg =>
             {
-                Course = course,
-                Test = test,
-                TestID = test.ID,
-                CourseID = course.ID,
-                ID = Guid.NewGuid().ToString()
-            });
+                cfg.CreateMap<TestInCourseDTO, CourseTest>();
+                cfg.AddGlobalIgnore("CreatedBy");
+            })
+                .CreateMapper()
+                .Map<TestInCourseDTO, CourseTest>(model);
+
+            mapped.Course = course;
+            mapped.Test = test;
+            mapped.ID = Guid.NewGuid().ToString();
+            course.CourseTests.Add(mapped);
 
             return await courseRepository.UpdateAsync(course);
         }

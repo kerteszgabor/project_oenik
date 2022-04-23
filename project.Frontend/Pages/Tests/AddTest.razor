@@ -32,7 +32,6 @@
                                     }
                                 </MudSelect>
                             }
-
                         </div>
                         <div class="col-12 my-2">
                             <NewQuestion></NewQuestion>
@@ -42,7 +41,7 @@
             </div>
 
             <div class="col-md-3">
-                <MudPaper Class="d-flex justify-center mud-width-full p-2 py-8">
+                <MudPaper Outlined="true" Class="d-flex justify-center mud-width-full p-2 py-8">
                     <div class="row">
                         <div class="col-12">
                             <MudText Typo=Typo.h6>Tesztjeim</MudText>
@@ -64,7 +63,7 @@
                         <div class="col-12">
                             @if (addedQuestions.Count() > 0)
                             {
-                                <MudPaper Class="col-12">
+                                <MudPaper Outlined="true" Class="col-12">
                                     <MudList>
                                         @foreach (Question q in addedQuestions)
                                         {
@@ -76,11 +75,31 @@
                                 </MudPaper>
                             }
                         </div>
-                        <div class="col-12 d-flex align-center justify-space-between mt-6">
-                            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mx-auto" OnClick="() => SubmitTest()">Teszt hozzáadása</MudButton>
-                        </div>
                     </div>
                 </MudCard>
+            </div>
+            <div class="col-md-7 mt-3">
+                <MudCard Class="mb-3 d-flex p-2 justify-center mud-width-full py-8" Outlined=true Elevation=6>
+                    <div class="row">
+                        <div class="col-12">
+                            <MudText Typo=Typo.h6>Beállítások</MudText>
+                        </div>
+                        <div class="col-12">
+                            <MudCheckBox @bind-Checked="@takingAllowed" T="bool" Class="ml-n2" Label="Teszt megnyitása kitöltésre" />
+                            <MudCheckBox @bind-Checked="@ipFilter" T="bool" Class="ml-n2" Label="IP cím szűrés beállítása" />
+                        </div>
+                        @if (ipFilter)
+                        {
+                            <div class="col-12">
+                                <MudText Typo=Typo.subtitle1>Add meg azt az IP tartományt, amelyre a kitöltést engedélyezni szeretnéd. Formátum: 80.90.x.x esetén 80.90.0.0-tól 80.90.255.2555-ig bármilyen hoszt kitöltheti a tesztet.</MudText>
+                                <div class="d-flex justify-space-between mt-6">
+                                    <MudTextField TextChanged="() => SaveIP()" @bind-Value="ipAddress" Label="IP tartomány" Variant="Variant.Text"></MudTextField>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </MudCard>
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mx-auto" OnClick="() => SubmitTest()">Teszt hozzáadása</MudButton>
             </div>
         </div>
     }
@@ -89,8 +108,11 @@
 @code {
 
     private bool isBusy;
+    private bool takingAllowed;
+    private bool ipFilter;
     private Course? selectedCourse;
     private string? testName;
+    private string? ipAddress = "0.0.0.0";
     private List<Question>? addedQuestions;
     private IEnumerable<Course> courses = new List<Course>();
 
@@ -117,32 +139,58 @@
         await storageService.SetItemAsync("savedQuestions", addedQuestions);
     }
 
+    async void SaveIP()
+    {
+        await storageService.SetItemAsync("IP", ipAddress);
+    }
+
     async void SubmitTest()
     {
-        await testService.AddTestAsync(new TestDTO()
+        try
         {
-            Title = testName,
-            AllowedTakeLength = TimeSpan.FromMinutes(2),
-            IsLateSubmissionAllowed = true,
-            IsShared = true
-        });
-        await storageService.RemoveItemsAsync(new List<string>()
+            await testService.AddTestAsync(new TestDTO()
+                {
+                    Title = testName,
+                    AllowedTakeLength = TimeSpan.FromMinutes(2),
+                    IsLateSubmissionAllowed = true,
+                    IsShared = true
+                });
+            
+            var newTest = (await testService.GetAllTestsAsync()).OrderByDescending(x => x.CreationTime).FirstOrDefault();
+            if (newTest != null)
+            {
+                foreach (var q in addedQuestions)
+                {
+                    await questionService.AddQuestionToTest(q.ID, newTest.ID);
+                }
+                await courseService.AddTestToCourse(new TestInCourseDTO()
+                    {
+                        TestID = newTest.ID,
+                        CourseID = selectedCourse?.ID,
+                        AllowedIPSubnet = ipAddress,
+                        IsOpen = takingAllowed
+                    });
+
+                Snackbar.Add($"{newTest.Title} sikeresen hozzá lett adva a(z) {selectedCourse.Name} kurzushoz!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Hiba: a teszt hozzáadása sikertelen volt!", Severity.Error);
+            }
+
+            await storageService.RemoveItemsAsync(new List<string>()
             {
                 "selectedCourse",
                 "newTestName",
-                "savedQuestions"
+                "savedQuestions",
+                "IP"
             });
-        var newTest = (await testService.GetOwnTestsAsync()).OrderByDescending(x => x.CreationTime).FirstOrDefault();
-        if (newTest != null)
-        {
-            foreach (var q in addedQuestions)
-            {
-                await questionService.AddQuestionToTest(q.ID, newTest.ID);
-            }
+
+            _navManager.NavigateTo(_pageState.PreviousPage());
         }
-        else
+        catch (Exception)
         {
-            Snackbar.Add("Hiba: a teszt hozzáadása sikertelen volt!", Severity.Error);
+            Snackbar.Add("Hiba: ismeretlen hiba történt!", Severity.Error);
         }
     }
 
@@ -155,10 +203,12 @@
         courses = await courseService.GetOwnCoursesAsync();
 
         string? getSavedName = await storageService.GetItemAsync<string>("newTestName");
+        string? getIP = await storageService.GetItemAsync<string>("IP");
         Course? getSavedSelected = await storageService.GetItemAsync<Course>("selectedCourse");
         List<Question>? getSavedQuestions = await storageService.GetItemAsync<List<Question>>("savedQuestions");
 
         testName = getSavedName == null ? String.Empty : getSavedName;
+        ipAddress = getIP == null ? String.Empty : getIP;
         if (getSavedSelected != null)
         {
             selectedCourse = getSavedSelected;

@@ -12,17 +12,52 @@ else
     <MudGrid>
         <MudItem xs="12">
             <MudCard Outlined="true" Class="pa-5">
-                <MudText Typo=Typo.h2>@course?.Name</MudText>
+                <MudText Class="mb-3" Typo=Typo.h3>Kurzus: @course?.Name</MudText>
                 @if (Tests.Count() > 0)
                 {
                     @foreach (var test in Tests)
                     {
-                        <MudCard Outlined="true" Elevation="2" Class="pa-5">
+                        <MudCard Outlined="true" Elevation="2" Class="pa-5 mb-4">
                             <MudCardContent>
-                                <MudText Typo=Typo.h6>@test.Title</MudText>
-                                if (isTeacher)
+                                <div class="row">
+                                    <div class="col-12">
+                                        <MudText Typo=Typo.h6 Class="pl-1">@test.Title</MudText>
+                                    </div>
+                                    <div class="col-12">
+                                        @{
+                                            var connectingEntity = test.CourseTests.FirstOrDefault(x => x.CourseID == course.ID);
+                                        }
+                                        <MudChip Color="Color.Secondary">Létrehozva: @test.CreationTime</MudChip>
+                                        <MudChip Color="Color.Primary">Kitöltés maximális ideje: @test.AllowedTakeLength</MudChip>
+                                        <MudChip Color="Color.Info">Max pontok: @test.MaxPoints</MudChip>
+                                        @if (connectingEntity?.AllowedIPSubnet == "0.0.0.0")
+                                        {
+                                            <MudChip Color="Color.Warning">Bármilyen IP címmel kitölthető</MudChip>
+                                        }
+                                        else
+                                        {
+                                            <MudChip Color="Color.Warning">IP tartomány: @connectingEntity?.AllowedIPSubnet</MudChip>
+                                        }
+
+                                        @if (connectingEntity.IsOpen)
+                                        {
+                                            <MudChip Color="Color.Success">Kitölthető</MudChip>
+                                        }
+                                        else
+                                        {
+                                            <MudChip Color="Color.Success">Jelenleg nem kitölthető</MudChip>
+                                        }
+                                    </div>
+                                </div>
+
+
+                                @if (isTeacher)
                                 {
-                                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Filled.DoneAll" Color="Color.Primary">Eredmények megtekintése</MudButton>
+                                    <MudButton Class="mt-3" Variant="Variant.Outlined" StartIcon="@Icons.Filled.DoneAll" Size="Size.Small" Color="Color.Default">Eredmények megtekintése</MudButton>
+                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.EditNote" Size="Size.Small" Color="Color.Default">Szerkesztés</MudButton>
+                                    string btnText = connectingEntity.IsOpen ? "Lezárás" : "Megnyitás";
+                                    string btnIcon = connectingEntity.IsOpen ? "Icons.Filled.NotStarted" : "Icons.Filled.StopCircle";
+                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@btnText" Size="Size.Small" Color="Color.Default" OnClick="() => ToogleTestStatus(test)">@btnText</MudButton>
                                 }
                                 else
                                 {
@@ -68,5 +103,10 @@ else
         Tests = await testService.GetTestsOfCourse(course.ID);
 
         isBusy = false;
+    }
+
+    private void ToogleTestStatus(Test test)
+    {
+        
     }
 }
