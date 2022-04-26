@@ -18,13 +18,15 @@ namespace project.Service.Interfaces
         private readonly IQuestionService questionService;
         private readonly ICourseService courseService;
         private readonly ITestResultRepository testResultRepository;
-        public TestManagerService(ITestsService testsService, IClassReportBuilder builder, IQuestionService questionService, ICourseService courseService, ITestResultRepository testResultRepository)
+        private readonly ICourseRepository courseRepository;
+        public TestManagerService(ITestsService testsService, IClassReportBuilder builder, IQuestionService questionService, ICourseService courseService, ITestResultRepository testResultRepository, ICourseRepository courseRepository)
         {
             this.testsService = testsService;
             this.builder = builder;
             this.questionService = questionService;
             this.courseService = courseService;
             this.testResultRepository = testResultRepository;
+            this.courseRepository = courseRepository;
         }
 
         public async Task<bool> SubmitAnswerToTestResult(AnswerDTO answerDTO)
@@ -42,8 +44,24 @@ namespace project.Service.Interfaces
                 else if (!testresult.IsClosed)
                 {
                     CorrectTestResult(testresult);
-                    return false; // TODO throw exception
+                    return false;
                 }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> ToogleTestStatus(string testID, string courseID)
+        {
+            Test relatedTest = await testsService.Get(testID);
+            Course relatedCourse = await courseService.Get(courseID);
+            var connectingEntity = relatedCourse.CourseTests.FirstOrDefault(x => x.TestID == relatedTest.ID);
+
+            if (connectingEntity != null)
+            {
+                connectingEntity.IsOpen = !connectingEntity.IsOpen;
+                await courseRepository.UpdateAsync(relatedCourse);
+                return true;
             }
 
             return false;

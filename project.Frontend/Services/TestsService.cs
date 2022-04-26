@@ -65,5 +65,11 @@ namespace project.Client.Services
             var response = await Client.GetProtectedAsync<IEnumerable<Test>>($"{BaseURL}/tests/OwnTests");
             return response.Result;
         }
+
+        public async Task<bool> ToogleTestStatus(string testID, string courseID)
+        {
+            var response = await Client.GetProtectedAsync<Test>($"{BaseURL}/TestManager/ToogleTestStatus?testID={testID}&courseID={courseID}");
+            return response.IsSucceded;
+        }
     }
 }

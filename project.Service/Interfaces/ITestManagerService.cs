@@ -11,6 +11,7 @@ namespace project.Service.Interfaces
     {
         Task<bool> SubmitAnswerToTestResult(AnswerDTO answer);
         Task<bool> StartTestCompletion(TestStartStopDTO startDTO);
+        Task<bool> ToogleTestStatus(string testID, string courseID);
         Task EndTestCompletion(TestStartStopDTO stopDTO);
     }
 }

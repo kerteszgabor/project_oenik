@@ -51,6 +51,19 @@ namespace project.WebAPI.Controllers
             }
         }
 
+        [HttpGet("ToogleTestStatus")]
+        public async Task<IActionResult> ToogleTestStatus(string testID, string courseID)
+        {
+            if (await testManagerService.ToogleTestStatus(testID, courseID))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
         [HttpPost("StartCompletion")]
         public async Task<IActionResult> StartTestCompletion([FromBody] TestStartStopDTO model)
         {

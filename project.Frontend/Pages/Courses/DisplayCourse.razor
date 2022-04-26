@@ -54,10 +54,10 @@ else
                                 @if (isTeacher)
                                 {
                                     <MudButton Class="mt-3" Variant="Variant.Outlined" StartIcon="@Icons.Filled.DoneAll" Size="Size.Small" Color="Color.Default">Eredmények megtekintése</MudButton>
-                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.EditNote" Size="Size.Small" Color="Color.Default">Szerkesztés</MudButton>
+                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.EditNote" Size="Size.Small" Color="Color.Default" OnClick="() => EditTest(test)">Szerkesztés</MudButton>
                                     string btnText = connectingEntity.IsOpen ? "Lezárás" : "Megnyitás";
-                                    string btnIcon = connectingEntity.IsOpen ? "Icons.Filled.NotStarted" : "Icons.Filled.StopCircle";
-                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@btnText" Size="Size.Small" Color="Color.Default" OnClick="() => ToogleTestStatus(test)">@btnText</MudButton>
+                                    string btnIcon = !connectingEntity.IsOpen ? Icons.Filled.NotStarted : Icons.Filled.StopCircle;
+                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@btnIcon" Size="Size.Small" Color="Color.Default" OnClick="() => ToogleTestStatus(test)">@btnText</MudButton>
                                 }
                                 else
                                 {
@@ -89,14 +89,10 @@ else
     {
         isBusy = true;
 
-        var state = await authenticationState;
-        if (state.User.Identity == null)
-        {
-            navigationManager.NavigateTo("/courses");
-        }
 
-        courseService.AccessToken = state.User.FindFirst("AccessToken").Value;
-        testService.AccessToken = state.User.FindFirst("AccessToken").Value;
+        courseService.AccessToken = await GetAccessToken();
+        testService.AccessToken = await GetAccessToken();
+        var state = await authenticationState;
         isTeacher = state.User.FindFirst(ClaimTypes.Role)?.Value == "Teacher";
 
         course = await courseService.GetCourseAsync(courseID);
@@ -105,8 +101,25 @@ else
         isBusy = false;
     }
 
-    private void ToogleTestStatus(Test test)
+    private async void ToogleTestStatus(Test test)
     {
-        
+        testService.AccessToken = await GetAccessToken();
+        if(await testService.ToogleTestStatus(test.ID, course.ID))
+        {
+            Tests = await testService.GetTestsOfCourse(course.ID);
+            StateHasChanged();
+        }
     }
+
+    private async Task<string> GetAccessToken()
+    {
+        var state = await authenticationState;
+        if (state.User.Identity == null)
+        {
+            navigationManager.NavigateTo("/courses");
+        }
+
+        return state.User.FindFirst("AccessToken").Value;
+    }
+
 }
