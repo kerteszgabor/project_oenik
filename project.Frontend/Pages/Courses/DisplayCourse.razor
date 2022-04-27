@@ -1,6 +1,10 @@
 ﻿@page "/courses/displayCourse/{courseID}"
+@using Json.Patch
+@using project.Domain.Models.DBConnections
+@using Microsoft.AspNetCore.JsonPatch
 @inject CoursesService courseService
 @inject NavigationManager navigationManager
+@inject IDialogService DialogService
 @inject TestsService testService
 
 @if (isBusy)
@@ -54,7 +58,7 @@ else
                                 @if (isTeacher)
                                 {
                                     <MudButton Class="mt-3" Variant="Variant.Outlined" StartIcon="@Icons.Filled.DoneAll" Size="Size.Small" Color="Color.Default">Eredmények megtekintése</MudButton>
-                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.EditNote" Size="Size.Small" Color="Color.Default" OnClick="() => EditTest(test)">Szerkesztés</MudButton>
+                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.EditNote" Size="Size.Small" Color="Color.Default" OnClick="() => EditTest(test, connectingEntity)">Szerkesztés</MudButton>
                                     string btnText = connectingEntity.IsOpen ? "Lezárás" : "Megnyitás";
                                     string btnIcon = !connectingEntity.IsOpen ? Icons.Filled.NotStarted : Icons.Filled.StopCircle;
                                     <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@btnIcon" Size="Size.Small" Color="Color.Default" OnClick="() => ToogleTestStatus(test)">@btnText</MudButton>
@@ -122,4 +126,23 @@ else
         return state.User.FindFirst("AccessToken").Value;
     }
 
+    private async void EditTest(Test test, CourseTest connectingEntity)
+    {
+        var origTest = test.Clone();
+        var parameters = new DialogParameters { ["model"] = test, ["connectingEntity"] = connectingEntity};
+        var dialog = DialogService.Show<EditTestDialog>("Szerkesztés", parameters);
+        if(!(await dialog.Result).Cancelled)
+        {
+            JsonPatch patch= origTest.CreatePatch(test);
+            var t = JsonHelpers.CalculatePatch(origTest, test);
+             var patchito = JsonSerializer.Serialize<JsonPatchDocument>(t);
+            // var patch = JsonSerializer.Serialize<JsonPatch>(patchObj);
+            testService.AccessToken = await GetAccessToken();
+            if(await testService.UpdateTestAsync(test.ID, patch))
+            {
+                Tests = await testService.GetTestsOfCourse(course.ID);
+                StateHasChanged();
+            }
+        }
+    }
 }

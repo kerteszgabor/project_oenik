@@ -7,6 +7,7 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'project.WebAPI (Macbook)' " />
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'project.WebAPI (Windows)' " />
   <ItemGroup>
+    <PackageReference Include="JsonPatch.Net" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.2" />

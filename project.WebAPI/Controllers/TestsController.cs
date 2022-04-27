@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Json.Patch;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using project.Domain.DTO.Tests;
 using project.Domain.Models;
@@ -68,9 +68,9 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        [HttpPatch("{uid}")]
-      //  [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Test> patchDoc)
+        [HttpPost("update/{uid}")]
+        [Authorize]
+        public async Task<IActionResult> Update(string uid, [FromBody] JsonPatch patchDoc)
         {
             if (await testsService.Update(uid, patchDoc))
             {

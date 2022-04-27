@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace project.Domain.Models
 {
-    public class Test
+    public class Test : ICloneable
     {
         [Key]
         public string ID { get; set; }
@@ -31,5 +31,10 @@ namespace project.Domain.Models
         public ICollection<TestProgQuestion> TestProgQuestions { get; set; }
 
         public ICollection<TestQuestion> TestQuestions { get; set; }
+
+        public object Clone()
+        {
+            return MemberwiseClone() as Test;
+        }
     }
 }

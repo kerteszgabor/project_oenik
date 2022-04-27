@@ -1,4 +1,5 @@
-﻿using project.Domain.DTO.Tests;
+﻿using Json.Patch;
+using project.Domain.DTO.Tests;
 using project.Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -48,10 +49,12 @@ namespace project.Client.Services
                 return false;
             }
         }
-        public async Task<Test> UpdateTestAsync(string id)
+        public async Task<bool> UpdateTestAsync(string id, JsonPatch patch)
         {
-            var response = await Client.GetProtectedAsync<Test>($"{BaseURL}/tests/{id}");
-            return response.Result;
+            var response = await Client.PostProtectedAsync<Test>($"{BaseURL}/tests/update/{id}", patch);
+            var responsestr = response.ToString();
+            var responsestr2 = response.HttpResponse.ToString();
+            return response.IsSucceded;
         }
 
         public async Task<IEnumerable<Test>> GetTestsOfCourse(string courseID)

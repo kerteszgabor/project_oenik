@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.DTO.Tests;
 using project.Domain.Interfaces;
 using project.Domain.Models;
@@ -10,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using project.Domain.Models.DBConnections;
 using project.Service.Interfaces;
+using Json.Patch;
 
 namespace project.Service.Services
 {
@@ -101,12 +101,12 @@ namespace project.Service.Services
             }
         }
 
-        public async Task<bool> Update(string uid, JsonPatchDocument<Test> patch)
+        public async Task<bool> Update(string uid, JsonPatch patch)
         {
             if (patch != null)
             {
                 var test = await testRepository.GetAsync(uid);
-                patch.ApplyTo(test);
+                patch.Apply(test);
                 var result = await testRepository.UpdateAsync(test);
                 return result;
             }

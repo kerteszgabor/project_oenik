@@ -62,12 +62,6 @@ namespace project.Client.Services
             return response.IsSucceded;
         }
 
-        //public async Task<bool> AddTestToCourse(string testID, string courseID)
-        //{
-        //    var response = await Client.GetProtectedAsync<Course>($"{BaseURL}/Courses/addTestToCourse/?testID={testID}&courseID={courseID}");
-        //    return response.IsSucceded;
-        //}
-
         public async Task<bool> AddTestToCourse(TestInCourseDTO model)
         {
             var response = await Client.PostProtectedAsync<Course>($"{BaseURL}/Courses/addTestToCourse/", model);
