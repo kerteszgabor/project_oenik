@@ -71,7 +71,7 @@ namespace project.Service.Interfaces
         {
             Test relatedTest = await testsService.Get(startDTO.TestID);
             Course relatedCourse = await courseService.Get(startDTO.CourseID);
-            if (relatedCourse.UserCourses.Any(x => x.User == startDTO.User))
+            if (relatedCourse.UserCourses.Any(x => x.User == startDTO.User) && (await GetExistingTestResult(startDTO.TestID, startDTO.User) == null))
             {
                 TestResult newResult = InitNewTestResult(relatedTest, relatedCourse, startDTO.User);
                 return await testResultRepository.CreateAsync(newResult);

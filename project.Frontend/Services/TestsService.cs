@@ -1,4 +1,5 @@
 ﻿using Json.Patch;
+using project.Domain.DTO.TestResults;
 using project.Domain.DTO.Tests;
 using project.Domain.Models;
 using System.Collections.Generic;
@@ -72,6 +73,23 @@ namespace project.Client.Services
         public async Task<bool> ToogleTestStatus(string testID, string courseID)
         {
             var response = await Client.GetProtectedAsync<Test>($"{BaseURL}/TestManager/ToogleTestStatus?testID={testID}&courseID={courseID}");
+            return response.IsSucceded;
+        }
+
+        public async Task<bool> RemoveTestFromCourse(string testID, string courseID)
+        {
+            var response = await Client.GetProtectedAsync<Test>($"{BaseURL}/courses/removeTestFromCourse?testID={testID}&courseID={courseID}");
+            return response.IsSucceded;
+        }
+
+        public async Task<bool> StartTestCompletion(string testID, string courseID)
+        {
+            TestStartStopDTO start = new TestStartStopDTO()
+            {
+                CourseID = courseID,
+                TestID = testID
+            };
+            var response = await Client.PostProtectedAsync<Test>($"{BaseURL}/TestManager/StartCompletion", start);
             return response.IsSucceded;
         }
     }

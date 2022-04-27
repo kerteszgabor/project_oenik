@@ -67,7 +67,7 @@ namespace project.WebAPI.Controllers
         [HttpPost("StartCompletion")]
         public async Task<IActionResult> StartTestCompletion([FromBody] TestStartStopDTO model)
         {
-            model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            model.User = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (await testManagerService.StartTestCompletion(model))
             {
                 return Ok();
@@ -81,7 +81,7 @@ namespace project.WebAPI.Controllers
         [HttpPost("StopCompletion")]
         public async Task<IActionResult> StopTestCompletion([FromBody] TestStartStopDTO model)
         {
-            model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            model.User = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
             await testManagerService.EndTestCompletion(model);
             return Ok();
         }
