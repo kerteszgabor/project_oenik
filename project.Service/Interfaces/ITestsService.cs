@@ -17,5 +17,6 @@ namespace project.Service.Interfaces
         Task<bool> RemoveQuestionFromTest(string questionID, string testID);
         IAsyncEnumerable<Test> GetTestsOfUser(string userID);
         IAsyncEnumerable<Test> GetTestsOfCourse(string courseID);
+        IAsyncEnumerable<Question> GetQuestionsOfTest(string testID);
     }
 }

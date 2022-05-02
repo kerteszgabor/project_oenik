@@ -36,11 +36,16 @@ namespace project.WebAPI.Controllers
             return await resultManagerService.GetAllResults().ToListAsync();
         }
 
+        [HttpGet("GetQuestionsOfTest")]
+        public async Task<IEnumerable<TestResult>> GetQuestionsOfTest(string testID)
+        {
+            return await resultManagerService.GetAllResults().ToListAsync();
+        }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] AnswerDTO model)
         {
-            model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            model.User = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (await testManagerService.SubmitAnswerToTestResult(model))
             {
                 return Ok();

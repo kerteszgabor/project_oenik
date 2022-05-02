@@ -153,5 +153,13 @@ namespace project.Service.Services
 
             return await testRepository.UpdateAsync(testToUpdate);
         }
+
+        public async IAsyncEnumerable<Question> GetQuestionsOfTest(string testID)
+        {
+            await foreach (var item in questionRepository.GetAllAsync().Where(x => x.TestQuestions.Any(y => y.TestID == testID)))
+            {
+                yield return item;
+            }
+        }
     }
 }

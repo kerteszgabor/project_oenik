@@ -122,5 +122,13 @@ namespace project.WebAPI.Controllers
         {
             return await testsService.GetTestsOfCourse(courseID).ToListAsync();
         }
+
+        [HttpGet("GetQuestionsOfTest")]
+        public async Task<IEnumerable<Question>> GetQuestionsOfTest(string testID)
+        {
+            var questions = await testsService.GetQuestionsOfTest(testID).ToListAsync();
+            questions.ForEach(x => x.CorrectAnswer = string.Empty);
+            return questions;
+        }
     }
 }

@@ -8,10 +8,13 @@
         public ISnackbar Snackbar { get; set; }
         [Inject]
         public PageHistoryState _pageState { get; set; }
-        public PageBase(NavigationManager navManager, PageHistoryState pageState)
+        [Inject]
+        public ILocalStorageService storageService { get; set; }
+        public PageBase(NavigationManager navManager, PageHistoryState pageState, ILocalStorageService localStorageService)
         {
             _navManager = navManager;
             _pageState = pageState;
+            storageService = localStorageService;
         }
 
         public PageBase()

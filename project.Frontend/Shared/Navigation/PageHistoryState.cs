@@ -5,7 +5,7 @@ namespace project.Client.Shared.Navigation
 {
     public class PageHistoryState
     {
-        private List<string> previousPages;
+        public List<string> previousPages { get; set; }
 
         public PageHistoryState()
         {

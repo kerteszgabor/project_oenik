@@ -1,9 +1,9 @@
 ﻿@page "/courses/displayCourse/{courseID}"
+@inherits PageBase
 @using Json.Patch
 @using project.Domain.Models.DBConnections
 @using Microsoft.AspNetCore.JsonPatch
 @inject CoursesService courseService
-@inject NavigationManager navigationManager
 @inject IDialogService DialogService
 @inject TestsService testService
 
@@ -138,7 +138,7 @@ else
         var state = await authenticationState;
         if (state.User.Identity == null)
         {
-            navigationManager.NavigateTo("/courses");
+            _navManager.NavigateTo("/courses");
         }
 
         return state.User.FindFirst("AccessToken").Value;
@@ -177,8 +177,11 @@ else
     private async void StartCompletion(Test test)
     {
         testService.AccessToken = await GetAccessToken();
+        var questions = await testService.GetQuestionsOfTest(test.ID);
+        await storageService.SetItemAsync("remainingQuestions", questions);
         if(await testService.StartTestCompletion(test.ID, course.ID))
         {
+             _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{test.ID}");
             Console.WriteLine("elindítva");
         }
     }

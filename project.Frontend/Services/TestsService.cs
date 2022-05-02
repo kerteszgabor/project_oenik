@@ -70,6 +70,12 @@ namespace project.Client.Services
             return response.Result;
         }
 
+        public async Task<IEnumerable<Question>> GetQuestionsOfTest(string testID)
+        {
+            var response = await Client.GetProtectedAsync<IEnumerable<Question>>($"{BaseURL}/tests/GetQuestionsOfTest?testID={testID}");
+            return response.Result;
+        }
+
         public async Task<bool> ToogleTestStatus(string testID, string courseID)
         {
             var response = await Client.GetProtectedAsync<Test>($"{BaseURL}/TestManager/ToogleTestStatus?testID={testID}&courseID={courseID}");
@@ -90,6 +96,12 @@ namespace project.Client.Services
                 TestID = testID
             };
             var response = await Client.PostProtectedAsync<Test>($"{BaseURL}/TestManager/StartCompletion", start);
+            return response.IsSucceded;
+        }
+
+        public async Task<bool> SubmitAnswer(AnswerDTO answerDTO)
+        {
+            var response = await Client.PostProtectedAsync<Test>($"{BaseURL}/TestManager/", answerDTO);
             return response.IsSucceded;
         }
     }
