@@ -73,6 +73,7 @@ namespace project.WebAPI.Controllers
         public async Task<IActionResult> StartTestCompletion([FromBody] TestStartStopDTO model)
         {
             model.User = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            model.IPAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
             if (await testManagerService.StartTestCompletion(model))
             {
                 return Ok();

@@ -12,6 +12,7 @@ namespace project.Domain.DTO.TestResults
         public string QuestionID { get; set; }
         public string TestID { get; set; }
         public string CourseID { get; set; }
+        public string IPAddress { get; set; }
         public User User { get; set; }
     }
 }

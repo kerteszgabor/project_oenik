@@ -167,7 +167,7 @@
                     {
                         TestID = newTest.ID,
                         CourseID = selectedCourse?.ID,
-                        AllowedIPSubnet = ipAddress,
+                        AllowedIPSubnet = String.IsNullOrWhiteSpace(ipAddress) ? "0.0.0.0" : ipAddress,
                         IsOpen = takingAllowed
                     });
 

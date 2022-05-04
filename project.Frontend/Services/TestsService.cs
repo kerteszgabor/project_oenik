@@ -99,6 +99,17 @@ namespace project.Client.Services
             return response.IsSucceded;
         }
 
+        public async Task<bool> StopTestCompletion(string testID, string courseID)
+        {
+            TestStartStopDTO stop = new TestStartStopDTO()
+            {
+                CourseID = courseID,
+                TestID = testID
+            };
+            var response = await Client.PostProtectedAsync<Test>($"{BaseURL}/TestManager/StopCompletion", stop);
+            return response.IsSucceded;
+        }
+
         public async Task<bool> SubmitAnswer(AnswerDTO answerDTO)
         {
             var response = await Client.PostProtectedAsync<Test>($"{BaseURL}/TestManager/", answerDTO);

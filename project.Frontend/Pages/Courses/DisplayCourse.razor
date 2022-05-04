@@ -32,7 +32,7 @@ else
                                             var connectingEntity = test.CourseTests.FirstOrDefault(x => x.CourseID == course.ID);
                                         }
                                         @if (isTeacher)
-                                        { 
+                                        {
                                             <MudChip Color="Color.Secondary">Létrehozva: @test.CreationTime</MudChip>
                                             <MudChip Color="Color.Primary">Kitöltés maximális ideje: @test.AllowedTakeLength</MudChip>
                                             <MudChip Color="Color.Info">Max pontok: @test.MaxPoints</MudChip>
@@ -56,11 +56,11 @@ else
                                         }
                                         else
                                         {
-                                        @if (connectingEntity.IsOpen)
+                                            @if (connectingEntity.IsOpen)
                                             {
                                                 <MudChip Color="Color.Success">Kitölthető</MudChip>
-                                                 <MudChip Color="Color.Primary">Kitöltés maximális ideje: @test.AllowedTakeLength</MudChip>
-                                            <MudChip Color="Color.Info">Max pontok: @test.MaxPoints</MudChip>
+                                                <MudChip Color="Color.Primary">Kitöltés maximális ideje: @test.AllowedTakeLength</MudChip>
+                                                <MudChip Color="Color.Info">Max pontok: @test.MaxPoints</MudChip>
                                             }
                                             else
                                             {
@@ -126,7 +126,7 @@ else
     private async void ToogleTestStatus(Test test)
     {
         testService.AccessToken = await GetAccessToken();
-        if(await testService.ToogleTestStatus(test.ID, course.ID))
+        if (await testService.ToogleTestStatus(test.ID, course.ID))
         {
             Tests = await testService.GetTestsOfCourse(course.ID);
             StateHasChanged();
@@ -147,16 +147,16 @@ else
     private async void EditTest(Test test, CourseTest connectingEntity)
     {
         var origTest = test.Clone();
-        var parameters = new DialogParameters { ["model"] = test, ["connectingEntity"] = connectingEntity};
+        var parameters = new DialogParameters { ["model"] = test, ["connectingEntity"] = connectingEntity };
         var dialog = DialogService.Show<EditTestDialog>("Szerkesztés", parameters);
-        if(!(await dialog.Result).Cancelled)
+        if (!(await dialog.Result).Cancelled)
         {
-            JsonPatch patch= origTest.CreatePatch(test);
+            JsonPatch patch = origTest.CreatePatch(test);
             var t = JsonHelpers.CalculatePatch(origTest, test);
             var patchito = JsonSerializer.Serialize<JsonPatchDocument>(t);
             // var patch = JsonSerializer.Serialize<JsonPatch>(patchObj);
             testService.AccessToken = await GetAccessToken();
-            if(await testService.UpdateTestAsync(test.ID, patch))
+            if (await testService.UpdateTestAsync(test.ID, patch))
             {
                 Tests = await testService.GetTestsOfCourse(course.ID);
                 StateHasChanged();
@@ -167,7 +167,7 @@ else
     private async void DeleteTest(Test test)
     {
         testService.AccessToken = await GetAccessToken();
-        if(await testService.RemoveTestFromCourse(test.ID, course.ID))
+        if (await testService.RemoveTestFromCourse(test.ID, course.ID))
         {
             Tests = await testService.GetTestsOfCourse(course.ID);
             StateHasChanged();
@@ -179,10 +179,10 @@ else
         testService.AccessToken = await GetAccessToken();
         var questions = await testService.GetQuestionsOfTest(test.ID);
         await storageService.SetItemAsync("remainingQuestions", questions);
-        if(await testService.StartTestCompletion(test.ID, course.ID))
+        if (await testService.StartTestCompletion(test.ID, course.ID))
         {
-             _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{test.ID}");
-            Console.WriteLine("elindítva");
+            await storageService.SetItemAsync("currentCourseID", courseID);
+            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{test.ID}/{questions.First().ID}");
         }
     }
 }

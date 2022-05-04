@@ -71,10 +71,15 @@ namespace project.Service.Interfaces
         {
             Test relatedTest = await testsService.Get(startDTO.TestID);
             Course relatedCourse = await courseService.Get(startDTO.CourseID);
-            if (relatedCourse.UserCourses.Any(x => x.User == startDTO.User) && (await GetExistingTestResult(startDTO.TestID, startDTO.User) == null))
+            var connectingEntity = relatedTest.CourseTests.FirstOrDefault(x => x.CourseID == relatedCourse.ID);
+
+            if (connectingEntity.IsOpen && ValidateIPAddress(connectingEntity.AllowedIPSubnet, startDTO.IPAddress))
             {
-                TestResult newResult = InitNewTestResult(relatedTest, relatedCourse, startDTO.User);
-                return await testResultRepository.CreateAsync(newResult);
+                if (relatedCourse.UserCourses.Any(x => x.User == startDTO.User) && (await GetExistingTestResult(startDTO.TestID, startDTO.User) == null))
+                {
+                    TestResult newResult = InitNewTestResult(relatedTest, relatedCourse, startDTO.User);
+                    return await testResultRepository.CreateAsync(newResult);
+                }
             }
 
             return false;
@@ -225,6 +230,31 @@ namespace project.Service.Interfaces
         {
             return await testResultRepository.GetAllAsync()
                 .FirstOrDefaultAsync(x => x.User == user && x.Test.ID == testID);
+        }
+
+        private bool ValidateIPAddress(string expectedIP, string actualIP)
+        {
+            expectedIP = expectedIP.ToLower();
+            actualIP = actualIP.ToLower();
+
+            if (string.IsNullOrEmpty(expectedIP))
+            {
+                return true;
+            }
+            else if (expectedIP == "0.0.0.0" && actualIP == "::1")
+            {
+                return true;
+            }
+
+            if (expectedIP.Contains('x'))
+            {
+                int idxOfx = expectedIP.IndexOf('x');
+                return actualIP.Substring(0, idxOfx) == expectedIP.Substring(0, idxOfx);
+            }
+            else
+            {
+                return expectedIP == actualIP;
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/questions/answer/Text/{testID}"
+﻿@page "/questions/answer/Text/{testID}/{questionID}"
 @inherits PageBase
 @using project.Domain.DTO.TestResults
 @using project.Domain.DTO.Tests
@@ -14,7 +14,7 @@
             <MudText @bind-Value="model.Text" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="3" />
             <MudTextField @bind-Value="answer.AnswerText" T="string" Label="Helyes válasz" Variant="Variant.Outlined" Lines="3" />
             <div class="d-flex align-center justify-space-between mt-6">
-                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Hozzáadás</MudButton>
+                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" OnClick="() => StateHasChanged()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@buttonText</MudButton>
             </div>
         </EditForm>
     </MudPaper>
@@ -25,19 +25,25 @@
 
     [Parameter]
     public string testID { get; set; }
+    [Parameter]
+    public string questionID { get; set; }
 
-    private Question model;
+    private Question model = new Question();
     private AnswerDTO answer = new AnswerDTO();
     private bool isBusy;
+    private string buttonText;
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
+
+  //  override 
 
     protected async override Task OnInitializedAsync()
     {
         questions = await storageService.GetItemAsync<List<Question>>("remainingQuestions");
         model = questions?.FirstOrDefault();
         questions.RemoveAt(0);
+        buttonText = questions.Count == 0 ? "Teszt befejezése" : "Tovább"; 
         answer.CorrectManually = false;
         answer.QuestionID = model.ID;
         answer.TestID = testID;
@@ -62,11 +68,14 @@
         if(questions.Count > 0)
         {
             await storageService.SetItemAsync("remainingQuestions", questions);
-            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{testID}");
+            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{testID}/{questions.First().ID}",true);
         }
         else
         {
-             _navManager.NavigateTo(_pageState.previousPages.Where(x => x.Contains("displayCourse")).LastOrDefault());
+            var courseID = await storageService.GetItemAsync<string>("currentCourseID");
+            await testService.StopTestCompletion(testID, courseID);
+            await storageService.RemoveItemAsync("currentCourseID");
+            _navManager.NavigateTo($"/courses/displayCourse/{courseID}");
         }
 
         isBusy = false;
