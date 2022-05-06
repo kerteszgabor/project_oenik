@@ -78,7 +78,8 @@ else
                                     <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.EditNote" Size="Size.Small" Color="Color.Default" OnClick="() => EditTest(test, connectingEntity)">Szerkesztés</MudButton>
                                     string btnText = connectingEntity.IsOpen ? "Lezárás" : "Megnyitás";
                                     string btnIcon = !connectingEntity.IsOpen ? Icons.Filled.NotStarted : Icons.Filled.StopCircle;
-                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="() => DeleteTest(test)">Teszt eltávolítása</MudButton>
+                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="() => DeleteTestFromCourse(test)">Teszt eltávolítása</MudButton>
+                                    <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@Icons.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="() => DeleteTest(test)">Teszt végleges törlése</MudButton>
                                     <MudButton Class="mt-3 ml-2" Variant="Variant.Outlined" StartIcon="@btnIcon" Size="Size.Small" Color="Color.Default" OnClick="() => ToogleTestStatus(test)">@btnText</MudButton>
                                 }
                                 else
@@ -164,10 +165,20 @@ else
         }
     }
 
-    private async void DeleteTest(Test test)
+    private async void DeleteTestFromCourse(Test test)
     {
         testService.AccessToken = await GetAccessToken();
         if (await testService.RemoveTestFromCourse(test.ID, course.ID))
+        {
+            Tests = await testService.GetTestsOfCourse(course.ID);
+            StateHasChanged();
+        }
+    }
+
+    private async void DeleteTest(Test test)
+    {
+        testService.AccessToken = await GetAccessToken();
+        if (await testService.DeleteTestAsync(test.ID))
         {
             Tests = await testService.GetTestsOfCourse(course.ID);
             StateHasChanged();

@@ -1,18 +1,39 @@
-﻿@page "/questions/answer/Text/{testID}/{questionID}"
+﻿@page "/questions/answer/fillin/{testID}/{questionID}"
 @inherits PageBase
+@using System.Text.RegularExpressions
 @using project.Domain.DTO.TestResults
 @using project.Domain.DTO.Tests
 @inject TestsService testService
 @inject ISnackbar Snackbar
 @attribute [Authorize]
 
-<MudContainer MaxWidth="MaxWidth.Medium">
+<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
     <MudPaper Class="pa-4 sm-6">
-        <MudText Typo="Typo.h4">@model.Title</MudText>
-        <MudText Typo="Typo.subtitle1">@testID</MudText>
+        <MudText Typo="Typo.h4">Kitöltős kérdés</MudText>
+        <MudText Typo="Typo.subtitle1">Írd be az üres helyekre a helyesnek vélt válaszokat!</MudText>
         <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
-            <MudText @bind-Value="model.Text" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="3" />
-            <MudTextField @bind-Value="answer.AnswerText" T="string" Label="Helyes válasz" Variant="Variant.Outlined" Lines="3" />
+            <DataAnnotationsValidator />
+            @if (model?.Text is not null)
+            {
+                var elements = model.Text.Split("***").ToList();
+                @foreach (var item in elements)
+                {
+                    foreach (var ch in item)
+                    {
+                        if (ch == '*')
+                        {
+                          int idx = elements.FindIndex(x => x == item) - 1;
+                          <div class="col-2">
+                            <DynamicComponent  @ref="answers[idx]" Type="@typeof(MudTextField<string>)" />
+                          </div>
+                        }
+                        else
+                        {
+                            @ch;
+                        }
+                    }
+                }
+            }
             <div class="d-flex align-center justify-space-between mt-6">
                 <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" OnClick="() => StateHasChanged()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@buttonText</MudButton>
             </div>
@@ -32,6 +53,7 @@
     private AnswerDTO answer = new AnswerDTO();
     private bool isBusy;
     private string buttonText;
+    private List<DynamicComponent> answers = new List<DynamicComponent>();
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
@@ -41,10 +63,15 @@
         questions = await storageService.GetItemAsync<List<Question>>("remainingQuestions");
         model = questions?.FirstOrDefault();
         questions.RemoveAt(0);
-        buttonText = questions.Count == 0 ? "Teszt befejezése" : "Tovább"; 
+        buttonText = questions.Count == 0 ? "Teszt befejezése" : "Tovább";
         answer.CorrectManually = false;
         answer.QuestionID = model.ID;
         answer.TestID = testID;
+        int answerCount = model.Text.Split("****").Count() - 1;
+        for(int i = 0; i < answerCount; i++)
+        {
+            answers.Add(new DynamicComponent());
+        }
     }
 
     async void Submit()
@@ -53,6 +80,7 @@
 
         var userState = authenticationState.Result;
         testService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        answer.AnswerText = JsonHelpers.SerializeList(answers.Select(x => (x.Instance as MudTextField<string>).Text).ToList());
         if (await testService.SubmitAnswer(answer))
         {
             Snackbar.Add("Kérdés sikeresen elküldve!", Severity.Success);
@@ -63,10 +91,10 @@
         }
 
         await storageService.RemoveItemAsync("remainingQuestions");
-        if(questions.Count > 0)
+        if (questions.Count > 0)
         {
             await storageService.SetItemAsync("remainingQuestions", questions);
-            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{testID}/{questions.First().ID}",true);
+            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{testID}/{questions.First().ID}", true);
         }
         else
         {

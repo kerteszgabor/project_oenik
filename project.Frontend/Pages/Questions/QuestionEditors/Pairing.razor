@@ -131,7 +131,14 @@
 
         model.QuestionType = "Pairing";
         model.IsShared = chipsEnabled;
-        model.CorrectAnswer = JsonHelpers.SerializeList(Elements1) + JsonHelpers.SerializeList(Elements2);
+        List<Tuple<string, string>> mergedElements = new List<Tuple<string, string>>();
+        for (int i = 0; i < Elements1.Count; i++)
+        {
+            mergedElements.Add(Tuple.Create(Elements1[i], Elements2[i]));
+        }
+
+        mergedElements = mergedElements.OrderBy(x => x.Item1).ToList();
+        model.CorrectAnswer = JsonHelpers<Tuple<string, string>>.SerializeList(mergedElements);
 
         var userState = authenticationState.Result;
         questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;

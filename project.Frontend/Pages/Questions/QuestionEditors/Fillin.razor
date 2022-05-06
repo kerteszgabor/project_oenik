@@ -66,7 +66,11 @@
 
         model.QuestionType = "Fillin";
         model.IsShared = chipsEnabled;
-        model.CorrectAnswer = ExtractAnswerStrings();
+        model.CorrectAnswer = JsonHelpers.SerializeList(ExtractAnswerStrings());
+        foreach (var item in ExtractAnswerStrings())
+        {
+            model.Text = model.Text.Replace(item,"");
+        }
 
         var userState = authenticationState.Result;
         questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
@@ -82,7 +86,7 @@
         }
     }
 
-    private string ExtractAnswerStrings()
+    private List<string> ExtractAnswerStrings()
     {
         string[] strings = model.Text.Split("**");
         List<string> arrayOfAnswers = new List<string>();
@@ -94,7 +98,7 @@
             }
         }
 
-        return JsonHelpers.SerializeList(arrayOfAnswers);
+        return arrayOfAnswers;
     }
 }
 

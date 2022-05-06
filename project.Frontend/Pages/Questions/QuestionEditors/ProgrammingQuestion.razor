@@ -43,11 +43,11 @@
             <MudCard Class="pa-4 sm-6">
                 <MudText Class="mb-3" Typo="Typo.h5">Eddig kért metódusok</MudText>
                 <MudList Clickable="false">
-                    @foreach (var item in methods)
+                    @foreach (var item in model.Methods)
                     {
                         <MudListItem>
                             <MudText Typo="Typo.body1">@item.MethodName</MudText>
-                            <MudChip Icon="@Icons.Filled.Delete" OnClick="() => methods.Remove(item)">Törlés</MudChip>
+                            <MudChip Icon="@Icons.Filled.Delete" OnClick="() => model.Methods.Remove(item)">Törlés</MudChip>
                         </MudListItem>
                         <MudDivider />
                     }
@@ -65,14 +65,14 @@
 <MudFab Class="mt-5" OnClick="() => showMethodAdder = !showMethodAdder" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Label="Új metódusellenőrzés hozzáadása" />
 
 @code {
-    private QuestionDTO model = new QuestionDTO();
+    private ProgQuestionDTO model = new ProgQuestionDTO() { Methods = new List<MethodInfoData>() };
     private bool chipsEnabled;
     private bool isBusy;
     private bool showMethodAdder = false;
     private string newLabel;
     List<LabelDTO> labels = new List<LabelDTO>();
     private AddMethodComponent addComponent;
-    List<MethodInfoData> methods = new List<MethodInfoData>();
+   // List<MethodInfoData> methods = new List<MethodInfoData>();
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
@@ -89,7 +89,7 @@
 
     void HandleMethodAdded(MethodInfoData method)
     {
-        methods.Add(method);
+        model.Methods.Add(method);
         showMethodAdder = false;
         addComponent = new AddMethodComponent();
     }

@@ -16,7 +16,7 @@ namespace project.Domain.DTO.Tests
         public string Text { get; set; }
 
         public DateTime CreationTime { get; set; }
-        public string CreatedBy { get; set; }
+        public User CreatedBy { get; set; }
 
         [Required]
         public bool IsShared { get; set; }

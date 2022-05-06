@@ -26,63 +26,63 @@ namespace project.WebAPI.Controllers
             this.builder = builder;
         }
 
-        [HttpPost]
-        [Authorize]
-        public IActionResult AddClass([FromBody] ClassRequestBody classData)
-        {
-            var buildObject = builder.GetReportOf(classData.Code);
-            foreach (var method in classData.Methods)
-            {
-                ICanRequireCompilation methodObject = null;
-                if (method.ParameterList != null && method.ExpectedReturnType != null)
-                {
-                    methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList, method.ExpectedReturnType);
-                }
-                else if (method.ParameterList != null)
-                {
-                    methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList);
-                }
-                else if (method.ExpectedReturnType != null)
-                {
-                    methodObject = buildObject.WithMethod(method.MethodName, method.ExpectedReturnType);
-                }
-                else
-                {
-                    methodObject = buildObject.WithMethod(method.MethodName);
-                }
-                if (method.RequireCompilation)
-                {
-                    ICanCompile compileObject = methodObject.AlsoCompile();
-                    if (method.Parameters != null)
-                    {
-                        object[] parameters = new object[method.Parameters.Length];
-                        for (int i = 0; i < parameters.Length; i++)
-                        {
-                            var node = (JsonElement)method.Parameters[i];
-                            if (node.ValueKind == JsonValueKind.Number)
-                            {
-                                parameters[i] = JsonConvert.DeserializeObject(method.Parameters[i].ToString());
-                            }
-                            else
-                            {
-                                parameters[i] = node.GetString();
-                            }
+    //    [HttpPost]
+    //    [Authorize]
+    //    public IActionResult AddClass([FromBody] ClassRequestBody classData)
+    //    {
+    //        var buildObject = builder.GetReportOf(classData.Code);
+    //        foreach (var method in classData.Methods)
+    //        {
+    //            ICanRequireCompilation methodObject = null;
+    //            if (method.ParameterList != null && method.ExpectedReturnType != null)
+    //            {
+    //                methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList, method.ExpectedReturnType);
+    //            }
+    //            else if (method.ParameterList != null)
+    //            {
+    //                methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList);
+    //            }
+    //            else if (method.ExpectedReturnType != null)
+    //            {
+    //                methodObject = buildObject.WithMethod(method.MethodName, method.ExpectedReturnType);
+    //            }
+    //            else
+    //            {
+    //                methodObject = buildObject.WithMethod(method.MethodName);
+    //            }
+    //            if (method.RequireCompilation)
+    //            {
+    //                ICanCompile compileObject = methodObject.AlsoCompile();
+    //                if (method.Parameters != null)
+    //                {
+    //                    object[] parameters = new object[method.Parameters.Length];
+    //                    for (int i = 0; i < parameters.Length; i++)
+    //                    {
+    //                        var node = (JsonElement)method.Parameters[i];
+    //                        if (node.ValueKind == JsonValueKind.Number)
+    //                        {
+    //                            parameters[i] = JsonConvert.DeserializeObject(method.Parameters[i].ToString());
+    //                        }
+    //                        else
+    //                        {
+    //                            parameters[i] = node.GetString();
+    //                        }
                            
-                        }
-                        compileObject.WithParameters(parameters);
-                    }
-                    if (method.ExpectedStringOutput != null)
-                    {
-                        compileObject = compileObject.SetExpectedStringOutput(method.ExpectedStringOutput);
-                    }
-                    if (method.ExpectedValue != null)
-                    {
-                        compileObject = compileObject.SetExpectedValue(method.ExpectedValue);
-                    }
-                }
-            }
-            var report = buildObject.Build();
-            return Ok(report);
-        }
+    //                    }
+    //                    compileObject.WithParameters(parameters);
+    //                }
+    //                if (method.ExpectedStringOutput != null)
+    //                {
+    //                    compileObject = compileObject.SetExpectedStringOutput(method.ExpectedStringOutput);
+    //                }
+    //                if (method.ExpectedValue != null)
+    //                {
+    //                    compileObject = compileObject.SetExpectedValue(method.ExpectedValue);
+    //                }
+    //            }
+    //        }
+    //        var report = buildObject.Build();
+    //        return Ok(report);
+    //    }
     }
 }

@@ -152,22 +152,7 @@ namespace project.Service.Interfaces
                 foreach (var method in question.Methods)
                 {
                     ICanRequireCompilation methodObject = null;
-                    if (method.ParameterList != null && method.ExpectedReturnType != null)
-                    {
-                        methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList, method.ExpectedReturnType);
-                    }
-                    else if (method.ParameterList != null)
-                    {
-                        methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList);
-                    }
-                    else if (method.ExpectedReturnType != null)
-                    {
-                        methodObject = buildObject.WithMethod(method.MethodName, method.ExpectedReturnType);
-                    }
-                    else
-                    {
-                        methodObject = buildObject.WithMethod(method.MethodName);
-                    }
+                    methodObject = buildObject.WithMethod(method);
                     if (method.RequireCompilation)
                     {
                         ICanCompile compileObject = methodObject.AlsoCompile();
@@ -193,6 +178,7 @@ namespace project.Service.Interfaces
                 reports.Add(buildObject.Build());
             }
 
+            testResult.ProgQuestionReports = new List<ClassReport>();
             foreach (var item in reports)
             {
                 if (!item.HadCompilationError)
@@ -208,6 +194,8 @@ namespace project.Service.Interfaces
 
                     testResult.PointResult += Math.Max(points, 0);
                 }
+
+                testResult.ProgQuestionReports.Add(item);
             }
         }
 

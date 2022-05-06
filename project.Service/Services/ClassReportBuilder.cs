@@ -15,6 +15,7 @@ using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using project.Service.Interfaces;
+using AutoMapper;
 
 namespace project.Service.Services
 {
@@ -82,9 +83,9 @@ namespace project.Service.Services
                 .ToList();
         }
 
-        private MethodDeclarationSyntax FindMethod(string identifier)
+        private MethodDeclarationSyntax FindMethod(MethodInfoData model)
         {
-            var method = methods.FirstOrDefault(x => x.Identifier.ToString() == identifier);
+            var method = methods.FirstOrDefault(x => x.Identifier.ToString() == model.MethodName || x.ReturnType.ToString() == model.ExpectedReturnType);
             if (method != null)
             {
                 return method;
@@ -95,98 +96,38 @@ namespace project.Service.Services
             }
         }
 
-        public ICanRequireCompilation WithMethod(string methodName)
+        public ICanRequireCompilation WithMethod(MethodInfoData methodInfo)
         {
             try
             {
-                var method = FindMethod(methodName);
-                MethodModel model = new MethodModel()
+                var method = FindMethod(methodInfo);
+                var model = new MapperConfiguration(cfg =>
                 {
-                    MethodName = methodName
-                };
-                methodPairs.Add(method, model);
-                lastMethod = model;
-                return this;
-            }
-            catch (MethodNotFoundException)
-            {
-                methodsNotFound.Add(methodName);
-                return this;
-            }
-        }
+                    cfg.CreateMap<MethodInfoData, MethodModel>();
+                })
+                    .CreateMapper()
+                    .Map<MethodInfoData, MethodModel>(methodInfo);
 
-        public ICanRequireCompilation WithMethod(string methodName, ParamList expectedParameters)
-        {
-            try
-            {
-                var method = FindMethod(methodName);
-                MethodModel model = new MethodModel()
-                {
-                    MethodName = methodName,
-                    ExpectedParameters = expectedParameters
-                };
                 methodPairs.Add(method, model);
                 lastMethod = model;
                 return this;
             }
             catch (MethodNotFoundException)
             {
-                methodsNotFound.Add(methodName);
-                return this;
-            }
-        }
-        public ICanRequireCompilation WithMethod(string methodName, string expectedReturnType)
-        {
-            try
-            {
-                var method = FindMethod(methodName);
-                MethodModel model = new MethodModel()
-                {
-                    MethodName = methodName,
-                    ExpectedReturnType = expectedReturnType
-                };
-                methodPairs.Add(method, model);
-                lastMethod = model;
-                return this;
-            }
-            catch (MethodNotFoundException)
-            {
-                methodsNotFound.Add(methodName);
-                return this;
-            }
-        }
-
-        public ICanRequireCompilation WithMethod(string methodName, ParamList expectedParameters, string expectedReturnType)
-        {
-            try
-            {
-                var method = FindMethod(methodName);
-                MethodModel model = new MethodModel()
-                {
-                    MethodName = methodName,
-                    ExpectedParameters = expectedParameters,
-                    ExpectedReturnType = expectedReturnType
-                };
-                methodPairs.Add(method, model);
-                lastMethod = model;
-                return this;
-            }
-            catch (MethodNotFoundException)
-            {
-                methodsNotFound.Add(methodName);
+                methodsNotFound.Add(methodInfo.MethodName);
                 return this;
             }
         }
 
         public ICanCompile AlsoCompile()
         {
-            lastMethod.ToBeCompiled = true;
+            lastMethod.RequireCompilation = true;
             return this;
         }
 
         public ICanCompile WithParameters(object[] parameters)
         {
-            lastMethod.CompilationParameters = parameters;
+            lastMethod.Parameters = parameters;
             return this;
         }
 
@@ -198,7 +139,7 @@ namespace project.Service.Services
 
         public ICanCompile SetExpectedValue(object expectedOutput)
         {
-            lastMethod.ExpectedOutput = expectedOutput;
+            lastMethod.ExpectedValue = expectedOutput;
             return this;
         }
 
@@ -210,7 +151,7 @@ namespace project.Service.Services
             ValidateMethodsExisting(classReport);
 
             var methodsToCompile = from m in methodPairs
-                                   where m.Value.ToBeCompiled
+                                   where m.Value.RequireCompilation
                                    select m.Key;
 
             if (Directory.Exists(compilationPath))
@@ -225,7 +166,7 @@ namespace project.Service.Services
             Parallel.ForEach(methodsToCompile, (method) =>
             {
                 var methodModel = methodPairs[method];
-                var compilationResult = CompileMethod(method, methodModel.CompilationParameters);
+                var compilationResult = CompileMethod(method, methodModel.Parameters);
                 compilationResults.Add(compilationResult);
 
                 if (compilationResult.ToString().Contains("Error"))
@@ -234,7 +175,7 @@ namespace project.Service.Services
                 }
 
                 if (
-                 compilationResult.ToString() == methodModel.ExpectedOutput?.ToString()
+                 compilationResult.ToString() == methodModel.ExpectedValue?.ToString()
                 || compilationResult.ToString() == methodModel.ExpectedStringOutput?.ToString())
                 {
                     classReport.ValidMethodsByOutput.Add(method.Identifier.ValueText);
@@ -274,10 +215,10 @@ namespace project.Service.Services
             foreach (var method in methodPairs.Keys)
             {
                 var methodModel = methodPairs[method];
-                if (methodModel.ExpectedParameters != null)
+                if (methodModel.ParameterList != null)
                 {
                     var parameters = method.ParameterList.Parameters;
-                    var expectedParameters = methodPairs[method].ExpectedParameters;
+                    var expectedParameters = methodPairs[method].ParameterList;
 
                     var areMatching = parameters
                     .SelectMany(x => new ParamList { { x.Type.ToString(), x.Identifier.ToString() } })
@@ -329,7 +270,19 @@ namespace project.Service.Services
                 {
                     var classType = asm.DefinedTypes.FirstOrDefault();
                     var instance = Activator.CreateInstance(classType);
-                    return methodinfo.Invoke(instance, parameters);
+                    try
+                    {
+                        return methodinfo.Invoke(instance, parameters);
+                    }
+                    catch (ArgumentException)
+                    {
+                        for (int i = 0; i < parameters.Length; i++)
+                        {
+                            parameters[i] = Convert.ToInt32(parameters[i]);
+                        }
+
+                        return methodinfo.Invoke(instance, parameters);
+                    }  
                 }
             }
             else

@@ -48,7 +48,7 @@ namespace project.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProgQuestionDTO model)
         {
-            model.CreatedBy = (await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier))).UserName;
+            model.CreatedBy = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (model?.Methods == null || model?.Methods?.Count == 0)
             {
                 var normalQuestion = new MapperConfiguration(cfg =>

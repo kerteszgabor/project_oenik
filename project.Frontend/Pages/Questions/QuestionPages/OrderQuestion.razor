@@ -1,20 +1,26 @@
-﻿@page "/questions/answer/Text/{testID}/{questionID}"
+﻿@page "/questions/answer/Order/{testID}/{questionID}"
 @inherits PageBase
 @using project.Domain.DTO.TestResults
 @using project.Domain.DTO.Tests
 @inject TestsService testService
+@inject QuestionsService questionService
 @inject ISnackbar Snackbar
 @attribute [Authorize]
 
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudPaper Class="pa-4 sm-6">
         <MudText Typo="Typo.h4">@model.Title</MudText>
-        <MudText Typo="Typo.subtitle1">@testID</MudText>
         <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
-            <MudText @bind-Value="model.Text" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="3" />
-            <MudTextField @bind-Value="answer.AnswerText" T="string" Label="Helyes válasz" Variant="Variant.Outlined" Lines="3" />
+            <MudText Typo="Typo.subtitle1">Helyezd a megfelelő sorrendbe az alábbiakat:</MudText>
+            <div class="col-sm-6 d-flex align-center justify-content-center mb-2">
+                <div class="d-flex align-center justify-space-between mt-6">
+                    <CascadingValue Value=@Elements>
+                        <OrderedComponent @ref="orderedComponent" OnOrderChanged="HandleOnChangedEvent"></OrderedComponent>
+                    </CascadingValue>
+                </div>
+            </div>
             <div class="d-flex align-center justify-space-between mt-6">
-                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" OnClick="() => StateHasChanged()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@buttonText</MudButton>
+                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@buttonText</MudButton>
             </div>
         </EditForm>
     </MudPaper>
@@ -33,6 +39,9 @@
     private bool isBusy;
     private string buttonText;
 
+    List<string> Elements = new List<string>();
+    OrderedComponent orderedComponent { get; set; }
+
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
 
@@ -41,10 +50,19 @@
         questions = await storageService.GetItemAsync<List<Question>>("remainingQuestions");
         model = questions?.FirstOrDefault();
         questions.RemoveAt(0);
-        buttonText = questions.Count == 0 ? "Teszt befejezése" : "Tovább"; 
+        buttonText = questions.Count == 0 ? "Teszt befejezése" : "Tovább";
         answer.CorrectManually = false;
         answer.QuestionID = model.ID;
         answer.TestID = testID;
+        var userState = authenticationState.Result;
+        questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        var answerJson = (await questionService.GetQuestionAsync(model.ID)).CorrectAnswer;
+        Elements = JsonHelpers<string>.DeserializeJson(answerJson).OrderBy(x => Guid.NewGuid()).ToList();
+    }
+
+    private void HandleOnChangedEvent(List<string> orderedElements)
+    {
+        Elements = orderedElements;
     }
 
     async void Submit()
@@ -53,6 +71,7 @@
 
         var userState = authenticationState.Result;
         testService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        answer.AnswerText = JsonHelpers.SerializeList(Elements);
         if (await testService.SubmitAnswer(answer))
         {
             Snackbar.Add("Kérdés sikeresen elküldve!", Severity.Success);
@@ -63,10 +82,10 @@
         }
 
         await storageService.RemoveItemAsync("remainingQuestions");
-        if(questions.Count > 0)
+        if (questions.Count > 0)
         {
             await storageService.SetItemAsync("remainingQuestions", questions);
-            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{testID}/{questions.First().ID}",true);
+            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{testID}/{questions.First().ID}", true);
         }
         else
         {

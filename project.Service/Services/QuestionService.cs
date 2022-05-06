@@ -9,8 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 using project.Service.Interfaces;
+using System.Text.Json.Nodes;
 
 namespace project.Service.Services
 {
@@ -84,7 +85,7 @@ namespace project.Service.Services
                     .CreateMapper()
                     .Map<QuestionDTO, Question>(newQuestion);
 
-                model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
+                model.CreatedBy = newQuestion.CreatedBy;
                 model.CreationTime = DateTime.Now;
                 if (String.IsNullOrEmpty(model.Title))
                 {
@@ -119,7 +120,7 @@ namespace project.Service.Services
                     .CreateMapper()
                     .Map<ProgQuestionDTO, ProgrammingQuestion>(newQuestion);
 
-                model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
+                model.CreatedBy = newQuestion.CreatedBy;
                 model.CreationTime = DateTime.Now;
 
                 for (int i = 0; i < newQuestion.Methods.Count; i++)
@@ -130,15 +131,49 @@ namespace project.Service.Services
                         object[] parameters = new object[method.Parameters.Length];
                         for (int j = 0; j < parameters.Length; j++)
                         {
-                            var node = (JsonElement)method.Parameters[i];
-                            if (node.ValueKind == JsonValueKind.Number)
+                            var obj = JsonNode.Parse(method.Parameters[j].ToString()).AsValue();
+
+                            try
                             {
-                                model.Methods.ToArray()[i].Parameters[j] = JsonConvert.DeserializeObject(method.Parameters[i].ToString());
+                                int number = obj.Deserialize<int>();
+                                model.Methods.ToArray()[i].Parameters[j] = Convert.ToInt32(number);
+                                continue;
                             }
-                            else
+                            catch (Exception) { }
+
+                            try
                             {
-                                model.Methods.ToArray()[i].Parameters[j] = node.GetString();
+                                double number = obj.Deserialize<double>();
+                                model.Methods.ToArray()[i].Parameters[j] = number;
+                                continue;
                             }
+                            catch (Exception) { }
+
+                            try
+                            {
+                                bool boolean = obj.Deserialize<bool>();
+                                model.Methods.ToArray()[i].Parameters[j] = boolean;
+                                continue;
+                            }
+                            catch (Exception) { }
+
+                            try
+                            {
+                                string str = obj.Deserialize<string>();
+                                model.Methods.ToArray()[i].Parameters[j] = str;
+                                continue;
+                            }
+                            catch (Exception) { }
+
+                            
+                            //if (node.ValueKind == JsonValueKind.Number)
+                            //{
+                            //  //  model.Methods.ToArray()[i].Parameters[j] = JsonConvert.DeserializeObject(method.Parameters[i].ToString());
+                            //}
+                            //else
+                            //{
+                            // //   model.Methods.ToArray()[i].Parameters[j] = node.GetString();
+                            //}
 
                         }
                     }
@@ -180,7 +215,7 @@ namespace project.Service.Services
         private async Task<bool> AddLabelsToNewQuestions(QuestionDTO newQuestion, User user)
         {
             var question = await GetQuestionsOfUser(user.Id).OrderByDescending(x => x.CreationTime).FirstOrDefaultAsync();
-            if (question != null)
+            if (question is not null && newQuestion.Labels is not null)
             {
                 foreach (var label in newQuestion.Labels)
                 {

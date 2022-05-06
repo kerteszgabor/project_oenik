@@ -9,6 +9,17 @@ using System;
 
 namespace project.Client.Services.Helpers
 {
+    public static class JsonHelpers<T>
+    {
+        public static List<T> DeserializeJson(string jsonObject)
+        {
+            return JsonSerializer.Deserialize<List<T>>(jsonObject, JsonHelpers.GetSerializerOption());
+        }
+        public static string SerializeList(List<T> list)
+        {
+            return JsonSerializer.Serialize(list, JsonHelpers.GetSerializerOption());
+        }
+    }
     public static class JsonHelpers
     {
         public static string SerializeList(List<string> strings)

@@ -1,4 +1,4 @@
-﻿@page "/questions/answer/Text/{testID}/{questionID}"
+﻿@page "/questions/answer/ProgrammingQuestion/{testID}/{questionID}"
 @inherits PageBase
 @using project.Domain.DTO.TestResults
 @using project.Domain.DTO.Tests
@@ -9,12 +9,11 @@
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudPaper Class="pa-4 sm-6">
         <MudText Typo="Typo.h4">@model.Title</MudText>
-        <MudText Typo="Typo.subtitle1">@testID</MudText>
+        <MudText Typo="Typo.subtitle1">@model.Text</MudText>
         <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
-            <MudText @bind-Value="model.Text" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="3" />
-            <MudTextField @bind-Value="answer.AnswerText" T="string" Label="Helyes válasz" Variant="Variant.Outlined" Lines="3" />
+            <MudTextField @bind-Value="@answer.AnswerText" T="string" Label="Válasz" Variant="Variant.Outlined" Lines="8" />
             <div class="d-flex align-center justify-space-between mt-6">
-                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" OnClick="() => StateHasChanged()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@buttonText</MudButton>
+                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@buttonText</MudButton>
             </div>
         </EditForm>
     </MudPaper>
@@ -53,6 +52,9 @@
 
         var userState = authenticationState.Result;
         testService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        answer.AnswerText = template.Replace("HERE", answer.AnswerText);
+
         if (await testService.SubmitAnswer(answer))
         {
             Snackbar.Add("Kérdés sikeresen elküldve!", Severity.Success);
@@ -78,5 +80,7 @@
 
         isBusy = false;
     }
+
+    string template = @"using System; using System.IO; namespace RoslynCore { public class Helper { HERE } }";
 }
 
