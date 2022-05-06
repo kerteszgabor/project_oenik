@@ -89,14 +89,7 @@ namespace project.Service.Services
                 model.CreationTime = DateTime.Now;
                 if (String.IsNullOrEmpty(model.Title))
                 {
-                    var textBody = model.Text.Split(' ');
-                    for (int i = 0; i < 3; i++)
-                    {
-                        if (textBody.Length > i)
-                        {
-                            model.Title += $"{textBody[i]} ";
-                        }
-                    }
+                    GenerateTitleFromText(model);
                 }
 
                 await questionRepository.CreateAsync(model);
@@ -123,6 +116,11 @@ namespace project.Service.Services
                 model.CreatedBy = newQuestion.CreatedBy;
                 model.CreationTime = DateTime.Now;
 
+                if (String.IsNullOrEmpty(model.Title))
+                {
+                    GenerateTitleFromText(model);
+                }
+
                 for (int i = 0; i < newQuestion.Methods.Count; i++)
                 {
                     var method = newQuestion.Methods[i];
@@ -131,7 +129,8 @@ namespace project.Service.Services
                         object[] parameters = new object[method.Parameters.Length];
                         for (int j = 0; j < parameters.Length; j++)
                         {
-                            var obj = JsonNode.Parse(method.Parameters[j].ToString()).AsValue();
+                            var obj = //JsonObject.Parse(method.Parameters[j].ToString()).AsValue();
+                            JsonObject.Parse(JsonSerializer.Serialize(method.Parameters[0].ToString())).AsValue();
 
                             try
                             {
@@ -164,17 +163,6 @@ namespace project.Service.Services
                                 continue;
                             }
                             catch (Exception) { }
-
-                            
-                            //if (node.ValueKind == JsonValueKind.Number)
-                            //{
-                            //  //  model.Methods.ToArray()[i].Parameters[j] = JsonConvert.DeserializeObject(method.Parameters[i].ToString());
-                            //}
-                            //else
-                            //{
-                            // //   model.Methods.ToArray()[i].Parameters[j] = node.GetString();
-                            //}
-
                         }
                     }
                 }
@@ -224,6 +212,19 @@ namespace project.Service.Services
                 }
             }
             return question != null;
+        }
+
+        private void GenerateTitleFromText(Question model)
+        {
+            var textBody = model.Text.Split(' ');
+            for (int i = 0; i < 3; i++)
+            {
+                if (textBody.Length > i)
+                {
+                    model.Title += $"{textBody[i]} ";
+                }
+            }
+            model.Title = model.Title.Trim();
         }
     }
 }
