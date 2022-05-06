@@ -15,6 +15,5 @@ namespace project.Domain.DTO.ClassReport
         public string ExpectedValue { get; set; }
         [Required]
         public bool RequireCompilation { get; set; }
-        
     }
 }

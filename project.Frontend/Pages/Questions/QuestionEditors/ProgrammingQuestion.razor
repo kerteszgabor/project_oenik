@@ -16,6 +16,9 @@
                 <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
                     <DataAnnotationsValidator />
                     <MudTextField For="@(() => model.Text)" @bind-Value="model.Text" T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="3" />
+                    <MudTextField  @bind-Value="disallowedWords" T="string" HelperText="Vesszővel elválasztva" Label="Tiltani kívánt kifejezések" Variant="Variant.Outlined" />
+                    <MudTextField  @bind-Value="requiredWords" T="string" HelperText="Vesszővel elválasztva" Label="Várt kifejezések" Variant="Variant.Outlined" />
+
                     <MudNumericField For="@(() => model.MaxPoints)" @bind-Value="model.MaxPoints" Label="Pontok száma" Format="F1" Variant="Variant.Outlined" />
                     <div class="d-flex align-center justify-space-between mt-6">
                         <MudCheckBox @bind-Checked="@ChipsEnabled" T="bool" Class="ml-n2" Label="Kérdés megosztása" />
@@ -70,9 +73,11 @@
     private bool isBusy;
     private bool showMethodAdder = false;
     private string newLabel;
+    private string disallowedWords;
+    private string requiredWords;
     List<LabelDTO> labels = new List<LabelDTO>();
     private AddMethodComponent addComponent;
-   // List<MethodInfoData> methods = new List<MethodInfoData>();
+    // List<MethodInfoData> methods = new List<MethodInfoData>();
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
@@ -104,6 +109,20 @@
 
         model.QuestionType = "ProgrammingQuestion";
         model.IsShared = chipsEnabled;
+
+        if (!String.IsNullOrWhiteSpace(requiredWords))
+        {
+            var words = requiredWords.Split(',').ToList();
+            words.ForEach(x => x = x.Trim());
+            model.RequiredWords = words;
+        }
+
+        if (!String.IsNullOrWhiteSpace(disallowedWords))
+        {
+            var words = disallowedWords.Split(',').ToList();
+            words.ForEach(x => x = x.Trim());
+            model.DisallowedWords = words;
+        }
 
         var userState = authenticationState.Result;
         questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
