@@ -90,6 +90,8 @@ namespace project.Service.Tests
             var parameters = new ParamList();
             parameters.Add(new MyTuple("string", "test"));
             string parameter = "given parameter";
+            List<User> userList = new List<User>();
+            userList.Add(user);
 
             var method = new MethodInfoData()
             {
@@ -97,7 +99,7 @@ namespace project.Service.Tests
                 ExpectedValue = "",
                 MethodName = "TestMethod",
                 ParameterList = parameters,
-                Parameters = new object[] { parameter},
+                Parameters = new object[] { parameter, 5, 3.4, true, 'x', new int[] {1, 2, 3 }, userList },
                 RequireCompilation = true
             };
 
@@ -137,6 +139,15 @@ namespace project.Service.Tests
             Assert.AreEqual(5, createdQuestion.MaxPoints);
             Assert.AreEqual("test question text,", createdQuestion.Title);
             Assert.AreEqual(user, createdQuestion.CreatedBy);
+            Assert.AreEqual(1, createdQuestion.Methods.Count);
+            Assert.AreEqual(method, createdQuestion.Methods.FirstOrDefault());
+            Assert.AreEqual("given parameter", (createdQuestion.Methods.FirstOrDefault().Parameters[0] as string));
+            Assert.AreEqual(5, (int)createdQuestion.Methods.FirstOrDefault().Parameters[1]);
+            Assert.AreEqual(3.4, (double)createdQuestion.Methods.FirstOrDefault().Parameters[2]);
+            Assert.AreEqual(true, (bool)createdQuestion.Methods.FirstOrDefault().Parameters[3]);
+            Assert.AreEqual('x', (char)createdQuestion.Methods.FirstOrDefault().Parameters[4]);
+            Assert.AreEqual(new int[] {1,2,3}, createdQuestion.Methods.FirstOrDefault().Parameters[5]);
+            Assert.AreEqual(userList, createdQuestion.Methods.FirstOrDefault().Parameters[6]);
 
             var addedLabel = (_labelServiceMock.Invocations.FirstOrDefault().Arguments.FirstOrDefault()) as LabelDTO;
             Assert.AreEqual(question.ID, addedLabel.QuestionID);

@@ -95,7 +95,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("removeTestFromCourse")]
-        public async Task<IActionResult> RemoveQuestionFromCourse(string testID, string courseID)
+        public async Task<IActionResult> RemoveTestFromCourse(string testID, string courseID)
         {
             if (await courseService.RemoveTestFromCourse(testID, courseID))
             {

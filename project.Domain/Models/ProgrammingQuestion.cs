@@ -22,7 +22,7 @@ namespace project.Domain.Models
 
         public ICollection<MethodInfoData> Methods { get; set; }
 
-        public List<string> DisallowedWords { get; set; }
-        public List<string> RequiredWords { get; set; }
+        public ICollection<string> DisallowedWords { get; set; }
+        public ICollection<string> RequiredWords { get; set; }
     }
 }

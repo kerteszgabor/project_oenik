@@ -104,6 +104,9 @@ namespace project.Repository.Repositories
             var user = await UserManager.FindByIdAsync(id);
             if (user != null)
             {
+                user.ConcurrencyStamp = String.Empty;
+                user.PasswordHash = String.Empty;
+                user.SecurityStamp = String.Empty;
                 return user;
             }
             else
@@ -120,7 +123,12 @@ namespace project.Repository.Repositories
         public async IAsyncEnumerable<User> GetAllAsync()
         {
             await foreach (var item in UserManager.Users.AsAsyncEnumerable())
+            {
+                item.ConcurrencyStamp = String.Empty;
+                item.PasswordHash = String.Empty;
+                item.SecurityStamp = String.Empty;
                 yield return item;
+            }
         }
 
         public async Task<bool> DeleteAsync(string uid)

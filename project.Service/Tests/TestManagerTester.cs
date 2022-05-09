@@ -131,17 +131,19 @@ namespace project.Service.Tests
             };
 
             _courseRepoMock.Setup(x => x.UpdateAsync(It.IsAny<Course>())).ReturnsAsync(true);
-            _courseRepoMock.Setup(x => x.GetAsync(It.IsAny<string>())).ReturnsAsync(course);
+            _courseRepoMock.Setup(x => x.GetAsync("courseID")).ReturnsAsync(course);
 
             // Act, Assert
             Assert.IsTrue(await testManagerService.ToogleTestStatus("testID", "courseID"));
-            Assert.IsTrue((_courseRepoMock.Invocations[1].Arguments[0] as Course).CourseTests.FirstOrDefault().IsOpen);
+            Assert.IsTrue((_courseRepoMock.Invocations.LastOrDefault().Arguments[0] as Course).CourseTests.FirstOrDefault().IsOpen);
             _courseRepoMock.Verify(x => x.UpdateAsync(It.IsAny<Course>()), Times.Once);
 
             Assert.IsTrue(await testManagerService.ToogleTestStatus("testID", "courseID"));
-            Assert.IsFalse((_courseRepoMock.Invocations[3].Arguments[0] as Course).CourseTests.FirstOrDefault().IsOpen);
+            Assert.IsFalse((_courseRepoMock.Invocations.LastOrDefault().Arguments[0] as Course).CourseTests.FirstOrDefault().IsOpen);
             _courseRepoMock.Verify(x => x.UpdateAsync(It.IsAny<Course>()), Times.Exactly(2));
 
+            Assert.IsFalse(await testManagerService.ToogleTestStatus("error", "courseID"));
+            Assert.IsFalse(await testManagerService.ToogleTestStatus("testID", "error"));
             Assert.IsFalse(await testManagerService.ToogleTestStatus("error", "error"));
         }
 
@@ -161,6 +163,18 @@ namespace project.Service.Tests
                 CourseTests = new List<CourseTest> { new CourseTest() { IsOpen = true, TestID = "testID", AllowedIPSubnet = "0.0.0.0", CourseID = course.ID } },
             };
 
+            Test restrictedIPTest = new Test()
+            {
+                ID = "testID",
+                CourseTests = new List<CourseTest> { new CourseTest() { IsOpen = true, TestID = "testID", AllowedIPSubnet = "1.1.x.x", CourseID = course.ID } },
+            };
+
+            Test restrictedButAllowedIPTest = new Test()
+            {
+                ID = "testID",
+                CourseTests = new List<CourseTest> { new CourseTest() { IsOpen = true, TestID = "testID", AllowedIPSubnet = "192.168.x.x", CourseID = course.ID } },
+            };
+
             TestStartStopDTO dto = new TestStartStopDTO()
             {
                 CourseID = course.ID,
@@ -174,20 +188,37 @@ namespace project.Service.Tests
             _courseRepoMock.Setup(x => x.GetAsync(It.IsAny<string>())).ReturnsAsync(course);
             _testServiceMock.Setup(x => x.Get(It.IsAny<string>())).ReturnsAsync(test);
 
+
             // Act, Assert
 
             Assert.IsTrue(await testManagerService.StartTestCompletion(dto));
-            var testResult = _testResultRepoMock.Invocations[1].Arguments[0] as TestResult;
+            var testResult = _testResultRepoMock.Invocations.LastOrDefault().Arguments[0] as TestResult;
+            _testResultRepoMock.Setup(x => x.GetAllAsync()).Returns(new List<TestResult>() { testResult }.ToAsyncEnumerable());
+
             Assert.IsFalse(testResult.IsClosed);
             Assert.AreEqual(user, testResult.User);
             Assert.AreEqual(test, testResult.Test);
             Assert.Zero(testResult.PointResult);
             _testResultRepoMock.Verify(x => x.CreateAsync(It.IsAny<TestResult>()), Times.Once);
+            await testManagerService.EndTestCompletion(dto);
+            _testResultRepoMock.Verify(x => x.UpdateAsync(It.IsAny<TestResult>()), Times.Once);
 
-            _testResultRepoMock.Setup(x => x.GetAllAsync()).Returns(new List<TestResult>() { testResult}.ToAsyncEnumerable());
+            _testResultRepoMock.Reset();
+            _testResultRepoMock.Setup(x => x.CreateAsync(It.IsAny<TestResult>())).ReturnsAsync(true);
+            _testResultRepoMock.Setup(x => x.UpdateAsync(It.IsAny<TestResult>())).ReturnsAsync(true);
+
+            Assert.IsTrue(await testManagerService.StartTestCompletion(dto));
+
+            _testServiceMock.Setup(x => x.Get(It.IsAny<string>())).ReturnsAsync(restrictedIPTest);
+            Assert.IsFalse(await testManagerService.StartTestCompletion(dto));
+
+            _testServiceMock.Setup(x => x.Get(It.IsAny<string>())).ReturnsAsync(restrictedButAllowedIPTest);
+            Assert.IsTrue(await testManagerService.StartTestCompletion(dto));
+
+            _testResultRepoMock.Setup(x => x.GetAllAsync()).Returns(new List<TestResult>() { testResult }.ToAsyncEnumerable());
 
             await testManagerService.EndTestCompletion(dto);
-            testResult = _testResultRepoMock.Invocations[3].Arguments[0] as TestResult;
+            testResult = _testResultRepoMock.Invocations.LastOrDefault().Arguments[0] as TestResult;
             Assert.IsTrue(testResult.IsClosed);
             Assert.IsTrue(testResult.IsCorrectionFinished);
         }

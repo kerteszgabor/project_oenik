@@ -129,8 +129,8 @@ namespace project.Service.Services
                         object[] parameters = new object[method.Parameters.Length];
                         for (int j = 0; j < parameters.Length; j++)
                         {
-                            var obj = //JsonObject.Parse(method.Parameters[j].ToString()).AsValue();
-                            JsonObject.Parse(JsonSerializer.Serialize(method.Parameters[0].ToString())).AsValue();
+                            
+                            var obj = JsonObject.Parse(JsonSerializer.Serialize(method.Parameters[j]));
 
                             try
                             {
@@ -152,6 +152,14 @@ namespace project.Service.Services
                             {
                                 bool boolean = obj.Deserialize<bool>();
                                 model.Methods.ToArray()[i].Parameters[j] = boolean;
+                                continue;
+                            }
+                            catch (Exception) { }
+
+                            try
+                            {
+                                char chr = obj.Deserialize<char>();
+                                model.Methods.ToArray()[i].Parameters[j] = chr;
                                 continue;
                             }
                             catch (Exception) { }

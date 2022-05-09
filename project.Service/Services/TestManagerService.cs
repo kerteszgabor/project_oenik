@@ -54,7 +54,7 @@ namespace project.Service.Interfaces
         public async Task<bool> ToogleTestStatus(string testID, string courseID)
         {
             Course relatedCourse = await courseRepository.GetAsync(courseID);
-            var connectingEntity = relatedCourse.CourseTests.FirstOrDefault(x => x.TestID == testID);
+            var connectingEntity = relatedCourse?.CourseTests?.FirstOrDefault(x => x.TestID == testID);
 
             if (connectingEntity != null)
             {
