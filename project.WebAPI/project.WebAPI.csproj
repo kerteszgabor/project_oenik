@@ -6,13 +6,7 @@
 
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'project.WebAPI (Macbook)' " />
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'project.WebAPI (Windows)' " />
-  <ItemGroup>
-    <AdditionalFiles Include="..\DependencyValidation1\DependencyValidation1.layerdiagram" Link="DependencyValidation1.layerdiagram">
-      <Visible>False</Visible>
-    </AdditionalFiles>
-    <None Include="..\DependencyValidation1\DependencyValidation1.layerdiagram.layout" Link="DependencyValidation1.layerdiagram.layout" />
-    <None Include="..\DependencyValidation1\DependencyValidation1.layerdiagram.suppressions" Link="DependencyValidation1.layerdiagram.suppressions" />
-  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="JsonPatch.Net" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.2" />
