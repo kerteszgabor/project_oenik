@@ -49,11 +49,16 @@ namespace project.Service.Services
 
         public async IAsyncEnumerable<TestResult> GetTestResultsOfTestOfCourse(string courseID, string testID)
         {
-            var tests = testsService.GetTestsOfCourse(courseID).Where(x => x.ID == testID);
-            var results = GetAllResults();
-            await foreach (var item in tests)
+            //var tests = testsService.GetTestsOfCourse(courseID).FirstOrDefaultAsync(x => x.ID == testID);
+            //var results = GetAllResults().Where(x => x.Test.ID == testID && x.Course.ID == courseID);
+            //await foreach (var item in tests)
+            //{
+            //    yield return await results.FirstOrDefaultAsync(x => x.Test == item);
+            //}
+
+            await foreach (var item in GetAllResults().Where(x => x.Test.ID == testID && x.Course.ID == courseID))
             {
-                yield return await results.FirstOrDefaultAsync(x => x.Test == item);
+                yield return item;
             }
         }
 

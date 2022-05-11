@@ -215,10 +215,10 @@ namespace project.Service.Services
             foreach (var method in methodPairs.Keys)
             {
                 var methodModel = methodPairs[method];
-                if (methodModel.ParameterList != null)
+                if (methodModel.ParameterList?.Count != 0)
                 {
                     var parameters = method.ParameterList.Parameters;
-                    var expectedParameters = methodPairs[method].ParameterList;
+                    var expectedParameters = methodModel.ParameterList;
 
                     var areMatching = parameters
                     .SelectMany(x => new ParamList { { x.Type.ToString(), x.Identifier.ToString() } })

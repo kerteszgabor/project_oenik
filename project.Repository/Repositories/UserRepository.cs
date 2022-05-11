@@ -55,6 +55,10 @@ namespace project.Repository.Repositories
 
                 currentUser.LastLogin = DateTime.Now;
                 currentUser.LastIP = loginData.IPAddress;
+                var getSensitiveData = await UserManager.FindByIdAsync(currentUser.Id);
+                currentUser.PasswordHash = getSensitiveData.PasswordHash;
+                currentUser.ConcurrencyStamp = getSensitiveData.ConcurrencyStamp;
+                currentUser.SecurityStamp = getSensitiveData.SecurityStamp;
                 await UserManager.UpdateAsync(currentUser);
 
                 return token;
@@ -104,9 +108,6 @@ namespace project.Repository.Repositories
             var user = await UserManager.FindByIdAsync(id);
             if (user != null)
             {
-                user.ConcurrencyStamp = String.Empty;
-                user.PasswordHash = String.Empty;
-                user.SecurityStamp = String.Empty;
                 return user;
             }
             else

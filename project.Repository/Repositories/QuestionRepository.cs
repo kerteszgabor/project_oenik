@@ -50,7 +50,12 @@ namespace project.Repository.Repositories
         public async IAsyncEnumerable<Question> GetAllAsync()
         {
             await foreach (var item in db.Questions.Include(x => x.CreatedBy).Include(x => x.TestQuestions).AsAsyncEnumerable())
+            {
+                item.CreatedBy.ConcurrencyStamp = String.Empty;
+                item.CreatedBy.PasswordHash = String.Empty;
+                item.CreatedBy.SecurityStamp = String.Empty;
                 yield return item;
+            }
         }
 
         public async Task<Question> GetAsync(string id)

@@ -255,7 +255,7 @@ namespace project.Service.Interfaces
             {
                 return true;
             }
-            else if ((actualIP == "::1" || actualIP == "127.0.0.0") && (expectedIP == "192.168.0.0" || actualIP == "127.0.0.0"))
+            else if ((actualIP == "::1" || actualIP == "127.0.0.0") && (expectedIP == "192.168.0.0" || expectedIP == "127.0.0.0"))
             {
                 return true;
             }

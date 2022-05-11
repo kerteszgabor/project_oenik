@@ -47,17 +47,20 @@ namespace project.Service.Services
 
         public async IAsyncEnumerable<Test> GetTestsOfUser(string userID)
         {
+            var userTestsID = new List<string>();
             var userTests = new List<Test>();
 
             await foreach (var course in courseService.GetCoursesOfUser(userID))
             {
                 if (course.CourseTests is not null)
                 {
-                    userTests.AddRange(course.CourseTests
+                    userTestsID.AddRange(course.CourseTests
                         .SelectMany(x => x.Course?.CourseTests)?
-                        .Select(x => x?.Test));
+                        .Select(x => x?.TestID));
                 }
             }
+
+            userTestsID.ForEach(x => userTests.Add(testRepository.GetAsync(x).Result));
 
             await foreach (var item in userTests.ToAsyncEnumerable())
             {

@@ -13,18 +13,6 @@
         <MudText Typo="Typo.h4">Új igaz-hamis kérdés hozzáadása</MudText>
         <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
             <DataAnnotationsValidator />
-
-            @*<MudTable Items="@options" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@isBusy" LoadingProgressColor="Color.Info">
-                <HeaderContent>
-                <MudTh>Igaz</MudTh>
-                <MudTh>Szöveg</MudTh>
-                </HeaderContent>
-                <RowTemplate Context="item">
-                <MudTd DataLabel="Igaz">@((item.Instance as TrueOrFalseComponent).isChecked)</MudTd>
-                <MudTd DataLabel="Szöveg">@((item.Instance as TrueOrFalseComponent).text)</MudTd>
-                </RowTemplate>
-                </MudTable>*@
-
             <MudGrid>
                 <MudItem xs="12">
                     <MudTextField For="@(() => model.Text)" @bind-Value="model.Text" T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="2" />
@@ -128,7 +116,7 @@
     {
         List<Tuple<bool, string>> itemsToSerialize = new List<Tuple<bool, string>>();
 
-        foreach(var item in options)
+        foreach (var item in options)
         {
             var option = item.Instance as TrueOrFalseComponent;
             itemsToSerialize.Add(Tuple.Create(option.isChecked, option.text));

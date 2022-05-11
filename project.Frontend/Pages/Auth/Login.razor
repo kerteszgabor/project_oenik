@@ -29,13 +29,6 @@
                         Bejelentkezés
                     </MudButton>
                 </MudItem>
-                <MudItem xs="12">
-                    <MudButton Disabled="isBusy" ButtonType="ButtonType.Button"
-                               Variant="Variant.Filled" Color="Color.Secondary"
-                               Class="d-flex align-center justify-center mud-width-full py-1" OnClick="GoToRegister">
-                        Regisztráció
-                    </MudButton>
-                </MudItem>
             </MudGrid>
         </MudCardActions>
     </MudCard>
@@ -75,10 +68,5 @@
         {
             isBusy = false;
         }
-    }
-
-    void GoToRegister()
-    {
-        navigationManager.NavigateTo("/auth/register");
     }
 }

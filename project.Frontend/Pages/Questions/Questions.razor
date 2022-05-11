@@ -1,7 +1,12 @@
 ﻿@page "/questions"
-@inherits PageBase 
+@inherits PageBase
 @attribute [Authorize(Roles = "Teacher")]
 @using project.Client.Pages.Courses
+@using System.Data;
+@using System.IO;
+@using NPOI.XSSF.UserModel;
+@using NPOI.SS.UserModel;
+@inject QuestionsService questionService
 @inject ISnackbar Snackbar
 
 <MudGrid Justify="Justify.SpaceEvenly">
@@ -17,7 +22,7 @@
             </div>
         </MudPaper>
     </MudItem>
-    <MudItem xs="12" md="6" >
+    <MudItem xs="12" md="6">
         <MudPaper Class="d-flex align-left justify-center mud-width-full py-8">
             <div class="row">
                 <div class="col-12"><MudText Typo="Typo.h2" Align="Align.Center">Kérdésbank</MudText></div>
@@ -25,7 +30,16 @@
                     <div class="col-12"><QuestionBank></QuestionBank></div>
                 </CascadingValue>
             </div>
-            </MudPaper>
+        </MudPaper>
+        <InputFile id="fileInput" OnChange="UploadFile" hidden accept=".xlsx" />
+
+        <MudButton Class="mt-5" HtmlTag="label"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Filled.CloudUpload"
+                   for="fileInput">
+            Excelből feltöltés
+        </MudButton>
     </MudItem>
 </MudGrid>
 
@@ -37,10 +51,85 @@
 
     string chipText { get; set; } = "Nincs kiválasztott teszt";
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
     void ClickHandler(Test selectedTest)
     {
         this.selectedTest = selectedTest;
         Snackbar.Add($"Kiválasztott teszt: {selectedTest.Title}", Severity.Info);
         chipText = "Kiválasztott teszt: " + selectedTest.Title;
+    }
+
+    async Task UploadFile(InputFileChangeEventArgs e)
+    {
+        var fs = e.File.OpenReadStream();
+        var memoryStream = new MemoryStream();
+        await fs.CopyToAsync(memoryStream);
+        fs.Close();
+        List<QuestionDTO> questions = new List<QuestionDTO>();
+
+        DataTable dtTable = new DataTable();
+        List<string> rowList = new List<string>();
+        ISheet sheet;
+
+        memoryStream.Position = 0;
+        XSSFWorkbook xssWorkbook = new XSSFWorkbook(memoryStream);
+        sheet = xssWorkbook.GetSheetAt(0);
+        int cellCount = sheet.GetRow(0).LastCellNum;
+        for (int i = (sheet.FirstRowNum + 1); i <= sheet.LastRowNum; i++)
+        {
+            IRow row = sheet.GetRow(i);
+            if (row == null) continue;
+            if (row.Cells.All(d => d.CellType == CellType.Blank)) continue;
+            for (int j = row.FirstCellNum; j < cellCount; j++)
+            {
+                if (row.GetCell(j) != null)
+                {
+                    if (!string.IsNullOrEmpty(row.GetCell(j).ToString()) && !string.IsNullOrWhiteSpace(row.GetCell(j).ToString()))
+                    {
+                        rowList.Add(row.GetCell(j).ToString());
+                    }
+                }
+            }
+            if (rowList.Count > 0)
+            {
+                try
+                {
+                    questions.Add(new QuestionDTO()
+                        {
+                            Title = rowList[0],
+                            Text = rowList[1],
+                            CorrectAnswer = rowList[2],
+                            MaxPoints = int.Parse(rowList[3])
+                        });
+                }
+                catch
+                {
+                    rowList.Clear();
+                    continue;
+                }
+
+                rowList.Clear();
+            }
+        }
+
+        foreach (var model in questions)
+        {
+            model.QuestionType = "Text";
+            model.IsShared = true;
+
+            var userState = authenticationState.Result;
+            questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+            if (await questionService.AddQuestionAsync(model))
+            {
+                Snackbar.Add("Kérdés sikeresen hozzáadva!", Severity.Success);
+                _navManager.NavigateTo(_pageState.PreviousPage());
+            }
+            else
+            {
+                Snackbar.Add("Hiba történt!", Severity.Success);
+            }
+        }
     }
 }

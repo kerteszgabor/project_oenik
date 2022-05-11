@@ -7,6 +7,13 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'project.WebAPI (Macbook)' " />
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'project.WebAPI (Windows)' " />
   <ItemGroup>
+    <AdditionalFiles Include="..\DependencyValidation1\DependencyValidation1.layerdiagram" Link="DependencyValidation1.layerdiagram">
+      <Visible>False</Visible>
+    </AdditionalFiles>
+    <None Include="..\DependencyValidation1\DependencyValidation1.layerdiagram.layout" Link="DependencyValidation1.layerdiagram.layout" />
+    <None Include="..\DependencyValidation1\DependencyValidation1.layerdiagram.suppressions" Link="DependencyValidation1.layerdiagram.suppressions" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="JsonPatch.Net" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.2" />
@@ -14,6 +21,7 @@
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.0.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
+    <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

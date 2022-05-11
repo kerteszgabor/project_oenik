@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "project.WebAPI", "project.W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "project.Domain", "project.Domain\project.Domain.csproj", "{EC1A2555-922C-4D2F-9EB7-2C5E6E487A45}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlannerApp.Client", "project.Frontend\PlannerApp.Client.csproj", "{091B4D30-4145-4DCE-BE40-A5673B1B5575}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "project.Client", "project.Frontend\project.Client.csproj", "{091B4D30-4145-4DCE-BE40-A5673B1B5575}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
