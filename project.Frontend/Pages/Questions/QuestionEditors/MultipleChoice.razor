@@ -1,4 +1,4 @@
-﻿@page "/questions/newQuestion/TrueOrFalse"
+﻿@page "/questions/newQuestion/MultipleChoice"
 @inherits PageBase
 
 @using project.Domain.DTO.Tests
@@ -10,7 +10,7 @@
 
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudPaper Class="pa-4 sm-6">
-        <MudText Typo="Typo.h4">Új igaz-hamis kérdés hozzáadása</MudText>
+        <MudText Typo="Typo.h4">Új több lehetőséges kérdés hozzáadása</MudText>
         <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
             <DataAnnotationsValidator />
             <MudGrid>
@@ -18,7 +18,7 @@
                     <MudTextField For="@(() => model.Text)" @bind-Value="model.Text" T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="2" />
                 </MudItem>
                 <MudItem xs="2">
-                    <MudText Typo="Typo.button" Class="d-flex align-center justify-center mud-width-full py-1">Igaz</MudText>
+                    <MudText Typo="Typo.button" Class="d-flex align-center justify-center mud-width-full py-1">Választandó</MudText>
                 </MudItem>
                 <MudItem xs="10">
                     <MudText Typo="Typo.button" Class="d-flex align-center justify-center mud-width-full py-1">Szöveg</MudText>
@@ -94,8 +94,9 @@
             model.Labels = labels;
         }
 
-        model.QuestionType = "TrueOrFalse";
+        model.QuestionType = "MultipleChoice";
         model.IsShared = chipsEnabled;
+
         model.CorrectAnswer = GenerateCorrectAnswerString();
 
         var userState = authenticationState.Result;
