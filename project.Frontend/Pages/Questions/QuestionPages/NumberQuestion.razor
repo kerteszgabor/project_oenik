@@ -1,0 +1,84 @@
+﻿@page "/questions/answer/Number/{testID}/{questionID}"
+@inherits PageBase
+@using project.Domain.DTO.TestResults
+@using project.Domain.DTO.Tests
+@inject TestsService testService
+@inject ISnackbar Snackbar
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Class="pa-4 sm-6">
+        <MudText Typo="Typo.h4">@model.Title</MudText>
+        <MudText Typo="Typo.subtitle1">@testID</MudText>
+        <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
+            <MudText @bind-Value="model.Text" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="3" />
+            <MudNumericField @bind-Value="numberField" T="double" Format="F1" Label="Helyes válasz" Variant="Variant.Outlined" />
+            <div class="d-flex align-center justify-space-between mt-6">
+                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" OnClick="() => StateHasChanged()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@buttonText</MudButton>
+            </div>
+        </EditForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<Question> questions;
+    private double numberField;
+
+    [Parameter]
+    public string testID { get; set; }
+    [Parameter]
+    public string questionID { get; set; }
+
+    private Question model = new Question();
+    private AnswerDTO answer = new AnswerDTO();
+    private bool isBusy;
+    private string buttonText;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        questions = await storageService.GetItemAsync<List<Question>>("remainingQuestions");
+        model = questions?.FirstOrDefault();
+        questions.RemoveAt(0);
+        buttonText = questions.Count == 0 ? "Teszt befejezése" : "Tovább"; 
+        answer.CorrectManually = false;
+        answer.QuestionID = model.ID;
+        answer.TestID = testID;
+    }
+
+    async void Submit()
+    {
+        isBusy = true;
+        model.CorrectAnswer = numberField.ToString();
+
+        var userState = authenticationState.Result;
+        testService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        if (await testService.SubmitAnswer(answer))
+        {
+            Snackbar.Add("Kérdés sikeresen elküldve!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Hiba történt!", Severity.Error);
+        }
+
+        await storageService.RemoveItemAsync("remainingQuestions");
+        if(questions.Count > 0)
+        {
+            await storageService.SetItemAsync("remainingQuestions", questions);
+            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{testID}/{questions.First().ID}",true);
+        }
+        else
+        {
+            var courseID = await storageService.GetItemAsync<string>("currentCourseID");
+            await testService.StopTestCompletion(testID, courseID);
+            await storageService.RemoveItemAsync("currentCourseID");
+            _navManager.NavigateTo($"/courses/displayCourse/{courseID}");
+        }
+
+        isBusy = false;
+    }
+}
+
