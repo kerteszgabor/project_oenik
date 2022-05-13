@@ -13,8 +13,7 @@
         <MudTextField @bind-Value="@connectingEntity.AllowedIPSubnet" Label="Engedélyezett IP" ReadOnly="false" />
         <MudNumericField @bind-Value="@model.MaxPoints" Label="Max pontok" ReadOnly="false" />
         <MudCheckBox @bind-Value="@model.IsLateSubmissionAllowed" T="bool" Label="Kései leadás" ReadOnly="false" />
-@*        <MudBooleanInput @bind-Value="@model?.IsLateSubmissionAllowed" T="bool" Label="Kései leadás" ReadOnly="false" />
-*@    </DialogContent>
+    </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Vissza</MudButton>
         <MudButton Color="Color.Success" OnClick="AddUser">Szerkesztés</MudButton>

@@ -153,9 +153,6 @@ else
         if (!(await dialog.Result).Cancelled)
         {
             JsonPatch patch = origTest.CreatePatch(test);
-            var t = JsonHelpers.CalculatePatch(origTest, test);
-            var patchito = JsonSerializer.Serialize<JsonPatchDocument>(t);
-            // var patch = JsonSerializer.Serialize<JsonPatch>(patchObj);
             testService.AccessToken = await GetAccessToken();
             if (await testService.UpdateTestAsync(test.ID, patch))
             {

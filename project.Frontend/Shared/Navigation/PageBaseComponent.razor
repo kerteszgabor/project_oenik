@@ -10,15 +10,16 @@
         public PageHistoryState _pageState { get; set; }
         [Inject]
         public ILocalStorageService storageService { get; set; }
+
+        public PageBase()
+        {
+        }
+
         public PageBase(NavigationManager navManager, PageHistoryState pageState, ILocalStorageService localStorageService)
         {
             _navManager = navManager;
             _pageState = pageState;
             storageService = localStorageService;
-        }
-
-        public PageBase()
-        {
         }
 
         protected override void OnInitialized()

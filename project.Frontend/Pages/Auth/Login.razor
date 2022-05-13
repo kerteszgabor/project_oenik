@@ -7,7 +7,6 @@
 @inject ISnackbar Snackbar
 
 
-
 <MudText GutterBottom="true" Typo="Typo.h5" Align="Align.Center">Bejelentkezés</MudText>
 <EditForm Model="model" OnValidSubmit="LoginUser">
     <AlertMessage Message="@message" MessageType="@messageType" />
@@ -60,7 +59,6 @@
         catch (Exception ex)
         {
             messageType = AlertMessageType.Error;
-            // message = result.Errors.FirstOrDefault() ?? "Something went wrong. Please try again!";
             Snackbar.Add("Hibás felhasználónév vagy jelszó!", Severity.Error);
             model = new LoginRequest();
         }

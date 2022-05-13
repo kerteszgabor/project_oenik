@@ -23,21 +23,13 @@ namespace project.WebAPI.Controllers
         {
             this.labelService = labelService;
         }
-        // GET: api/Labels
+
         [HttpGet]
         public async Task<IEnumerable<QuestionLabel>> List()
         {
             return await labelService.List().ToListAsync();
         }
 
-        //// GET: api/Tests/5
-        //[HttpGet("{id}", Name = "Get")]
-        //public async Task<Test> Get(string id)
-        //{
-        //    return await labelService.(id);
-        //}
-
-        // POST: api/Tests
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] LabelDTO model)
         {
@@ -51,7 +43,6 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {

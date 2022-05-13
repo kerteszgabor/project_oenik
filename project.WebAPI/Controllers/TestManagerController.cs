@@ -92,7 +92,6 @@ namespace project.WebAPI.Controllers
             return Ok();
         }
 
-
         [HttpGet("{id}")]
         public async Task<TestResult> Get(string id)
         {

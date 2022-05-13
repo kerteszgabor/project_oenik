@@ -96,15 +96,6 @@ namespace project.Service.Services
             var test = await testRepository.GetAsync(model.TestID);
             var course = await Get(model.CourseID);
 
-            //course.CourseTests.Add(new CourseTest()
-            //{
-            //    Course = course,
-            //    Test = test,
-            //    TestID = test.ID,
-            //    CourseID = course.ID,
-            //    ID = Guid.NewGuid().ToString()
-            //});
-
             var mapped = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<TestInCourseDTO, CourseTest>();

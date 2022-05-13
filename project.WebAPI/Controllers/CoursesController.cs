@@ -68,7 +68,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpPatch("{uid}")]
-        //  [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Course> patchDoc)
         {
             if (await courseService.Update(uid, patchDoc))
@@ -108,6 +108,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("enrollStudentInCourse")]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> EnrollStudentInCourse(string studentID, string courseID)
         {
             if (await courseService.EnrollStudentInCourse(studentID, courseID))
@@ -121,6 +122,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("removeStudentFromCourse")]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> RemoveStudentFromCourse(string studentID, string courseID)
         {
             if (await courseService.RemoveStudentFromCourse(studentID, courseID))

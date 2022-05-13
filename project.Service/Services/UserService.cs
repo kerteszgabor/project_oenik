@@ -82,7 +82,6 @@ namespace project.Service.Services
             else
             {
                 return null;
-                // throw
             }
         }
     }

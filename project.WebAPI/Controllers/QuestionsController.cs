@@ -30,14 +30,13 @@ namespace project.WebAPI.Controllers
             this.questionService = questionService;
             this.userService = userService;
         }
-        // GET: api/Tests
+
         [HttpGet]
         public async Task<IEnumerable<Question>> List()
         {
             return await questionService.List().ToListAsync();
         }
 
-        // GET: api/Tests/5
         [HttpGet("{id}", Name = "GetQuestion")]
         public async Task<Question> Get(string id)
         {
@@ -77,7 +76,6 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -93,7 +91,6 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpPatch("{uid}")]
-        //  [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Question> patchDoc)
         {
             if (await questionService.Update(uid, patchDoc))

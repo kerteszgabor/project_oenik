@@ -25,7 +25,6 @@ namespace project.Client
 
                 var claims = new[]
                 {
-//                    new Claim(ClaimTypes.NameIdentifier, userInfo.ID),
                     new Claim("AccessToken", userInfo.Token), 
                     new Claim("Expiration", userInfo.Expiration.AddHours(2).ToString()),
                     new Claim(ClaimTypes.Role, userInfo.Role),

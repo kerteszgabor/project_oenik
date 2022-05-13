@@ -3,8 +3,6 @@
 @inject ISnackbar Snackbar
 @attribute [Authorize(Roles = "Teacher")]
 
-
-
 @if (isBusy)
 {
     <MudProgressCircular Color="Color.Success" Indeterminate="true" />
@@ -53,7 +51,6 @@ else
         
     </MudContainer>
 }
-
 
 
 @code {

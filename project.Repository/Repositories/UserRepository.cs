@@ -66,14 +66,13 @@ namespace project.Repository.Repositories
             else
             {
                 return null;
-                // throw new UserNotFoundException();
             }
         }
         public async Task<bool> Register(RegisterData registerData)
         {
             User currentUser = UserManager.FindByNameAsync(registerData.RegisteringUserName).Result;
 
-            var newUser = new User()    //maybe automapper would be more elegant
+            var newUser = new User()
             {
                 Id = Guid.NewGuid().ToString(),
                 Email = registerData.Email,
@@ -99,7 +98,6 @@ namespace project.Repository.Repositories
             else
             {
                 return false;
-            //    throw new CannotAddUserException(result.Errors.ToList());
             }
         }
 
@@ -113,13 +111,8 @@ namespace project.Repository.Repositories
             else
             {
                 return null;
-                //throw new UserNotFoundException();
             }
         }
-        //public IQueryable<User> GetAllAsync()
-        //{
-        //    return UserManager.Users.AsQueryable();
-        //}
 
         public async IAsyncEnumerable<User> GetAllAsync()
         {
@@ -144,14 +137,12 @@ namespace project.Repository.Repositories
                 }
                 else
                 {
-                    //TODO: check for errors
                     return false;
                 }
             }
             else
             {
                 return false;
-               // throw new UserNotFoundException();
             }
         }
 

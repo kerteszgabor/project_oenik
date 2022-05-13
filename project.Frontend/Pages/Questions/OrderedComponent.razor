@@ -49,21 +49,24 @@
         Models.Clear();
         for (var i = 0; i < Elements.Count; i++)
         {
-            Models.Add(new() { Order = i, Name = Elements[i]});
+            Models.Add(new Model() { Order = i, Name = Elements[i]});
         }
     }
 
     private void HandleDrop(Model landingModel)
     {
-        if (draggingModel is null) return;
-        int originalOrderLanding = landingModel.Order;
+        if (draggingModel is null)
+        {
+            return;
+        }
+        int origOrder = landingModel.Order;
         Models.Where(x => x.Order >= landingModel.Order).ToList().ForEach(x => x.Order++);
-        draggingModel.Order = originalOrderLanding;
-        int ii = 0;
+        draggingModel.Order = origOrder;
+        int i = 0;
         var orderedModels = Models.OrderBy(x => x.Order).ToList();
         foreach (var model in orderedModels)
         {
-            model.Order = ii++;
+            model.Order = i++;
             model.IsDragOver = false;
         }
 

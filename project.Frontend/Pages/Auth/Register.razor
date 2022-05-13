@@ -7,7 +7,6 @@
 
 <MudText GutterBottom="true" Typo="Typo.h5" Align="Align.Center">Create a new account</MudText>
 <EditForm Model="model" OnValidSubmit="RegisterUser">
-    @*<AlertMessage Message="@message" MessageType="@messageType" />*@
     <DataAnnotationsValidator />
     <MudCard>
         <MudCardContent>
@@ -48,19 +47,7 @@
     public async Task RegisterUser()
     {
         isBusy = true;
-
         var result = await authService.RegisterUserAsync(model);
-        //if (result.IsSucceded)
-        //{
-        //    message = "User successfully created";
-        //    messageType = Models.AlertMessageType.Success;
-        //}
-        //else
-        //{
-        //    messageType = Models.AlertMessageType.Error;
-        //    message = result.Errors.FirstOrDefault() ?? "Something went wrong. Please try again!";
-        //}
-
         isBusy = false;
     }
 

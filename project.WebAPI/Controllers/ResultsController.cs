@@ -52,7 +52,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpPatch("{uid}")]
-        //  [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<TestResult> patchDoc)
         {
             if (await resultManagerService.Update(uid, patchDoc))

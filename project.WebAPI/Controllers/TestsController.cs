@@ -25,21 +25,19 @@ namespace project.WebAPI.Controllers
         {
             this.testsService = testsService;
         }
-        // GET: api/Tests
+
         [HttpGet]
         public async Task<IEnumerable<Test>> List()
         {
             return await testsService.List().ToListAsync();
         }
 
-        // GET: api/Tests/5
         [HttpGet("{id}", Name = "Get")]
         public async Task<Test> Get(string id)
         {
             return await testsService.Get(id);
         }
 
-        // POST: api/Tests
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] TestDTO model)
         {
@@ -54,7 +52,6 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -69,7 +66,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpPost("update/{uid}")]
-        [Authorize]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Update(string uid, [FromBody] JsonPatch patchDoc)
         {
             if (await testsService.Update(uid, patchDoc))
@@ -83,6 +80,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("addQuestionToTest")]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> AddQuestionToTest(string questionID, string testID)
         {
             if (await testsService.AddQuestionToTest(questionID, testID))
@@ -96,6 +94,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("removeQuestionFromTest")]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> RemoveQuestionFromTest(string questionID, string testID)
         {
             if (await testsService.RemoveQuestionFromTest(questionID, testID))
@@ -124,6 +123,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("GetQuestionsOfTest")]
+        [Authorize]
         public async Task<IEnumerable<Question>> GetQuestionsOfTest(string testID)
         {
             var questions = await testsService.GetQuestionsOfTest(testID).ToListAsync();
