@@ -1,0 +1,24 @@
+﻿<MudGrid>
+    <MudItem Class="my-1" xs="2">
+        <MudCheckBox Class="d-flex align-center justify-center mud-width-full py-1" @bind-Checked="@isChecked" Color="Color.Primary"></MudCheckBox>
+    </MudItem>
+    <MudItem Class="my-1" xs="10">
+        <MudTextField Class="d-flex mud-width-full py-1" @bind-Value="text" ReadOnly="@isReadOnly" T="string" Label="Lehetőség szövege" Variant="Variant.Outlined" Lines="@Lines" />
+    </MudItem>
+</MudGrid>
+
+@code
+{
+    public bool isChecked { get; set; }
+    [Parameter]
+    public bool isReadOnly { get; set; } = false;
+    [Parameter]
+    public string text { get; set; } = "";
+    private int Lines 
+    { 
+        get 
+        { 
+            return Math.Max(text.Length / 80, 1); 
+        }
+    }
+}

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
 using project.Domain.DTO.Tests;
 using project.Domain.Interfaces;
 using project.Domain.Models;
@@ -10,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using project.Domain.Models.DBConnections;
 using project.Service.Interfaces;
+using Json.Patch;
 
 namespace project.Service.Services
 {
@@ -18,13 +18,13 @@ namespace project.Service.Services
         private readonly ITestRepository<Test> testRepository;
         private readonly IQuestionRepository questionRepository;
         private readonly IUserService userService;
-        private readonly ICourseRepository courseRepository;
-        public TestsService(ITestRepository<Test> testRepository, IUserService userService, IQuestionRepository questionRepository, ICourseRepository courseRepository)
+        private readonly ICourseService courseService;
+        public TestsService(ITestRepository<Test> testRepository, IUserService userService, IQuestionRepository questionRepository, ICourseService courseService)
         {
             this.testRepository = testRepository;
             this.userService = userService;
             this.questionRepository = questionRepository;
-            this.courseRepository = courseRepository;
+            this.courseService = courseService;
         }
 
         public async Task<bool> Delete(string uid)
@@ -40,20 +40,29 @@ namespace project.Service.Services
         public async IAsyncEnumerable<Test> List()
         {
             await foreach (var item in testRepository.GetAllAsync())
-            { 
-               yield return item;
+            {
+                yield return item;
             }
         }
 
         public async IAsyncEnumerable<Test> GetTestsOfUser(string userID)
         {
-            var userTests = (await userService.Get(userID))?
-                .UserCourses
-                .SelectMany(x => x.Course.CourseTests)
-                .Select(x => x.Test)
-                .ToAsyncEnumerable();
+            var userTestsID = new List<string>();
+            var userTests = new List<Test>();
 
-            await foreach (var item in userTests)
+            await foreach (var course in courseService.GetCoursesOfUser(userID))
+            {
+                if (course.CourseTests is not null)
+                {
+                    userTestsID.AddRange(course.CourseTests
+                        .SelectMany(x => x.Course?.CourseTests)?
+                        .Select(x => x?.TestID));
+                }
+            }
+
+            userTestsID.ForEach(x => userTests.Add(testRepository.GetAsync(x).Result));
+
+            await foreach (var item in userTests.ToAsyncEnumerable())
             {
                 yield return item;
             }
@@ -61,7 +70,7 @@ namespace project.Service.Services
 
         public async IAsyncEnumerable<Test> GetTestsOfCourse(string courseID)
         {
-            var courseTests = (await courseRepository.GetAsync(courseID))?
+            var courseTests = (await courseService.Get(courseID))?
                 .CourseTests
                 .Select(x => x.Test)
                 .ToAsyncEnumerable();
@@ -84,7 +93,7 @@ namespace project.Service.Services
                 IMapper iMapper = config.CreateMapper();
 
                 var model = iMapper.Map<TestDTO, Test>(newTest);
-                model.CreatedBy = await userService.GetUserByName(newTest.CreatedBy);
+                model.CreatedBy = await userService.Get(newTest.CreatedBy);
                 model.CreationTime = DateTime.Now;
 
                 return await testRepository.CreateAsync(model);
@@ -95,12 +104,12 @@ namespace project.Service.Services
             }
         }
 
-        public async Task<bool> Update(string uid, JsonPatchDocument<Test> patch)
+        public async Task<bool> Update(string uid, JsonPatch patch)
         {
             if (patch != null)
             {
                 var test = await testRepository.GetAsync(uid);
-                patch.ApplyTo(test);
+                patch.Apply(test);
                 var result = await testRepository.UpdateAsync(test);
                 return result;
             }
@@ -115,18 +124,23 @@ namespace project.Service.Services
             var questionToAdd = await questionRepository.GetAsync(questionID);
             var testToUpdate = await Get(testID);
 
-            testToUpdate.MaxPoints += questionToAdd.MaxPoints;
-
-            testToUpdate.TestQuestions.Add(new TestQuestion
+            if (!testToUpdate.TestQuestions.Any(x => x.QuestionID == questionID && x.TestID == testID))
             {
-                Question = questionToAdd,
-                Test = testToUpdate,
-                ID = Guid.NewGuid().ToString(),
-                QuestionID = questionToAdd.ID,
-                TestID = testToUpdate.ID
-            });
+                testToUpdate.MaxPoints += questionToAdd.MaxPoints;
 
-            return await testRepository.UpdateAsync(testToUpdate);
+                testToUpdate.TestQuestions.Add(new TestQuestion
+                {
+                    Question = questionToAdd,
+                    Test = testToUpdate,
+                    ID = Guid.NewGuid().ToString(),
+                    QuestionID = questionToAdd.ID,
+                    TestID = testToUpdate.ID
+                });
+
+                return await testRepository.UpdateAsync(testToUpdate);
+            }
+
+            return false;
         }
 
         public async Task<bool> RemoveQuestionFromTest(string questionID, string testID)
@@ -141,6 +155,14 @@ namespace project.Service.Services
             questionToDelete.TestQuestions.Remove(linkingEntity);
 
             return await testRepository.UpdateAsync(testToUpdate);
+        }
+
+        public async IAsyncEnumerable<Question> GetQuestionsOfTest(string testID)
+        {
+            await foreach (var item in questionRepository.GetAllAsync().Where(x => x.TestQuestions.Any(y => y.TestID == testID)))
+            {
+                yield return item;
+            }
         }
     }
 }

@@ -36,12 +36,30 @@ namespace project.WebAPI.Controllers
             return await resultManagerService.GetAllResults().ToListAsync();
         }
 
+        [HttpGet("GetQuestionsOfTest")]
+        public async Task<IEnumerable<TestResult>> GetQuestionsOfTest(string testID)
+        {
+            return await resultManagerService.GetAllResults().ToListAsync();
+        }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] AnswerDTO model)
         {
-            model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            model.User = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (await testManagerService.SubmitAnswerToTestResult(model))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("ToogleTestStatus")]
+        public async Task<IActionResult> ToogleTestStatus(string testID, string courseID)
+        {
+            if (await testManagerService.ToogleTestStatus(testID, courseID))
             {
                 return Ok();
             }
@@ -54,7 +72,8 @@ namespace project.WebAPI.Controllers
         [HttpPost("StartCompletion")]
         public async Task<IActionResult> StartTestCompletion([FromBody] TestStartStopDTO model)
         {
-            model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            model.User = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            model.IPAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
             if (await testManagerService.StartTestCompletion(model))
             {
                 return Ok();
@@ -68,11 +87,10 @@ namespace project.WebAPI.Controllers
         [HttpPost("StopCompletion")]
         public async Task<IActionResult> StopTestCompletion([FromBody] TestStartStopDTO model)
         {
-            model.User = await userService.GetUserByName(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            model.User = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
             await testManagerService.EndTestCompletion(model);
             return Ok();
         }
-
 
         [HttpGet("{id}")]
         public async Task<TestResult> Get(string id)

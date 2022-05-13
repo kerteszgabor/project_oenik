@@ -4,19 +4,19 @@
 @inject NavigationManager navigationManager
 @inject ILocalStorageService storageService
 @inject AuthenticationStateProvider authenticationStateProvider
+@inject ISnackbar Snackbar
 
 
-
-<MudText GutterBottom="true" Typo="Typo.h5" Align="Align.Center">Login to your account</MudText>
+<MudText GutterBottom="true" Typo="Typo.h5" Align="Align.Center">Bejelentkezés</MudText>
 <EditForm Model="model" OnValidSubmit="LoginUser">
     <AlertMessage Message="@message" MessageType="@messageType" />
 
     <DataAnnotationsValidator />
     <MudCard>
         <MudCardContent>
-            <MudTextField Label="Email" Class="mt-3"
+            <MudTextField Label="Felhasználónév" Class="mt-3"
                           @bind-Value="model.userName" For="@(() => model.userName)" />
-            <MudTextField Label="Password" HelperText="Choose a strong password" Class="mt-3"
+            <MudTextField Label="Jelszó" Class="mt-3"
                           @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password" />
         </MudCardContent>
         <MudCardActions>
@@ -25,14 +25,7 @@
                     <MudButton Disabled="isBusy" ButtonType="ButtonType.Submit"
                                Variant="Variant.Filled" Color="Color.Primary"
                                Class="d-flex align-center justify-center mud-width-full py-1">
-                        Login
-                    </MudButton>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudButton Disabled="isBusy" ButtonType="ButtonType.Button"
-                               Variant="Variant.Filled" Color="Color.Secondary"
-                               Class="d-flex align-center justify-center mud-width-full py-1" OnClick="GoToRegister">
-                        Register
+                        Bejelentkezés
                     </MudButton>
                 </MudItem>
             </MudGrid>
@@ -41,48 +34,37 @@
 </EditForm>
 
 @code {
-    LoginRequest model = new LoginRequest();
 
+    LoginRequest model = new LoginRequest();
     bool isBusy = false;
     string message = string.Empty;
     AlertMessageType messageType = AlertMessageType.Success;
-
-
 
     public async Task LoginUser()
     {
         isBusy = true;
 
-        var result = await authService.LoginUserAsync(model);
-        if (!string.IsNullOrWhiteSpace(result.Token))
+        try
         {
+            var result = await authService.LoginUserAsync(model);
             message = "Login successful";
             messageType = AlertMessageType.Success;
 
-            //var userInfo = new ClientUserInfo()
-            //{
-            //    AccessToken = result.AccessToken,
-            //    ID = result.ID,
-            //    FirstName = 
-
-            //};
-
+            result.Expiration = result.Expiration.AddHours(2);
             await storageService.SetItemAsync("User", result);
             await authenticationStateProvider.GetAuthenticationStateAsync();
-
+            Snackbar.Add($"Üdv {result.Username}", Severity.Success);
             navigationManager.NavigateTo("/");
         }
-        else
+        catch (Exception ex)
         {
-            //messageType = Models.AlertMessageType.Error;
-            //message = result.Errors.FirstOrDefault() ?? "Something went wrong. Please try again!";
+            messageType = AlertMessageType.Error;
+            Snackbar.Add("Hibás felhasználónév vagy jelszó!", Severity.Error);
+            model = new LoginRequest();
         }
-
-        isBusy = false;
-    }
-
-    void GoToRegister()
-    {
-        navigationManager.NavigateTo("/auth/register");
+        finally
+        {
+            isBusy = false;
+        }
     }
 }

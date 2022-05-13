@@ -21,5 +21,8 @@ namespace project.Domain.Models
         public ICollection<TestProgQuestion> TestProgQuestions { get; set; }
 
         public ICollection<MethodInfoData> Methods { get; set; }
+
+        public ICollection<string> DisallowedWords { get; set; }
+        public ICollection<string> RequiredWords { get; set; }
     }
 }

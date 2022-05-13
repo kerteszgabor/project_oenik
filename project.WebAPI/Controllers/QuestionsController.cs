@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -21,18 +23,20 @@ namespace project.WebAPI.Controllers
     public class QuestionsController : ControllerBase
     {
         private IQuestionService questionService;
-        public QuestionsController(IQuestionService questionService)
+        private IUserService userService;
+
+        public QuestionsController(IQuestionService questionService, IUserService userService)
         {
             this.questionService = questionService;
+            this.userService = userService;
         }
-        // GET: api/Tests
+
         [HttpGet]
         public async Task<IEnumerable<Question>> List()
         {
             return await questionService.List().ToListAsync();
         }
 
-        // GET: api/Tests/5
         [HttpGet("{id}", Name = "GetQuestion")]
         public async Task<Question> Get(string id)
         {
@@ -43,10 +47,16 @@ namespace project.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProgQuestionDTO model)
         {
-            model.CreatedBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (model?.Methods.Count == 0)
+            model.CreatedBy = await userService.Get(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (model?.Methods == null || model?.Methods?.Count == 0)
             {
-                var normalQuestion = model as QuestionDTO;
+                var normalQuestion = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<ProgQuestionDTO, QuestionDTO>();
+                })
+                    .CreateMapper()
+                    .Map<ProgQuestionDTO, QuestionDTO>(model);
+
                 if (await questionService.Insert(normalQuestion))
                 {
                     return Ok();
@@ -66,7 +76,6 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -82,7 +91,6 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpPatch("{uid}")]
-        //  [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Question> patchDoc)
         {
             if (await questionService.Update(uid, patchDoc))
@@ -93,6 +101,21 @@ namespace project.WebAPI.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [HttpGet("OwnQuestions")]
+        [Authorize]
+        public async Task<IEnumerable<Question>> GetOwnQuestions()
+        {
+            var idOfCaller = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return await questionService.GetQuestionsOfUser(idOfCaller).ToListAsync();
+        }
+
+        [HttpGet("SharedQuestions")]
+        [Authorize]
+        public async Task<IEnumerable<Question>> GetSharedQuestions()
+        {
+            return await questionService.List().Where(x => x.IsShared).ToListAsync();
         }
     }
 }

@@ -1,0 +1,176 @@
+﻿@inject IDialogService DialogService
+@inject QuestionsService questionService
+@inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Teacher")]
+
+@if (isBusy)
+{
+    <MudProgressCircular Color="Color.Success" Indeterminate="true" />
+}
+else
+{
+    <MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.Small">
+        
+        <MudTabs @bind-ActivePanelIndex="activeIndex" Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+            <MudTabPanel Text="Saját kérdéseim" ToolTip="Az általad hozáadott kérdések böngészése">
+                <MudItem xs="12" Class="mb-2">
+            <MudPaper Class="d-flex flex-row py-2 px-1">
+                <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Keresett címke" Variant="Variant.Outlined"></MudTextField>
+                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetOwnQuestionsAsync()">Keresés</MudButton>
+            </MudPaper>
+        </MudItem>
+                <MudList Clickable="false">
+                    @foreach (var question in usersQuestions)
+                    {
+                        <MudListItem Icon="@Icons.Filled.QuestionAnswer" IconColor="Color.Tertiary">
+                            @question.Title
+                             <MudChip Color="Color.Primary" Icon="@Icons.Filled.CropFree" OnClick="() => OpenQuestion(question)">Megnyitás</MudChip>
+                            <MudChip Icon="@Icons.Filled.Delete" OnClick="() => DeleteQuestion(question.ID)">Törlés</MudChip>
+                            </MudListItem>
+                        <MudDivider />
+                    }
+                </MudList>
+            </MudTabPanel>
+            <MudTabPanel Text="Kérdésbank" ToolTip="Mások által létrehozott kérdések böngészése">
+                <MudItem xs="12" Class="mb-2">
+            <MudPaper Class="d-flex flex-row py-2 px-1">
+                <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Keresett címke" Variant="Variant.Outlined"></MudTextField>
+                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetQuestionsAsync()">Keresés</MudButton>
+            </MudPaper>
+        </MudItem>
+                @foreach (var question in allQuestions)
+                    {
+                        <MudListItem Icon="@Icons.Filled.QuestionAnswer" IconColor="Color.Tertiary">
+                            @question.Title
+                             <MudChip Color="Color.Primary" Icon="@Icons.Filled.CropFree" OnClick="() => OpenQuestion(question)">Megnyitás</MudChip>
+                            </MudListItem>
+                        <MudDivider />
+                    }
+            </MudTabPanel>
+</MudTabs>
+        
+    </MudContainer>
+}
+
+
+@code {
+    [Parameter]
+    public int? PageNumber { get; set; }
+
+    [Parameter]
+    public string Query { get; set; } = String.Empty;
+
+    [CascadingParameter]
+    private Test selectedTest { get; set; }
+
+    bool isBusy = true;
+
+    int activeIndex = 0;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    List<Question> allQuestions = new List<Question>();
+    List<Question> usersQuestions = new List<Question>();
+
+    async Task GetQuestionsAsync()
+    {
+        var userState = authenticationState.Result;
+        questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        IEnumerable<Question> result;
+
+        if (string.IsNullOrWhiteSpace(Query))
+        {
+            result = await questionService.GetSharedQuestions();
+        }
+        else
+        {
+            result = await questionService.GetLabelledQuestions(Query);
+        }
+
+        allQuestions = result.ToList();
+        isBusy = false;
+        activeIndex = 1;
+    }
+
+    async Task GetOwnQuestionsAsync()
+    {
+        var userState = authenticationState.Result;
+        questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        IEnumerable<Question> result;
+
+        if (string.IsNullOrWhiteSpace(Query))
+        {
+            result = await questionService.GetOwnQuestionsAsync();
+        }
+        else
+        {
+            result = (await questionService.GetOwnQuestionsAsync()).Where(x => x.Title != null && x.Title.Contains(Query));
+            result.ToList().AddRange((await questionService.GetLabelledQuestions(Query)));
+        }
+
+        usersQuestions = result.ToList();
+        isBusy = false;
+        activeIndex = 0;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetQuestionsAsync();
+        await GetOwnQuestionsAsync();
+    }
+
+    private async void DeleteQuestion(string id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Biztosan ki akarod törölni ezt a kérdést?");
+        parameters.Add("ButtonText", "Törlés");
+        parameters.Add("Color", Color.Error);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var result = await DialogService.Show<Dialog>("Törlés", parameters, options).Result;
+        if (!result.Cancelled)
+        {
+            var userState = authenticationState.Result;
+            questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+            var deleteResult = await questionService.DeleteQuestionAsync(id);
+            if (deleteResult)
+            {
+                await GetQuestionsAsync();
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task OpenQuestion(Question question)
+    {
+        var parameters = new DialogParameters { ["question"]=question};
+
+        var dialog = DialogService.Show<QuestionDialog>("Kérdés megnyitása", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            if (selectedTest == null)
+            {
+                Snackbar.Add("Kérdés hozzáadása sikertelen: nincs kijelölve teszt!", Severity.Error);
+            }
+            else
+            {
+                var additionResult = await questionService.AddQuestionToTest(question.ID, selectedTest.ID);
+                if (additionResult)
+                {
+                    Snackbar.Add("Kérdés hozzáadása sikeres!", Severity.Success);
+                }
+                else
+                {
+                    Snackbar.Add("Kérdés hozzáadása sikertelen: ismeretlen hiba történt!", Severity.Error);
+                }
+            }
+        }
+    }
+}

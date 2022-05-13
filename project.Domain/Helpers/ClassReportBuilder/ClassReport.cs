@@ -4,7 +4,6 @@ using System.Text;
 
 namespace project.Domain.Helpers.ClassReportBuilder
 {
-    //TODO: Store dictonaries here
     public class ClassReport
     {
         public List<string> ValidMethodsByExistence { get; set; } = new List<string>();
@@ -18,6 +17,6 @@ namespace project.Domain.Helpers.ClassReportBuilder
         public List<string> MismatchingParametersMethods { get; set; } = new List<string>();
 
         public bool HadCompilationError { get; set; }
-       // public List<Tuple<MethodDeclarationSyntax, CompilationResult>> CompiledMethods { get; set; } = new List<Tuple<MethodDeclarationSyntax, CompilationResult>>();
+        public bool HadDisallowedOrMissingWords { get; set; }
     }
 }

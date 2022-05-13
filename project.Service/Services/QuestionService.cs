@@ -9,8 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 using project.Service.Interfaces;
+using System.Text.Json.Nodes;
 
 namespace project.Service.Services
 {
@@ -19,11 +20,14 @@ namespace project.Service.Services
         private readonly IQuestionRepository questionRepository;
         private readonly IProgrammingQuestionRepository progQuestionRepository;
         private readonly IUserService userService;
-        public QuestionService(IQuestionRepository questionRepository, IProgrammingQuestionRepository progQuestionRepository, IUserService userService)
+        private ILabelService labelService;
+
+        public QuestionService(IQuestionRepository questionRepository, IProgrammingQuestionRepository progQuestionRepository, IUserService userService, ILabelService labelService)
         {
             this.questionRepository = questionRepository;
             this.progQuestionRepository = progQuestionRepository;
             this.userService = userService;
+            this.labelService = labelService;
         }
 
         public async Task<bool> Delete(string uid)
@@ -81,10 +85,15 @@ namespace project.Service.Services
                     .CreateMapper()
                     .Map<QuestionDTO, Question>(newQuestion);
 
-                model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
+                model.CreatedBy = newQuestion.CreatedBy;
                 model.CreationTime = DateTime.Now;
+                if (String.IsNullOrEmpty(model.Title))
+                {
+                    GenerateTitleFromText(model);
+                }
 
-                return await questionRepository.CreateAsync(model);
+                await questionRepository.CreateAsync(model);
+                return await AddLabelsToNewQuestions(newQuestion, model.CreatedBy);
             }
             else
             {
@@ -104,8 +113,13 @@ namespace project.Service.Services
                     .CreateMapper()
                     .Map<ProgQuestionDTO, ProgrammingQuestion>(newQuestion);
 
-                model.CreatedBy = await userService.GetUserByName(newQuestion.CreatedBy);
+                model.CreatedBy = newQuestion.CreatedBy;
                 model.CreationTime = DateTime.Now;
+
+                if (String.IsNullOrEmpty(model.Title))
+                {
+                    GenerateTitleFromText(model);
+                }
 
                 for (int i = 0; i < newQuestion.Methods.Count; i++)
                 {
@@ -115,21 +129,54 @@ namespace project.Service.Services
                         object[] parameters = new object[method.Parameters.Length];
                         for (int j = 0; j < parameters.Length; j++)
                         {
-                            var node = (JsonElement)method.Parameters[i];
-                            if (node.ValueKind == JsonValueKind.Number)
-                            {
-                                model.Methods.ToArray()[i].Parameters[j] = JsonConvert.DeserializeObject(method.Parameters[i].ToString());
-                            }
-                            else
-                            {
-                                model.Methods.ToArray()[i].Parameters[j] = node.GetString();
-                            }
+                            
+                            var obj = JsonObject.Parse(JsonSerializer.Serialize(method.Parameters[j]));
 
+                            try
+                            {
+                                int number = obj.Deserialize<int>();
+                                model.Methods.ToArray()[i].Parameters[j] = Convert.ToInt32(number);
+                                continue;
+                            }
+                            catch (Exception) { }
+
+                            try
+                            {
+                                double number = obj.Deserialize<double>();
+                                model.Methods.ToArray()[i].Parameters[j] = number;
+                                continue;
+                            }
+                            catch (Exception) { }
+
+                            try
+                            {
+                                bool boolean = obj.Deserialize<bool>();
+                                model.Methods.ToArray()[i].Parameters[j] = boolean;
+                                continue;
+                            }
+                            catch (Exception) { }
+
+                            try
+                            {
+                                char chr = obj.Deserialize<char>();
+                                model.Methods.ToArray()[i].Parameters[j] = chr;
+                                continue;
+                            }
+                            catch (Exception) { }
+
+                            try
+                            {
+                                string str = obj.Deserialize<string>();
+                                model.Methods.ToArray()[i].Parameters[j] = str;
+                                continue;
+                            }
+                            catch (Exception) { }
                         }
                     }
                 }
 
-                return await progQuestionRepository.CreateAsync(model);
+                await progQuestionRepository.CreateAsync(model);
+                return await AddLabelsToNewQuestions(newQuestion, model.CreatedBy);
             }
             else
             {
@@ -150,6 +197,42 @@ namespace project.Service.Services
             {
                 return false;
             }
+        }
+
+        public async IAsyncEnumerable<Question> GetQuestionsOfUser(string userID)
+        {
+            var results = List().Where(x => x.CreatedBy.Id == userID);
+            await foreach (var item in results)
+            {
+                yield return item;
+            }
+        }
+
+        private async Task<bool> AddLabelsToNewQuestions(QuestionDTO newQuestion, User user)
+        {
+            var question = await GetQuestionsOfUser(user.Id).OrderByDescending(x => x.CreationTime).FirstOrDefaultAsync();
+            if (question is not null && newQuestion.Labels is not null)
+            {
+                foreach (var label in newQuestion.Labels)
+                {
+                    label.QuestionID = question.ID;
+                    await labelService.Insert(label);
+                }
+            }
+            return question != null;
+        }
+
+        private void GenerateTitleFromText(Question model)
+        {
+            var textBody = model.Text.Split(' ');
+            for (int i = 0; i < 3; i++)
+            {
+                if (textBody.Length > i)
+                {
+                    model.Title += $"{textBody[i]} ";
+                }
+            }
+            model.Title = model.Title.Trim();
         }
     }
 }

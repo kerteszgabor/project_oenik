@@ -8,10 +8,7 @@ namespace project.Domain.Helpers.ClassReportBuilder
     public interface ICanCallBuild
     {
         ClassReport Build();
-        ICanRequireCompilation WithMethod(string methodName);
-        ICanRequireCompilation WithMethod(string methodName, string expectedReturnType);
-        ICanRequireCompilation WithMethod(string methodName, ParamList expectedParameters);
-        ICanRequireCompilation WithMethod(string methodName, ParamList expectedParameters, string expectedReturnType);
+        ICanRequireCompilation WithMethod(MethodInfoData method);
     }
     public interface ICanRequireCompilation : ICanCallBuild
     {
@@ -19,24 +16,8 @@ namespace project.Domain.Helpers.ClassReportBuilder
     }
     public interface ICanCompile : ICanCallBuild
     {
-        //ICanRequireCompilation WithMethod(string methodName);
-        //ICanRequireCompilation WithMethod(string methodName, Type expectedReturnType);
-        //ICanRequireCompilation WithMethod(string methodName, ParamList expectedParameters);
-        //ICanRequireCompilation WithMethod(string methodName, ParamList expectedParameters, Type expectedReturnType);
         ICanCompile WithParameters(object[] parameters);
         ICanCompile SetExpectedStringOutput(string expectedStringOutput);
         ICanCompile SetExpectedValue(object expectedOutput);
     }
-
-    //interface ICanSetExpectedOutput 
-    //{
-    //    ICanCallBuild WithParameters();
-    //}
-    //interface ICanParameterizeCompilations : ICanSetExpectedOutput, ICanSetExpectedStringOutput
-    //{
-    //}
-    //interface ICanSetExpectedStringOutput : ICanCallBuild
-    //{
-    //}
-
 }

@@ -13,10 +13,7 @@ namespace project.Service.Interfaces
         ClassReport Build();
         ICanCompile SetExpectedStringOutput(string expectedStringOutput);
         ICanCompile SetExpectedValue(object expectedOutput);
-        ICanRequireCompilation WithMethod(string methodName);
-        ICanRequireCompilation WithMethod(string methodName, ParamList expectedParameters);
-        ICanRequireCompilation WithMethod(string methodName, ParamList expectedParameters, string expectedReturnType);
-        ICanRequireCompilation WithMethod(string methodName, string expectedReturnType);
+        ICanRequireCompilation WithMethod(MethodInfoData method);
         ICanCompile WithParameters(object[] parameters);
     }
 }

@@ -83,6 +83,16 @@ namespace project.Repository.Data
                  v => JsonConvert.SerializeObject(v),
                  v => JsonConvert.DeserializeObject<List<MethodInfoData>>(v));
 
+            builder.Entity<ProgrammingQuestion>().Property(p => p.DisallowedWords)
+            .HasConversion(
+                 v => JsonConvert.SerializeObject(v),
+                 v => JsonConvert.DeserializeObject<List<string>>(v));
+
+            builder.Entity<ProgrammingQuestion>().Property(p => p.RequiredWords)
+            .HasConversion(
+                 v => JsonConvert.SerializeObject(v),
+                 v => JsonConvert.DeserializeObject<List<string>>(v));
+
             SetupManyToManyMaps(builder);
         }
 

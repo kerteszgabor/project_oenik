@@ -17,5 +17,8 @@ namespace project.Domain.Models.DBConnections
         public string CourseID { get; set; }
         [JsonIgnore]
         public Course Course { get; set; }
+
+        public bool IsOpen { get; set; }
+        public string AllowedIPSubnet{ get; set; }
     }
 }

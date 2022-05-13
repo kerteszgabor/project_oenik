@@ -1,0 +1,37 @@
+﻿@using project.Domain.Models.DBConnections
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.NoteAdd" Class="mr-3 mb-n1" />
+            @model.Title szerkesztése
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@model.AllowedTakeLength" Label="Kitöltés ideje" ReadOnly="false" />
+        <MudTextField @bind-Value="@model.Title" Label="Cím" ReadOnly="false" />
+        <MudTextField @bind-Value="@connectingEntity.AllowedIPSubnet" Label="Engedélyezett IP" ReadOnly="false" />
+        <MudNumericField @bind-Value="@model.MaxPoints" Label="Max pontok" ReadOnly="false" />
+        <MudCheckBox @bind-Value="@model.IsLateSubmissionAllowed" T="bool" Label="Kései leadás" ReadOnly="false" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Vissza</MudButton>
+        <MudButton Color="Color.Success" OnClick="AddUser">Szerkesztés</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public CourseTest connectingEntity { get; set; }
+    [Parameter] public Test model { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void AddUser()
+    {
+        MudDialog.Close(DialogResult.Ok(model));
+    }
+}

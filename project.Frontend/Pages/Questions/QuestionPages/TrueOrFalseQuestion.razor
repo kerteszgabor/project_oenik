@@ -1,0 +1,135 @@
+﻿@page "/questions/answer/TrueOrFalse/{testID}/{questionID}"
+@inherits PageBase
+@using project.Client.Pages.Questions.QuestionEditors.HelperComponents
+@using project.Domain.DTO.TestResults
+@using project.Domain.DTO.Tests
+@inject TestsService testService
+@inject QuestionsService questionService
+@inject ISnackbar Snackbar
+@attribute [Authorize]
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Class="pa-4 sm-6">
+        <MudText Typo="Typo.h4">@model.Title</MudText>
+        <MudText Typo="Typo.subtitle1">@testID</MudText>
+        <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField For="@(() => model.Text)" ReadOnly="true" @bind-Value="model.Text" T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="2" />
+                </MudItem>
+                <MudItem xs="2">
+                    <MudText Typo="Typo.button" Class="d-flex align-center justify-center mud-width-full py-1">Igaz</MudText>
+                </MudItem>
+                <MudItem xs="10">
+                    <MudText Typo="Typo.button" Class="d-flex align-center justify-center mud-width-full py-1">Szöveg</MudText>
+                </MudItem>
+            </MudGrid>
+            <MudDivider />
+            @if (options.Count > 0)
+            {
+                @foreach (var option in options)
+                {
+                    int idx = options.FindIndex(x => x == option);
+                    <DynamicComponent @ref="options[idx]" Type="@typeof(TrueOrFalseComponent)"  Parameters="@parameters[idx]" />
+                }
+            }
+            <div class="d-flex align-center justify-space-between mt-6">
+                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" OnClick="() => StateHasChanged()" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@buttonText</MudButton>
+            </div>
+        </EditForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<Question> questions;
+    private List<DynamicComponent> options = new List<DynamicComponent>();
+
+    private List<Dictionary<string, object>> parameters = new();
+
+    [Parameter]
+    public string testID { get; set; }
+    [Parameter]
+    public string questionID { get; set; }
+
+    private Question model = new Question();
+    private AnswerDTO answer = new AnswerDTO();
+    private bool isBusy;
+    private string buttonText;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        questions = await storageService.GetItemAsync<List<Question>>("remainingQuestions");
+        model = questions?.FirstOrDefault();
+        questions.RemoveAt(0);
+        buttonText = questions.Count == 0 ? "Teszt befejezése" : "Tovább";
+        answer.CorrectManually = false;
+        answer.QuestionID = model.ID;
+        answer.TestID = testID;
+
+        questionService.AccessToken = authenticationState.Result.User.FindFirst("AccessToken").Value;
+        var answerJson = (await questionService.GetQuestionAsync(model.ID)).CorrectAnswer;
+        List<Tuple<bool, string>> elements = JsonHelpers<Tuple<bool, string>>.DeserializeJson(answerJson).ToList();
+        elements = elements.OrderBy(x => Guid.NewGuid()).ToList();
+        foreach (var item in elements)
+        {
+            options.Add(new DynamicComponent());
+
+            parameters.Add(new Dictionary<string, object>()
+            {
+                { "text", item.Item2},
+                { "isReadOnly", true},
+            });
+        }
+    }
+
+    async void Submit()
+    {
+        isBusy = true;
+
+        var userState = authenticationState.Result;
+        testService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        answer.AnswerText = GenerateAnswerString();
+        if (await testService.SubmitAnswer(answer))
+        {
+            Snackbar.Add("Kérdés sikeresen elküldve!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Hiba történt!", Severity.Error);
+        }
+
+        await storageService.RemoveItemAsync("remainingQuestions");
+        if (questions.Count > 0)
+        {
+            await storageService.SetItemAsync("remainingQuestions", questions);
+            _navManager.NavigateTo($"/questions/answer/{questions.First().QuestionType}/{testID}/{questions.First().ID}", true);
+        }
+        else
+        {
+            var courseID = await storageService.GetItemAsync<string>("currentCourseID");
+            await testService.StopTestCompletion(testID, courseID);
+            await storageService.RemoveItemAsync("currentCourseID");
+            _navManager.NavigateTo($"/courses/displayCourse/{courseID}");
+        }
+
+        isBusy = false;
+    }
+
+    private string GenerateAnswerString()
+    {
+        List<Tuple<bool, string>> itemsToSerialize = new List<Tuple<bool, string>>();
+
+        foreach (var item in options)
+        {
+            var option = item.Instance as TrueOrFalseComponent;
+            itemsToSerialize.Add(Tuple.Create(option.isChecked, option.text));
+        }
+
+        itemsToSerialize.Sort((x, y) => y.Item2.CompareTo(x.Item2));
+        return JsonSerializer.Serialize(itemsToSerialize, JsonHelpers.GetSerializerOption());
+    }
+}
+

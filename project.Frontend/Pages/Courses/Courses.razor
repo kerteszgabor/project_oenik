@@ -1,0 +1,134 @@
+﻿@page "/courses"
+
+@inject CoursesService coursesService
+@inject IDialogService DialogService
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+<h1>Courses</h1>
+
+@if (isBusy)
+{
+    <MudProgressCircular Color="Color.Success" Indeterminate="true" />
+}
+else
+{
+<MudContainer Class="mt-16 px-8" MaxWidth="MaxWidth.Large">
+    <MudItem xs="12" md="6" Class="mb-2">
+        <MudPaper Class="d-flex flex-row py-2 px-1">
+            <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Outlined" Variant="Variant.Outlined"></MudTextField>
+            <MudButton Class="pa-1 mx-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetCoursesAsync()">Search</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudGrid>
+        @foreach (var course in courses)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Elevation="2" Class="pa-4">
+                    <MudCardContent>
+                        <a href="@(url + course.ID)"><MudText>@course.Name</MudText></a>
+                        <MudText Typo="Typo.body2">Felhasználók száma: @course.UserCourses.Count</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => navigationManager.NavigateTo(url + course.ID)">Megnyitás</MudButton>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCourse(course.ID)">Törlés</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
+ <MudFab Color="Color.Primary" Icon="@Icons.Material.Filled.Add" Class="mt-5" OnClick="AddCourse" />
+}
+
+
+
+@code {
+    [Parameter]
+    public int? PageNumber { get; set; }
+
+    [Parameter]
+    public string Query { get; set; } = String.Empty;
+
+    bool isBusy = false;
+    private string url = "/courses/displayCourse/";
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    List<Course> courses = new List<Course>();
+
+    async Task GetCoursesAsync()
+    {
+        isBusy = true;
+
+        var userState = authenticationState.Result;
+        coursesService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        IEnumerable<Course> result;
+
+        if (string.IsNullOrWhiteSpace(Query))
+        {
+            result = await coursesService.GetOwnCoursesAsync();
+        }
+        else
+        {
+            result = (await coursesService.GetOwnCoursesAsync()).Where(x => x.Name.Contains(Query));
+        }
+
+        courses = result.ToList();
+
+        isBusy = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCoursesAsync();
+    }
+
+    private async void DeleteCourse(string id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Biztosan törölni szeretnéd a kurzust?");
+        parameters.Add("ButtonText", "Törlés");
+        parameters.Add("Color", Color.Error);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var result = await DialogService.Show<Dialog>("Törlés", parameters, options).Result;
+        if (!result.Cancelled)
+        {
+            var userState = authenticationState.Result;
+            coursesService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+            var deleteResult = await coursesService.DeleteCourseAsync(id);
+            if (deleteResult)
+            {
+                await GetCoursesAsync();
+                StateHasChanged();
+            }
+        }
+    }
+
+    async Task AddCourse()
+    {
+        CourseDTO newCourse = new CourseDTO();
+        var parameters = new DialogParameters { ["request"] = newCourse };
+
+        var dialog = DialogService.Show<AddCourseDialog>("Új kurzus hozzáadása", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var userState = authenticationState.Result;
+            coursesService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+            var addResult = await coursesService.AddCourseAsync(newCourse);
+            if (addResult)
+            {
+                await GetCoursesAsync();
+                StateHasChanged();
+            }
+        }
+    }
+}

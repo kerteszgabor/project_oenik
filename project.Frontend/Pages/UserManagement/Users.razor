@@ -2,7 +2,7 @@
 
 @inject UserService userService
 @inject IDialogService DialogService
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 
 <h1>Users</h1>
 
@@ -16,7 +16,7 @@ else
     <MudItem xs="12" md="6" Class="mb-2">
         <MudPaper Class="d-flex flex-row py-2 px-1">
             <MudTextField Class="pa-2 mx-2" @bind-Value="Query" Label="Outlined" Variant="Variant.Outlined"></MudTextField>
-            <MudButton Class="pa-1 mx-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetUsersAsync()">Search</MudButton>
+            <MudButton Class="pa-1 mx-1" Variant="Variant.Outlined" Color="Color.Primary" OnClick="async () => await GetUsersAsync()">Keresés</MudButton>
         </MudPaper>
     </MudItem>
     <MudGrid>
@@ -29,7 +29,7 @@ else
                         <MudText Typo="Typo.body2">@user</MudText>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteUser(user.Id)">Delete</MudButton>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteUser(user.Id)">Törlés</MudButton>
                     </MudCardActions>
                 </MudCard>
             </MudItem>
@@ -87,13 +87,13 @@ else
     private async void DeleteUser(string id)
     {
         var parameters = new DialogParameters();
-        parameters.Add("ContentText", "Do you really want to delete this user? This process cannot be undone.");
-        parameters.Add("ButtonText", "Delete");
+        parameters.Add("ContentText", "Biztosan törölni szeretnéd ezt a felhasználót?.");
+        parameters.Add("ButtonText", "Törlés");
         parameters.Add("Color", Color.Error);
 
         var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
 
-        var result = await DialogService.Show<Dialog>("Delete", parameters, options).Result;
+        var result = await DialogService.Show<Dialog>("Törlés", parameters, options).Result;
         if (!result.Cancelled)
         {
             var userState = authenticationState.Result;
@@ -113,7 +113,7 @@ else
         RegisterRequest newUser = new RegisterRequest();
         var parameters = new DialogParameters { ["request"] = newUser };
 
-        var dialog = DialogService.Show<AddUserDialog>("Add new user", parameters);
+        var dialog = DialogService.Show<AddUserDialog>("Új felhasználó hozzáadása", parameters);
         var result = await dialog.Result;
 
         if (!result.Cancelled)

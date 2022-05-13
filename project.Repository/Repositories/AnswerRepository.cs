@@ -63,14 +63,12 @@ namespace project.Repository.Repositories
                 }
                 else
                 {
-                    //TODO: check for errors
                     return false;
                 }
             }
             else
             {
                 return false;
-                // throw new UserNotFoundException();
             }
         }
 

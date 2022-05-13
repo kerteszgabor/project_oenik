@@ -54,7 +54,10 @@ namespace project.WebAPI.Controllers
               new
               {
                   token = new JwtSecurityTokenHandler().WriteToken(token),
-                  expiration = token.ValidTo
+                  expiration = token.ValidTo,
+                  role = token.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Role).Value,
+                  username = token.Claims.SingleOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value,
+                  ID = token.Claims.SingleOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub).Value
               });
         }
 

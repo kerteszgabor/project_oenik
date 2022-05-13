@@ -7,14 +7,14 @@
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-        <MudAppBarSpacer />
+        <MudSpacer />
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Garderoben/MudBlazor" Target="_blank" />
     </MudAppBar>
     <MudDrawer @bind-Open="@open" Elevation="1">
         <MudDrawerHeader>
             <MudText Typo="Typo.h6">Todos App</MudText>
         </MudDrawerHeader>
-        <MudNavMenu>
+        <MudNavMenu id="test">
             <MudNavLink Href="/todos" Match="NavLinkMatch.All">Todos</MudNavLink>
             <MudNavLink Match="NavLinkMatch.All">Dummy</MudNavLink>
             <MudNavLink Match="NavLinkMatch.All">Also Dummy</MudNavLink>
@@ -28,47 +28,25 @@
 </MudLayout>
 @code{
     bool open = false;
+    bool isAdmin = false;
+    bool isTeacher = false;
+    private Task<AuthenticationState> authenticationState { get; set; }
 
     void ToggleDrawer()
     {
         open = !open;
     }
-}
 
-@*<div class="top-row pl-4 navbar navbar-dark">
-        <a class="navbar-brand" href="">PlannerApp.Client</a>
-        <button class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-
-    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-        <ul class="nav flex-column">
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="oi oi-home" aria-hidden="true"></span> Home
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="counter">
-                    <span class="oi oi-plus" aria-hidden="true"></span> Counter
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="fetchdata">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-                </NavLink>
-            </li>
-        </ul>
-    </div>
-
-    @code {
-        private bool collapseNavMenu = true;
-
-        private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-        private void ToggleNavMenu()
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var user = authenticationState.Result.User.FindFirst("Role")?.Value;
+        switch (user)
         {
-            collapseNavMenu = !collapseNavMenu;
+            case "Admin" : isAdmin = true; break;
+            case "Teacher" : isTeacher = true; break;
+            default: break;
         }
-    }*@
+    }
+
+}

@@ -16,5 +16,7 @@ namespace project.Domain.DTO.Tests
         public string ReferenceRuntime { get; set; }
 
         public List<MethodInfoData> Methods { get; set; }
+        public List<string> DisallowedWords { get; set; }
+        public List<string> RequiredWords { get; set; }
     }
 }

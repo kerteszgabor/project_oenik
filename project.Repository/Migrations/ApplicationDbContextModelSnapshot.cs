@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using project.Repository.Data;
 
+#nullable disable
+
 namespace project.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
@@ -15,9 +17,10 @@ namespace project.Repository.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.3")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "6.0.2")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -43,27 +46,27 @@ namespace project.Repository.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AspNetRoles");
+                    b.ToTable("AspNetRoles", (string)null);
 
                     b.HasData(
                         new
                         {
-                            Id = "0bf65ce1-f114-49d9-b073-96ad19263346",
-                            ConcurrencyStamp = "bc0b7460-679c-4ea0-ae8c-cb8097eea847",
+                            Id = "5700dca6-1550-4887-9d04-8d67ac2f0fdc",
+                            ConcurrencyStamp = "0aadd444-cf53-4ea8-8afe-b176ab1deb3b",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "1467e099-d101-48e5-92fc-24d2885961c8",
-                            ConcurrencyStamp = "fe333760-dde9-4fc1-9537-be80c5e0013c",
+                            Id = "2adb5394-d1ad-488b-84fc-ec2883b26626",
+                            ConcurrencyStamp = "19656681-a3d7-413a-96f5-b937c7e8b369",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "6e6f03cf-c406-44c2-9189-f4556aca57a0",
-                            ConcurrencyStamp = "9ca62739-b18d-4cc9-89d6-1283effb31c7",
+                            Id = "f9daca0d-3b38-4569-8c7f-d6865b2e840c",
+                            ConcurrencyStamp = "e2c40d7e-7fa7-4b70-baf8-74284afb029f",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         });
@@ -73,8 +76,9 @@ namespace project.Repository.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -90,7 +94,7 @@ namespace project.Repository.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims");
+                    b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
@@ -159,7 +163,7 @@ namespace project.Repository.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AspNetUsers");
+                    b.ToTable("AspNetUsers", (string)null);
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
@@ -168,8 +172,9 @@ namespace project.Repository.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -185,7 +190,7 @@ namespace project.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims");
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -209,7 +214,7 @@ namespace project.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins");
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -224,13 +229,13 @@ namespace project.Repository.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles");
+                    b.ToTable("AspNetUserRoles", (string)null);
 
                     b.HasData(
                         new
                         {
-                            UserId = "9494ec51-b92d-430b-b813-c18dc5dd7568",
-                            RoleId = "0bf65ce1-f114-49d9-b073-96ad19263346"
+                            UserId = "25f86929-8984-4065-99b9-13998b74e9b9",
+                            RoleId = "5700dca6-1550-4887-9d04-8d67ac2f0fdc"
                         });
                 });
 
@@ -252,7 +257,7 @@ namespace project.Repository.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens");
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("project.Domain.Models.Answer", b =>
@@ -303,8 +308,14 @@ namespace project.Repository.Migrations
                     b.Property<string>("ID")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("AllowedIPSubnet")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CourseID")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("bit");
 
                     b.Property<string>("TestID")
                         .HasColumnType("nvarchar(450)");
@@ -524,6 +535,34 @@ namespace project.Repository.Migrations
                     b.ToTable("TestResults");
                 });
 
+            modelBuilder.Entity("project.Domain.Models.ProgrammingQuestion", b =>
+                {
+                    b.HasBaseType("project.Domain.Models.Question");
+
+                    b.Property<string>("DisallowedWords")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExpectedOutput")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Methods")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OptimalNumberOfLines")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReferenceComplexityLevel")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("ReferenceRuntime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("RequiredWords")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("ProgrammingQuestion");
+                });
+
             modelBuilder.Entity("project.Domain.Models.User", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -559,45 +598,23 @@ namespace project.Repository.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "9494ec51-b92d-430b-b813-c18dc5dd7568",
+                            Id = "25f86929-8984-4065-99b9-13998b74e9b9",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "44f5c0d6-84cf-4773-b4a5-2c6e931c3ff2",
+                            ConcurrencyStamp = "4c2b366a-cc98-4591-b754-cf71af1b86ae",
                             Email = "admin@oenik.hu",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@OENIK.hu",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEOgRxmI2icyHTeuiGZXFxOE1xIqxLK2DtciFrN4rd8ZypxntMQYZp3FkJX3Bi/+w8w==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEImMA2SZY3j7vW/q1GeaUzKFQ0aln8eFim4YewmZtQ/M/7m1X/FywxSGHn+uPa2hrg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "f7a6fa24-9014-4e94-bc40-967b29d6e15e",
+                            SecurityStamp = "6858c11c-3b0d-4004-8953-3c8b85101b8d",
                             TwoFactorEnabled = false,
                             UserName = "admin",
                             CreatedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastLogin = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             ModifiedOn = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
-                });
-
-            modelBuilder.Entity("project.Domain.Models.ProgrammingQuestion", b =>
-                {
-                    b.HasBaseType("project.Domain.Models.Question");
-
-                    b.Property<string>("ExpectedOutput")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Methods")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OptimalNumberOfLines")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReferenceComplexityLevel")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("ReferenceRuntime")
-                        .HasColumnType("time");
-
-                    b.HasDiscriminator().HasValue("ProgrammingQuestion");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -817,14 +834,14 @@ namespace project.Repository.Migrations
                     b.Navigation("Answers");
                 });
 
-            modelBuilder.Entity("project.Domain.Models.User", b =>
-                {
-                    b.Navigation("UserCourses");
-                });
-
             modelBuilder.Entity("project.Domain.Models.ProgrammingQuestion", b =>
                 {
                     b.Navigation("TestProgQuestions");
+                });
+
+            modelBuilder.Entity("project.Domain.Models.User", b =>
+                {
+                    b.Navigation("UserCourses");
                 });
 #pragma warning restore 612, 618
         }

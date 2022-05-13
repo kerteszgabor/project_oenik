@@ -1,48 +1,79 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims
+@inject NavigationManager navigationManager
+@inherits LayoutComponentBase
+@attribute [Authorize]
 
-    <MudThemeProvider />
-    <MudDialogProvider />
-    <MudSnackbarProvider />
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-    <div class="page">
-        <MudLayout>
-            <MudAppBar Elevation="1" Dense="true" Class="teal darken-1">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-                <MudAppBarSpacer />
-                <UserStatus />
-            </MudAppBar>
-            <MudDrawer @bind-Open="@open" ClipMode="DrawerClipMode.Docked" Elevation="1" Variant="@DrawerVariant.Responsive">
-                <MudDrawerHeader>
-                    <MudText Typo="Typo.h6">Kertesz Project</MudText>
-                </MudDrawerHeader>
-                <MudNavMenu>
-                    <MudNavLink Href="/users" Match="NavLinkMatch.All">Users</MudNavLink>
-                    <MudNavLink Match="NavLinkMatch.All">Dummy</MudNavLink>
-                    <MudNavLink Match="NavLinkMatch.All">Also Dummy</MudNavLink>
-                </MudNavMenu>
-            </MudDrawer>
-            <MudMainContent Class="pt-16 px-16">
-                <MudContainer Class="mt-6">
-                    @Body
-                </MudContainer>
-            </MudMainContent>
-        </MudLayout>
-        @code{
-            bool open = true;
+<div class="page">
+    <MudLayout>
+        <MudAppBar Elevation="1" Dense="true" Class="teal darken-1">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+            <MudSpacer />
+            <UserStatus />
+        </MudAppBar>
+        <MudDrawer @bind-Open="@open" ClipMode="DrawerClipMode.Docked" Elevation="1" Variant="@DrawerVariant.Responsive">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h6">OExam</MudText>
+            </MudDrawerHeader>
+            <MudNavMenu>
+                @if (isAdmin)
+                {
+                    <MudNavLink Href="/users" Match="NavLinkMatch.All">Felhasználók kezelése</MudNavLink>
+                    <MudNavLink Href="/admin" Match="NavLinkMatch.All">Admin felület</MudNavLink>
+                    <MudDivider />
+                }
+                <MudNavLink Href="/courses" Match="NavLinkMatch.All">Kurzusok</MudNavLink>
+                @if (isTeacher || isAdmin)
+                {
+                    <MudNavLink Href="/questions" Match="NavLinkMatch.All">Kérdésbank</MudNavLink>
+                }
+                @if (isTeacher || isAdmin)
+                {
+                    <MudNavLink Href="/QuestionEditor" Match="NavLinkMatch.All">Kérdések szerkesztése</MudNavLink>
+                }
+                @if (isTeacher || isAdmin)
+                {
+                    <MudNavLink Href="/Tests/Add" Match="NavLinkMatch.All">Új teszt létrehozása</MudNavLink>
+                }
+            </MudNavMenu>
+        </MudDrawer>
+        <MudMainContent Class="pt-16 px-16">
+            <MudContainer Class="mt-6">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+    @code {
+        bool open = true;
+        bool isAdmin = false;
+        bool isTeacher = false;
 
-            void ToggleDrawer()
-            {
-                open = !open;
-            }
+        [CascadingParameter]
+        private Task<AuthenticationState> authenticationState { get; set; }
+
+        void ToggleDrawer()
+        {
+            open = !open;
         }
 
-        @*<div class="main">
-            <div class="top-row px-4">
-                <UserStatus />
-            </div>
-
-            <div class="content px-4">
-                
-            </div>
-        </div>*@
-    </div>
+        protected async override Task OnInitializedAsync()
+        {
+            base.OnInitialized();
+            var state = await authenticationState;
+            if(state.User.Identity == null)
+            {
+                navigationManager.NavigateTo("/courses");
+            }
+            var user = state.User.FindFirst(ClaimTypes.Role)?.Value;
+            switch (user)
+            {
+                case "Admin": isAdmin = true; break;
+                case "Teacher": isTeacher = true; break;
+                default: break;
+            }
+        }
+    }
+</div>

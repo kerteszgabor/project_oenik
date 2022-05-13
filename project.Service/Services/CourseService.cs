@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
+using project.Domain.DTO.Client;
 using project.Domain.DTO.Courses;
 using project.Domain.Interfaces;
 using project.Domain.Models;
@@ -90,19 +91,23 @@ namespace project.Service.Services
             }
         }
 
-        public async Task<bool> AddTestToCourse(string testID, string courseID)
+        public async Task<bool> AddTestToCourse(TestInCourseDTO model)
         {
-            var test = await testRepository.GetAsync(testID);
-            var course = await Get(courseID);
+            var test = await testRepository.GetAsync(model.TestID);
+            var course = await Get(model.CourseID);
 
-            course.CourseTests.Add(new CourseTest()
+            var mapped = new MapperConfiguration(cfg =>
             {
-                Course = course,
-                Test = test,
-                TestID = test.ID,
-                CourseID = course.ID,
-                ID = Guid.NewGuid().ToString()
-            });
+                cfg.CreateMap<TestInCourseDTO, CourseTest>();
+                cfg.AddGlobalIgnore("CreatedBy");
+            })
+                .CreateMapper()
+                .Map<TestInCourseDTO, CourseTest>(model);
+
+            mapped.Course = course;
+            mapped.Test = test;
+            mapped.ID = Guid.NewGuid().ToString();
+            course.CourseTests.Add(mapped);
 
             return await courseRepository.UpdateAsync(course);
         }
@@ -124,16 +129,21 @@ namespace project.Service.Services
             var student = await userRepository.GetAsync(studentID);
             var course = await Get(courseID);
 
-            course.UserCourses.Add(new UserCourse()
+            if (!course.UserCourses.Any(x => x.UserID == student.Id && x.CourseID == course.ID))
             {
-                ID = Guid.NewGuid().ToString(),
-                Course = course,
-                CourseID = course.ID,
-                User = student,
-                UserID = student.Id
-            });
+                course.UserCourses.Add(new UserCourse()
+                {
+                    ID = Guid.NewGuid().ToString(),
+                    Course = course,
+                    CourseID = course.ID,
+                    User = student,
+                    UserID = student.Id
+                });
 
-            return await courseRepository.UpdateAsync(course);
+                return await courseRepository.UpdateAsync(course);
+            }
+
+            return false;
         }
 
         public async Task<bool> RemoveStudentFromCourse(string studentID, string courseID)
@@ -146,6 +156,15 @@ namespace project.Service.Services
             studentToDelete.UserCourses.Remove(linkingEntity);
 
             return await courseRepository.UpdateAsync(courseToUpdate);
+        }
+
+        public async IAsyncEnumerable<Course> GetCoursesOfUser(string userID)
+        {
+            var results = List().Where(x => x.UserCourses.Any(y => y.UserID == userID));
+            await foreach (var item in results)
+            {
+                yield return item;
+            }
         }
     }
 }

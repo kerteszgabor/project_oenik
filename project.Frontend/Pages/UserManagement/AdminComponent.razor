@@ -1,0 +1,209 @@
+@page "/Admin"
+@inherits PageBase
+@inject UserService userService
+@inject CoursesService coursesService
+@inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
+
+<MudTable Class="m-3" Outlined="true" ServerData="@(new Func<TableState, Task<TableData<User>>>(ServerReload))"
+          Dense="true" Hover="true" @ref="table" Striped="true"
+          MultiSelection="true" @bind-SelectedItems="selectedUsers">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Felhasználók</MudText>
+        <MudSpacer />
+        <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Keresés" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortLabel="nr_field" T="User">Nr</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="firstname_field" T="User">Utónév</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="lastname_field" T="User">Családi név</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="username_field" T="User">Felhasználónév</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="email_field" T="User">Email</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="lastlogin_field" T="User">Utolsó belépés</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="lastip_field" T="User">Utolsó IP cím</MudTableSortLabel></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nr">@(idx++)</MudTd>
+        <MudTd DataLabel="Utónév">@context.FirstName</MudTd>
+        <MudTd DataLabel="Családi név">@context.LastName</MudTd>
+        <MudTd DataLabel="Felhasználónév">@context.UserName</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd DataLabel="Utolsó belépés">@context.LastLogin</MudTd>
+        <MudTd DataLabel="Utolsó IP cím">@context.LastIP</MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>Nem található ilyen felhasználó!</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudProgressCircular Color="Color.Success" Indeterminate="true" />
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+<MudPaper Outlined="true" Class="d-flex justify-center mud-width-full m-3 py-8">
+    <div class="row">
+        <div class="col-12">
+            <MudText Typo=Typo.h6>Műveletek a kijelöltekkel</MudText>
+        </div>
+        <div class="col-12">
+            <MudSelect @bind-Value="selectedOption" SelectedValuesChanged="() => SelectedChanged()" T="string" Label="Művelet kiválasztása" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                  <MudSelectItem Value="@("addToCourse")">Kurzushoz adás</MudSelectItem>
+            </MudSelect>
+        </div>
+        <div class="col-12">
+            @if(showCourseDropdown)
+            {
+                @if (isLoading)
+                {
+                    <MudProgressCircular Color="Color.Success" Indeterminate="true" />
+                }
+                else
+                {
+                     <MudSelect Class="my-2" @bind-Value="selectedCourse" T="Course" Label="Kurzus kiválasztása" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                        @foreach(var item in courses)
+                        {
+                             <MudSelectItem T="Course" Value="item">@item.Name</MudSelectItem>
+                        }
+                       
+                     </MudSelect>
+
+                     <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mx-auto my-2 pl-5" OnClick="() => AddUsersToCourse()">Felhasználók hozzáadása</MudButton>
+                }
+            }
+        </div>
+    </div>
+</MudPaper>
+
+@code {
+    private IEnumerable<User> pagedData;
+    private IEnumerable<Course> courses;
+    private MudTable<User> table;
+    private HashSet<User> selectedUsers = new HashSet<User>();
+
+    private int totalItems;
+    private int idx = 1;
+    private string searchString = null;
+    private string selectedOption = "";
+    private Course selectedCourse;
+    private bool showCourseDropdown = false;
+    private bool isLoading = false;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    private async Task<TableData<User>> ServerReload(TableState state)
+    {
+        var userState = authenticationState.Result;
+        userService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+
+        IEnumerable<User> data = await userService.GetAllUsersAsync();
+        data = data.Where(user =>
+        {
+            if (string.IsNullOrWhiteSpace(searchString))
+                return true;
+            if (user.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (user.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (user.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (user.UserName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
+            return false;
+        }).ToArray();
+
+        totalItems = data.Count();
+        switch (state.SortLabel)
+        {
+            case "nr_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.Id);
+                break;
+            case "firstname_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.FirstName);
+                break;
+            case "lastname_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.LastName);
+                break;
+            case "username_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.UserName);
+                break;
+            case "email_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.Email);
+                break;
+            case "lastlogin_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.LastLogin);
+                break;
+            case "lastip_field":
+                data = data.OrderByDirection(state.SortDirection, o => o.LastIP);
+                break;
+        }
+
+        pagedData = data.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
+        idx = 1;
+        selectedUsers.Clear();
+        return new TableData<User>() { TotalItems = totalItems, Items = pagedData };
+    }
+
+    private void SelectedChanged()
+    {
+        if (selectedOption == "addToCourse")
+        {
+            isLoading = true;
+            showCourseDropdown = true;
+            isLoading = false;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userState = await authenticationState;
+        coursesService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        courses = await coursesService.GetAllCoursesAsync();
+    }
+
+    private async void AddUsersToCourse()
+    {
+        List<string> cannotBeAdded = new List<string>();
+        foreach(var user in selectedUsers)
+        {
+            try
+            {
+                var addResult = await coursesService.EnrollUserInCourse(user.Id, selectedCourse?.ID);
+                if (!addResult)
+                {
+                    cannotBeAdded.Add(user.UserName);
+                }
+            }
+            catch (Exception ex)
+            {
+                cannotBeAdded.Add(user.UserName);
+            }
+        }
+
+        if(cannotBeAdded.Count == 0)
+        {
+            Snackbar.Add("Sikeres hozzáadás", Severity.Success);  
+        }
+        else if(cannotBeAdded.Count == 1)
+        {
+            Snackbar.Add($"A következő felhasználó már hozzá van rendelve a kurzushoz: {cannotBeAdded[0]}", Severity.Error);
+        }
+        else
+        {
+            string str = string.Join(", ", cannotBeAdded);
+            Snackbar.Add($"A következő felhasználók már hozzá vannak rendelve a kurzushoz:\n {str}", Severity.Error);
+        }
+        selectedOption = "";
+        showCourseDropdown = false;
+        selectedUsers.Clear();
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        table.ReloadServerData();
+    }
+}

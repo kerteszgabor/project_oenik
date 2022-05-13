@@ -1,0 +1,103 @@
+﻿@using project.Domain.DTO.ClassReport
+@page "/test"
+
+<MudGrid Justify="Justify.FlexStart">
+    <MudItem>
+        <MudCard>
+            <MudCardContent>
+                <MudText>Új metódusellenőrzés hozzáadása</MudText>
+                <MudText Typo="Typo.caption">Add meg az ellenőrizni kívánt metódus szignatúrját! Amit nem szeretnél ellenőrizni, azt hagyd üresen!</MudText>
+                <div class="row mb-2">
+                    <div class="col-2"><p class="p-3">public</p></div>
+                    <div class="col-3">
+                        <MudTextField Margin="Margin.Dense" @bind-Value="method.ExpectedReturnType" T="string" Label="Visszatérési érték" Variant="Variant.Filled"/>
+                    </div>
+                    <div class="col-3">
+                        <MudTextField Margin="Margin.Dense" @bind-Value="method.MethodName" T="string" Label="A metódus neve" Variant="Variant.Filled" />
+                    </div>
+                    <div class="col-4">
+                        <p>(</p>
+                        <MudTextField Margin="Margin.Dense" @bind-Value="paramList" T="string" Label="Paraméterek" Variant="Variant.Filled" />
+                        <p>)</p>
+                    </div>
+                </div>
+
+                <MudCheckBox @bind-Checked="@method.RequireCompilation" Label="Fordítás kérése" Color="Color.Primary"></MudCheckBox>
+                @if (method.RequireCompilation)
+                {
+                    <div class="row mb-2">
+                        <div class="col-4">
+                        <MudText>Ha szeretnél mintaparamétereket átadni, itt add meg őket vesszővel ellátva:</MudText>
+
+                        </div>
+                        <div class="col-8">
+                            <MudTextField Margin="Margin.Dense" @bind-Value="providedParameters" T="string" Label="Bemeneti paraméterek" Variant="Variant.Filled"/>
+                        </div>
+                    </div>
+                    
+                    @if(method.ExpectedReturnType == "string")
+                    {
+                        <div class="row mb-2">
+                        <div class="col-4">
+                        <MudText>Ha szeretnéd megadni az elvárt string formájú kimenetet, itt add meg:</MudText>
+
+                        </div>
+                        <div class="col-8">
+                            <MudTextField Margin="Margin.Dense" @bind-Value="method.ExpectedStringOutput" T="string" Label="Várt kimenet" Variant="Variant.Filled"/>
+                        </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row mb-2">
+                        <div class="col-4">
+                        <MudText>Ha szeretnéd megadni az elvárt kimenetet, itt add meg:</MudText>
+
+                        </div>
+                        <div class="col-8">
+                            <MudTextField Margin="Margin.Dense" @bind-Value="method.ExpectedValue" T="string" Label="Várt kimenet" Variant="Variant.Filled"/>
+                        </div>
+                        </div>
+                    }
+                }
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton OnClick="(() => OnAddClick())" Variant="Variant.Text" Color="Color.Primary">Hozzáadás</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private bool requiresCompilation { get; set; }
+    private string paramList { get; set; }
+    private string providedParameters { get; set; }
+
+    public MethodInfoData method { get; set; } = new MethodInfoData();
+
+    [Parameter]
+    public EventCallback<MethodInfoData> OnAdd { get; set; }
+
+    void OnAddClick()
+    {
+        if (!string.IsNullOrWhiteSpace(paramList))
+        {
+            var splittedString = paramList.Split(',');
+            method.ParameterList = new ParamList();
+            foreach(var item in splittedString)
+            {
+                var currentItem = item.Trim();
+                var splittedParams = currentItem.Split(' ');
+                method.ParameterList.Add(splittedParams[0], splittedParams[1]);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(providedParameters))
+        {
+            method.Parameters = providedParameters.Split(',').Select(x => (object)x.Trim()).ToArray();
+        }
+
+        OnAdd.InvokeAsync(method);
+    }
+
+}

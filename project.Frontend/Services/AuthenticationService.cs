@@ -21,32 +21,12 @@ namespace project.Client.Services
         public async Task<ClientUserInfo> RegisterUserAsync(RegisterRequest request)
         {
             var response = await client.PostAsync<ClientUserInfo>($"{baseURL}/users/register", request);
-            //if (response.IsSucceded)
-            //{
-            //    response.Result.IsSucceded = true;
-            //}
-            //else
-            //{
-            //    response.Result.IsSucceded = false;
-            //    response.Result.Errors.ToList().Add(response.HttpResponse.Content.ReadAsStringAsync().Result);
-            //}
-
             return response.Result;
         }
 
         public async Task<ClientUserInfo> LoginUserAsync(LoginRequest request)
         {
             var response = await client.PostAsync<ClientUserInfo>($"{baseURL}/users/login", request);
-            //if (response.IsSucceded)
-            //{
-            //    response.Result.IsSucceded = true;
-            //}
-            //else
-            //{
-            //    response.Result.IsSucceded = false;
-            //    response.Result.Errors.ToList().Add(response.HttpResponse.Content.ReadAsStringAsync().Result);
-            //}
-
             return response.Result;
         }
     }

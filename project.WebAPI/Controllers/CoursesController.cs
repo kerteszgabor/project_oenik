@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using project.Domain.DTO.Client;
 using project.Domain.DTO.Courses;
 using project.Domain.Models;
 using project.Service.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace project.WebAPI.Controllers
@@ -65,7 +68,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpPatch("{uid}")]
-        //  [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string uid, [FromBody] JsonPatchDocument<Course> patchDoc)
         {
             if (await courseService.Update(uid, patchDoc))
@@ -78,10 +81,10 @@ namespace project.WebAPI.Controllers
             }
         }
 
-        [HttpGet("addTestToCourse")]
-        public async Task<IActionResult> AddTestToCourse(string testID, string courseID)
+        [HttpPost("addTestToCourse")]
+        public async Task<IActionResult> AddTestToCourse(TestInCourseDTO model)
         {
-            if (await courseService.AddTestToCourse(testID, courseID))
+            if (await courseService.AddTestToCourse(model))
             {
                 return Ok();
             }
@@ -92,7 +95,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("removeTestFromCourse")]
-        public async Task<IActionResult> RemoveQuestionFromCourse(string testID, string courseID)
+        public async Task<IActionResult> RemoveTestFromCourse(string testID, string courseID)
         {
             if (await courseService.RemoveTestFromCourse(testID, courseID))
             {
@@ -105,6 +108,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("enrollStudentInCourse")]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> EnrollStudentInCourse(string studentID, string courseID)
         {
             if (await courseService.EnrollStudentInCourse(studentID, courseID))
@@ -118,6 +122,7 @@ namespace project.WebAPI.Controllers
         }
 
         [HttpGet("removeStudentFromCourse")]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> RemoveStudentFromCourse(string studentID, string courseID)
         {
             if (await courseService.RemoveStudentFromCourse(studentID, courseID))
@@ -128,6 +133,14 @@ namespace project.WebAPI.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [HttpGet("OwnCourses")]
+        [Authorize]
+        public async Task<IEnumerable<Course>> GetOwnCourses()
+        {
+            var idOfCaller = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return await courseService.GetCoursesOfUser(idOfCaller).ToListAsync();
         }
     }
 }

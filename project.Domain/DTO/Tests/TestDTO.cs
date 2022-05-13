@@ -11,8 +11,6 @@ namespace project.Domain.DTO.Tests
     {
         public string Title { get; set; }
 
-        public DateTime CreationTime { get; set; }
-
         public string CreatedBy { get; set; }
 
         public bool IsShared { get; set; }
@@ -20,7 +18,5 @@ namespace project.Domain.DTO.Tests
         public bool IsLateSubmissionAllowed { get; set; }
 
         public TimeSpan AllowedTakeLength { get; set; }
-
-        public double MaxPoints { get; set; }
     }
 }

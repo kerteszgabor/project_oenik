@@ -35,8 +35,10 @@ namespace project.Repository.Repositories
             if (currentUser != null && await UserManager.CheckPasswordAsync(currentUser, loginData.Password))
             {
                 var claim = new[] {
-                    new Claim(JwtRegisteredClaimNames.Sub, currentUser.UserName),
-                    new Claim(ClaimTypes.Role, userRoles.FirstOrDefault())
+                    new Claim(JwtRegisteredClaimNames.Sub, currentUser.Id),
+                    new Claim(ClaimTypes.Role, userRoles.FirstOrDefault()),
+                    new Claim(ClaimTypes.NameIdentifier, currentUser.UserName),
+                    new Claim(ClaimTypes.Email, currentUser.Email)
                 };
                 var signinKey = new SymmetricSecurityKey(
                   Encoding.UTF8.GetBytes(Configuration["Jwt:SigningKey"]));
@@ -53,6 +55,10 @@ namespace project.Repository.Repositories
 
                 currentUser.LastLogin = DateTime.Now;
                 currentUser.LastIP = loginData.IPAddress;
+                var getSensitiveData = await UserManager.FindByIdAsync(currentUser.Id);
+                currentUser.PasswordHash = getSensitiveData.PasswordHash;
+                currentUser.ConcurrencyStamp = getSensitiveData.ConcurrencyStamp;
+                currentUser.SecurityStamp = getSensitiveData.SecurityStamp;
                 await UserManager.UpdateAsync(currentUser);
 
                 return token;
@@ -60,14 +66,13 @@ namespace project.Repository.Repositories
             else
             {
                 return null;
-                // throw new UserNotFoundException();
             }
         }
         public async Task<bool> Register(RegisterData registerData)
         {
             User currentUser = UserManager.FindByNameAsync(registerData.RegisteringUserName).Result;
 
-            var newUser = new User()    //maybe automapper would be more elegant
+            var newUser = new User()
             {
                 Id = Guid.NewGuid().ToString(),
                 Email = registerData.Email,
@@ -93,7 +98,6 @@ namespace project.Repository.Repositories
             else
             {
                 return false;
-            //    throw new CannotAddUserException(result.Errors.ToList());
             }
         }
 
@@ -107,18 +111,18 @@ namespace project.Repository.Repositories
             else
             {
                 return null;
-                //throw new UserNotFoundException();
             }
         }
-        //public IQueryable<User> GetAllAsync()
-        //{
-        //    return UserManager.Users.AsQueryable();
-        //}
 
         public async IAsyncEnumerable<User> GetAllAsync()
         {
             await foreach (var item in UserManager.Users.AsAsyncEnumerable())
+            {
+                item.ConcurrencyStamp = String.Empty;
+                item.PasswordHash = String.Empty;
+                item.SecurityStamp = String.Empty;
                 yield return item;
+            }
         }
 
         public async Task<bool> DeleteAsync(string uid)
@@ -133,14 +137,12 @@ namespace project.Repository.Repositories
                 }
                 else
                 {
-                    //TODO: check for errors
                     return false;
                 }
             }
             else
             {
                 return false;
-               // throw new UserNotFoundException();
             }
         }
 

@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MudBlazor;
 using MudBlazor.Services;
 using project.Client;
 using project.Client.Services;
+using project.Client.Shared.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -21,7 +23,7 @@ namespace project.Client
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
-            builder.RootComponents.Add<App>("#app");
+            builder.RootComponents.Add<project.Client.App>("#app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
@@ -35,6 +37,23 @@ namespace project.Client
                 return new UserService(URL);
             });
 
+            builder.Services.AddScoped<CoursesService>(s =>
+            {
+                return new CoursesService(URL);
+            });
+            
+            builder.Services.AddScoped<TestsService>(s =>
+            {
+                return new TestsService(URL);
+            });
+            
+            builder.Services.AddScoped<QuestionsService>(s =>
+            {
+                return new QuestionsService(URL);
+            });
+
+            builder.Services.AddSingleton<PageHistoryState>();
+
             builder.Services.AddScoped<AuthenticationStateProvider, LocalAuthenticationStateProvider>();
 
             builder.Services.AddMudServices();
@@ -42,6 +61,18 @@ namespace project.Client
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddMudBlazorDialog();
+            builder.Services.AddMudServices(config =>
+            {
+                config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+
+                config.SnackbarConfiguration.PreventDuplicates = false;
+                config.SnackbarConfiguration.NewestOnTop = false;
+                config.SnackbarConfiguration.ShowCloseIcon = true;
+                config.SnackbarConfiguration.VisibleStateDuration = 10000;
+                config.SnackbarConfiguration.HideTransitionDuration = 500;
+                config.SnackbarConfiguration.ShowTransitionDuration = 500;
+                config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+            });
 
             await builder.Build().RunAsync();
         }

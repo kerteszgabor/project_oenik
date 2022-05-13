@@ -1,0 +1,104 @@
+﻿@page "/questions/newQuestion/Fillin"
+@inherits PageBase
+
+@inject QuestionsService questionService
+@inject ISnackbar Snackbar
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Teacher")]
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Class="pa-4 sm-6">
+        <MudText Typo="Typo.h4">Új kitöltős kérdés hozzáadása</MudText>
+        <EditForm Class="mt-3" Model="@model" OnValidSubmit="Submit">
+            <DataAnnotationsValidator />
+            <MudText Typo="Typo.caption">Használat: a kérdés kitöltésre kijelölt kifejezéseit tedd csillagok közé! Például: "A *ló* barna" megadása esetén a ló kulcsszót kell megadnia a diáknak. Több kifejezést is megjelölhetsz egyidejűleg.</MudText>
+            <MudTextField For="@(() => model.Text)" @bind-Value="model.Text" T="string" Label="A kérdés szövege" Variant="Variant.Outlined" Lines="3" />
+            <MudNumericField For="@(() => model.MaxPoints)" @bind-Value="model.MaxPoints" Label="Pontok száma" Format="F1" Variant="Variant.Outlined" />
+            <div class="d-flex align-center justify-space-between mt-6">
+                <MudCheckBox @bind-Checked="@ChipsEnabled" T="bool" Class="ml-n2" Label="Kérdés megosztása" />
+                <MudCheckBox For="@(() => model.CorrectManually)" @bind-Checked="@model.CorrectManually" T="bool" Class="ml-n2" Label="Kézzel javítandó" />
+                <MudButton Disabled="@isBusy" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Hozzáadás</MudButton>
+            </div>
+            @if (ChipsEnabled)
+            {
+                <div class="d-flex align-center justify-space-between mt-6">
+                    <MudTextField @bind-Value="newLabel" Label="Új címke neve" Variant="Variant.Text"></MudTextField>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => AddLabel()"></MudIconButton>
+                </div>
+
+                <MudChipSet AllClosable="true" OnClose="Closed">
+                    @foreach (var value in labels)
+                    {
+                        <MudChip Color="Color.Primary" Text="@value.LabelText"></MudChip>
+                    }
+                </MudChipSet>
+            }
+        </EditForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private QuestionDTO model = new QuestionDTO();
+    private bool chipsEnabled;
+    private bool isBusy;
+    private string newLabel;
+    List<LabelDTO> labels = new List<LabelDTO>();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    bool ChipsEnabled { get { return chipsEnabled; } set { chipsEnabled = value; labels = new List<LabelDTO>(); StateHasChanged(); } }
+
+    public void AddLabel()
+    {
+        labels.Add(new LabelDTO() { LabelText = newLabel });
+        newLabel = "";
+    }
+
+    public void Closed(MudChip chip) => labels.Remove(labels.FirstOrDefault(x => x.LabelText == chip.Text));
+
+    async void Submit()
+    {
+        isBusy = true;
+        if (labels.Count > 0)
+        {
+            model.Labels = labels;
+        }
+
+        model.QuestionType = "Fillin";
+        model.IsShared = chipsEnabled;
+        model.CorrectAnswer = JsonHelpers.SerializeList(ExtractAnswerStrings());
+        foreach (var item in ExtractAnswerStrings())
+        {
+            model.Text = model.Text.Replace(item,"");
+        }
+
+        var userState = authenticationState.Result;
+        questionService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+        if (await questionService.AddQuestionAsync(model))
+        {
+            Snackbar.Add("Kérdés sikeresen hozzáadva!", Severity.Success);
+            _navManager.NavigateTo(_pageState.PreviousPage());
+        }
+        else
+        {
+            Snackbar.Add("Hiba történt!", Severity.Success);
+            isBusy = false;
+        }
+    }
+
+    private List<string> ExtractAnswerStrings()
+    {
+        string[] strings = model.Text.Split("**");
+        List<string> arrayOfAnswers = new List<string>();
+        for (int i = 0; i < strings.Length; i++)
+        {
+            if (i % 2 != 0)
+            {
+                arrayOfAnswers.Add(strings[i]);
+            }
+        }
+
+        return arrayOfAnswers;
+    }
+}
+

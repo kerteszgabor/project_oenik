@@ -18,13 +18,15 @@ namespace project.Service.Interfaces
         private readonly IQuestionService questionService;
         private readonly ICourseService courseService;
         private readonly ITestResultRepository testResultRepository;
-        public TestManagerService(ITestsService testsService, IClassReportBuilder builder, IQuestionService questionService, ICourseService courseService, ITestResultRepository testResultRepository)
+        private readonly ICourseRepository courseRepository;
+        public TestManagerService(ITestsService testsService, IClassReportBuilder builder, IQuestionService questionService, ICourseService courseService, ITestResultRepository testResultRepository, ICourseRepository courseRepository)
         {
             this.testsService = testsService;
             this.builder = builder;
             this.questionService = questionService;
             this.courseService = courseService;
             this.testResultRepository = testResultRepository;
+            this.courseRepository = courseRepository;
         }
 
         public async Task<bool> SubmitAnswerToTestResult(AnswerDTO answerDTO)
@@ -34,7 +36,7 @@ namespace project.Service.Interfaces
 
             if (await testResultRepository.GetAsync(testresult?.ID) != null)
             {
-                if (IsInTime(testresult.StartTime, testresult.Test.AllowedTakeLength))
+                if (IsInTime(testresult.StartTime, testresult.Test.AllowedTakeLength) && !testresult.IsClosed)
                 {
                     testresult.Answers.Add(model);
                     return await testResultRepository.UpdateAsync(testresult);
@@ -42,8 +44,23 @@ namespace project.Service.Interfaces
                 else if (!testresult.IsClosed)
                 {
                     CorrectTestResult(testresult);
-                    return false; // TODO throw exception
+                    return false;
                 }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> ToogleTestStatus(string testID, string courseID)
+        {
+            Course relatedCourse = await courseRepository.GetAsync(courseID);
+            var connectingEntity = relatedCourse?.CourseTests?.FirstOrDefault(x => x.TestID == testID);
+
+            if (connectingEntity != null)
+            {
+                connectingEntity.IsOpen = !connectingEntity.IsOpen;
+                await courseRepository.UpdateAsync(relatedCourse);
+                return true;
             }
 
             return false;
@@ -52,11 +69,16 @@ namespace project.Service.Interfaces
         public async Task<bool> StartTestCompletion(TestStartStopDTO startDTO)
         {
             Test relatedTest = await testsService.Get(startDTO.TestID);
-            Course relatedCourse = await courseService.Get(startDTO.CourseID);
-            if (relatedCourse.UserCourses.Any(x => x.User == startDTO.User))
+            Course relatedCourse = await courseRepository.GetAsync(startDTO.CourseID);
+            var connectingEntity = relatedTest.CourseTests.FirstOrDefault(x => x.CourseID == relatedCourse.ID);
+
+            if (connectingEntity.IsOpen && ValidateIPAddress(connectingEntity.AllowedIPSubnet, startDTO.IPAddress))
             {
-                TestResult newResult = InitNewTestResult(relatedTest, relatedCourse, startDTO.User);
-                return await testResultRepository.CreateAsync(newResult);
+                if (relatedCourse.UserCourses.Any(x => x.User == startDTO.User) && (await GetExistingTestResult(startDTO.TestID, startDTO.User) == null))
+                {
+                    TestResult newResult = InitNewTestResult(relatedTest, relatedCourse, startDTO.User);
+                    return await testResultRepository.CreateAsync(newResult);
+                }
             }
 
             return false;
@@ -120,31 +142,19 @@ namespace project.Service.Interfaces
 
         private void CorrectProgrammingQuestions(IEnumerable<Answer> answers, TestResult testResult)
         {
-            List<ClassReport> reports = new List<ClassReport>();
-
+            testResult.ProgQuestionReports = new List<ClassReport>();
             foreach (var item in answers)
             {
                 var question = item.Question as ProgrammingQuestion;
+                if (!ValidateDisallowedAndRequiredWords(item, question))
+                {
+                    testResult.ProgQuestionReports.Add(new ClassReport() { HadDisallowedOrMissingWords = true });
+                }
                 var buildObject = builder.GetReportOf(item.AnswerText);
                 foreach (var method in question.Methods)
                 {
                     ICanRequireCompilation methodObject = null;
-                    if (method.ParameterList != null && method.ExpectedReturnType != null)
-                    {
-                        methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList, method.ExpectedReturnType);
-                    }
-                    else if (method.ParameterList != null)
-                    {
-                        methodObject = buildObject.WithMethod(method.MethodName, method.ParameterList);
-                    }
-                    else if (method.ExpectedReturnType != null)
-                    {
-                        methodObject = buildObject.WithMethod(method.MethodName, method.ExpectedReturnType);
-                    }
-                    else
-                    {
-                        methodObject = buildObject.WithMethod(method.MethodName);
-                    }
+                    methodObject = buildObject.WithMethod(method);
                     if (method.RequireCompilation)
                     {
                         ICanCompile compileObject = methodObject.AlsoCompile();
@@ -167,12 +177,12 @@ namespace project.Service.Interfaces
                         }
                     }
                 }
-                reports.Add(buildObject.Build());
+                testResult.ProgQuestionReports.Add(buildObject.Build());
             }
 
-            foreach (var item in reports)
+            foreach (var item in testResult.ProgQuestionReports)
             {
-                if (!item.HadCompilationError)
+                if (!item.HadCompilationError && !item.HadDisallowedOrMissingWords)
                 {
                     int points = item.ValidMethodsByExistence.Count
                     + item.ValidMethodsByOutput.Count
@@ -186,6 +196,22 @@ namespace project.Service.Interfaces
                     testResult.PointResult += Math.Max(points, 0);
                 }
             }
+        }
+
+        private bool ValidateDisallowedAndRequiredWords(Answer answer, ProgrammingQuestion question)
+        {
+            bool valid = true;
+            if (question.DisallowedWords is not null)
+            {
+                valid = !question.DisallowedWords.Any(x => answer.AnswerText.Contains(x));
+            }
+
+            if (question.RequiredWords is not null)
+            {
+                valid = question.RequiredWords.Any(x => answer.AnswerText.Contains(x));
+            }
+
+            return valid;
         }
 
         private TestResult InitNewTestResult(Test test, Course course, User user)
@@ -205,8 +231,44 @@ namespace project.Service.Interfaces
 
         private async Task<TestResult> GetExistingTestResult(string testID, User user)
         {
-            return await testResultRepository.GetAllAsync()
+            try
+            {
+                return await testResultRepository.GetAllAsync()
                 .FirstOrDefaultAsync(x => x.User == user && x.Test.ID == testID);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private bool ValidateIPAddress(string expectedIP, string actualIP)
+        {
+            expectedIP = expectedIP.ToLower();
+            actualIP = actualIP.ToLower();
+
+            if (string.IsNullOrEmpty(expectedIP))
+            {
+                return true;
+            }
+            else if (expectedIP == "0.0.0.0")
+            {
+                return true;
+            }
+            else if ((actualIP == "::1" || actualIP == "127.0.0.0") && (expectedIP == "192.168.0.0" || expectedIP == "127.0.0.0"))
+            {
+                return true;
+            }
+
+            if (expectedIP.Contains('x'))
+            {
+                int idxOfx = expectedIP.IndexOf('x');
+                return actualIP.Substring(0, idxOfx) == expectedIP.Substring(0, idxOfx);
+            }
+            else
+            {
+                return expectedIP == actualIP;
+            }
         }
     }
 }

@@ -8,12 +8,12 @@ namespace project.Domain.Helpers.ClassReportBuilder
     public class MethodModel
     {
         public string MethodName { get; set; }
-        public ParamList ExpectedParameters { get; set; }
+        public ParamList ParameterList { get; set; }
         public string ExpectedReturnType { get; set; }
         public string ExpectedStringOutput { get; set; }
-        public object ExpectedOutput { get; set; }
-        public object[] CompilationParameters { get; set; }
-        public bool ToBeCompiled { get; set; }
+        public object ExpectedValue { get; set; }
+        public object[] Parameters { get; set; }
+        public bool RequireCompilation { get; set; }
 
     }
 }

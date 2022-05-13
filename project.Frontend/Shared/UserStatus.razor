@@ -1,16 +1,17 @@
-﻿@inject AuthenticationStateProvider authenticationStateProvider
+﻿@using System.Security.Claims
+@inject AuthenticationStateProvider authenticationStateProvider
 @inject NavigationManager navigationManager
 
 <AuthorizeView>
     <MudMenu>
         <ActivatorContent>
-            <MudAvatar Color="Color.Primary">@context.User.Claims.FirstOrDefault().Value.ToUpper()[0]</MudAvatar>
+            <MudChip Icon="@Icons.Material.Filled.Person" Color="Color.Primary" >@context.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name).Value</MudChip>
         </ActivatorContent>
         <ChildContent>
             <MudMenuItem>Profile</MudMenuItem>
             <MudMenuItem>Theme</MudMenuItem>
             <MudMenuItem>Usage</MudMenuItem>
-            <MudMenuItem>Sign Out</MudMenuItem>
+            <MudMenuItem OnClick="Logout">Sign Out</MudMenuItem>
         </ChildContent>
     </MudMenu>
     <MudIconButton Icon="@Icons.Material.Filled.Logout" Class="ml-3" OnClick="Logout" />
@@ -22,6 +23,6 @@
     {
         var localstateProvider = (LocalAuthenticationStateProvider)authenticationStateProvider;
         await localstateProvider.LogoutAsync();
-        navigationManager.NavigateTo("/auth/login");
+        navigationManager.NavigateTo("/courses");
     }
 }

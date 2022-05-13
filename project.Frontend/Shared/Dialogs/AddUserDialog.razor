@@ -5,7 +5,7 @@
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.NoteAdd" Class="mr-3 mb-n1" />
-            Add a new todo
+            Új felhasználó hozzáadása
         </MudText>
     </TitleContent>
     <DialogContent>
@@ -14,19 +14,14 @@
         <MudTextField @bind-Value="@request.FirstName" Label="First Name" ReadOnly="false" />
         <MudTextField @bind-Value="@request.LastName" Label="Last Name" ReadOnly="false" />
         <MudTextField @bind-Value="@request.Email" Label="Email" ReadOnly="false" />
-        <MudSelect @bind.Value="@request.Role" T="string" Label="Role">
-            <MudSelectItem Value="@("teacher")"/>
-            <MudSelectItem Value="@("student")"/>
+        <MudSelect MultiSelection="false" @bind-Value="@request.Role" T="string" Label="Role">
+            <MudSelectItem Value="@("teacher")" />
+            <MudSelectItem Value="@("student")" />
         </MudSelect>
-        <select T="string" @bind="request.Role">
-            <option Value="@("teacher")">teacher</option>
-            <option Value="@("student")">student</option>
-        </select>
-
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Success" OnClick="AddUser">Add User</MudButton>
+        <MudButton OnClick="Cancel">Vissza</MudButton>
+        <MudButton Color="Color.Success" OnClick="AddUser">Hozzáadás</MudButton>
     </DialogActions>
 </MudDialog>
 @code {
@@ -41,7 +36,7 @@
 
     private void AddUser()
     {
-        Snackbar.Add("User was successfully created!", Severity.Success);
+        Snackbar.Add("Felhasználó sikeresen hozzáadva!", Severity.Success);
         MudDialog.Close(DialogResult.Ok(request));
     }
 }

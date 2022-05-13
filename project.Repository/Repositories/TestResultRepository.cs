@@ -50,7 +50,13 @@ namespace project.Repository.Repositories
 
         public async IAsyncEnumerable<TestResult> GetAllAsync()
         {
-            await foreach (var item in db.TestResults.Include(x => x.Test).AsAsyncEnumerable())
+            await foreach (var item in db.TestResults
+                .Include(x => x.Test)
+                .Include(x => x.Answers)
+                .ThenInclude(x => x.Question)
+                .Include(x => x.Course)
+                .Include(x => x.User)
+                .AsAsyncEnumerable())
             {
                 yield return item;
             }
